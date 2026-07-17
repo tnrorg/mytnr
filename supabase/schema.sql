@@ -91,6 +91,7 @@ create table if not exists candidates (
   name          text not null,
   photo_url     text,
   symbol        text,
+  symbol_url    text,
   union_id      int references unions(id) on delete set null,
   manifesto     text,
   education     text,

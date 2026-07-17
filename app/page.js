@@ -245,6 +245,7 @@ function CandidateCard({ c, vis, ended, onProfile }) {
         <h4 style={mont} className="mt-3 text-lg font-extrabold">{c.name}</h4>
         <div className="flex items-center gap-2 mt-1 text-xs">
           <span className="px-2 py-0.5 rounded-full font-bold" style={{ color: C.gold, background: 'rgba(212,167,44,0.14)' }}>#{c.number}</span>
+          {c.symbol_url && <img src={c.symbol_url} alt="symbol" className="w-6 h-6 rounded object-cover border border-[#D4A72C]/60 bg-white" />}
           {c.symbol && <span className="px-2 py-0.5 rounded-full text-[#F3E4B3]" style={{ background: 'rgba(212,167,44,0.10)' }}>{c.symbol}</span>}
         </div>
         {(c.region || c.qualification) && <div className="mt-2 text-xs text-white/60">{[c.region, c.qualification].filter(Boolean).join(' · ')}</div>}

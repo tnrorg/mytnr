@@ -52,7 +52,7 @@ export async function GET() {
         else statusBadge = tie ? 'TIED' : (v === max ? 'LEADING' : 'TRAILING');
       }
       return {
-        id: c.id, name: c.name, number: i + 1, symbol: c.symbol,
+        id: c.id, name: c.name, number: i + 1, symbol: c.symbol, symbol_url: c.symbol_url,
         photo_url: c.photo_url, region: umap[c.union_id] || null,
         qualification: c.education || null, manifesto: c.manifesto || null,
         votes: showCounts ? v : null,

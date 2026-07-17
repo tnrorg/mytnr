@@ -27,9 +27,11 @@ export async function POST(req) {
   if (!election_id || !b.name) return fail('MISSING', 400, { message: 'Election and candidate name required.' });
   let photo_url = b.photo_url || null;
   if (b.photo_data) { try { photo_url = await uploadDataUrl(b.photo_data, 'candidates'); } catch (e) { return fail('UPLOAD_FAILED', 500, { message: e.message }); } }
+  let symbol_url = b.symbol_url || null;
+  if (b.symbol_data) { try { symbol_url = await uploadDataUrl(b.symbol_data, 'symbols'); } catch (e) { return fail('UPLOAD_FAILED', 500, { message: e.message }); } }
   const row = {
     election_id, position_id: b.position_id || null, name: b.name, photo_url,
-    symbol: b.symbol || null, union_id: b.union_id || null, manifesto: b.manifesto || null,
+    symbol: b.symbol || null, symbol_url, union_id: b.union_id || null, manifesto: b.manifesto || null,
     education: b.education || null, status: b.status || 'Active', sort_order: b.sort_order || 0,
   };
   const { data, error } = await sb.from('candidates').insert(row).select().maybeSingle();

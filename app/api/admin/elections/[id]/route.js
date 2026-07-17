@@ -32,3 +32,20 @@ export async function PATCH(req, { params }) {
   if ('result_published' in b && b.result_published) await logAudit({ action: 'RESULT_PUBLISHED', actor: admin.username, details: data?.title, election_id: id, ip: clientIp(req) });
   return ok({ election: data });
 }
+
+export async function DELETE(req, { params }) {
+  const { admin, res } = requireAdmin(req); if (res) return res;
+  const sb = supabaseAdmin();
+  const id = params.id;
+  const { data: e } = await sb.from('elections').select('status, result_published, title').eq('id', id).maybeSingle();
+  if (!e) return fail('NOT_FOUND', 404, { message: 'Election not found.' });
+  const url = new URL(req.url);
+  const force = url.searchParams.get('force') === '1';
+  // Safe rule: drafts always deletable; anything with votes needs force=1 (typed confirm on the UI).
+  const { count: voteCount } = await sb.from('votes').select('*', { count: 'exact', head: true }).eq('election_id', id);
+  if (voteCount && !force) return fail('HAS_VOTES', 409, { message: `This election has ${voteCount} votes. Confirm to permanently delete everything.`, votes: voteCount });
+  const { error } = await sb.from('elections').delete().eq('id', id); // cascades positions/candidates/votes/etc.
+  if (error) return fail('DELETE_FAILED', 500, { message: error.message });
+  await logAudit({ action: 'ELECTION_DELETED', actor: admin.username, details: e.title, election_id: id, ip: clientIp(req) });
+  return ok({});
+}
