@@ -74,6 +74,10 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
               {e.voter_list_locked && <Badge tone="gold">🔒 Locked</Badge>}{e.result_published && <Badge>📢 Published</Badge>}</div>
             <p className="text-sm text-tnr-cream/60 mt-1">{e.description}</p>
             <p className="text-xs text-tnr-cream/40 mt-1">{e.starts_at ? new Date(e.starts_at).toLocaleString() : '—'} → {e.ends_at ? new Date(e.ends_at).toLocaleString() : '—'}</p>
+            <div className="flex items-center gap-2 mt-2 text-xs">
+              <span className="chip bg-tnr-green2/40 text-tnr-goldLight">{(e.candidate_count?.active ?? 0)} active candidates</span>
+              {e.candidate_count?.no_position > 0 && <span className="chip bg-red-500/20 text-red-300">{e.candidate_count.no_position} without a position</span>}
+            </div>
             {e.voter_list_locked && <p className="text-xs text-tnr-goldLight mt-2">Locked by {e.locked_by} · {e.locked_at ? new Date(e.locked_at).toLocaleString() : ''}</p>}
           </div>
           <div className="flex gap-2 shrink-0">

@@ -10,7 +10,16 @@ export async function GET(req) {
   const { data: elections } = await sb.from('elections').select('*').order('created_at', { ascending: false });
   const { data: positions } = await sb.from('positions').select('*').order('sort_order');
   const { data: settings } = await sb.from('result_settings').select('*');
-  return ok({ elections: elections || [], positions: positions || [], settings: settings || [] });
+  const { data: cands } = await sb.from('candidates').select('election_id, position_id, status');
+  const counts = {};
+  for (const c of cands || []) {
+    counts[c.election_id] = counts[c.election_id] || { total: 0, active: 0, no_position: 0 };
+    counts[c.election_id].total++;
+    if (c.status === 'Active') counts[c.election_id].active++;
+    if (!c.position_id) counts[c.election_id].no_position++;
+  }
+  const withCounts = (elections || []).map(e => ({ ...e, candidate_count: counts[e.id] || { total: 0, active: 0, no_position: 0 } }));
+  return ok({ elections: withCounts, positions: positions || [], settings: settings || [] });
 }
 
 export async function POST(req) {
