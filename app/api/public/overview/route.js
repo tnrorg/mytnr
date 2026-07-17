@@ -66,6 +66,19 @@ export async function GET() {
     return { id: p.id, title: p.title, total: showCounts ? total : null, candidates: out };
   });
 
+  // Safety net: surface Active candidates that have no (or an unknown) position so nothing is hidden.
+  const knownPos = new Set((positions || []).map(p => p.id));
+  const orphans = (candidates || []).filter(c => !c.position_id || !knownPos.has(c.position_id));
+  if (orphans.length) {
+    const oc = orphans.map((c, i) => ({
+      id: c.id, name: c.name, number: i + 1, symbol: c.symbol, symbol_url: c.symbol_url,
+      photo_url: c.photo_url, region: umap[c.union_id] || null, qualification: c.education || null,
+      manifesto: c.manifesto || null, votes: showCounts ? (tally[c.id] || 0) : null,
+      percent: null, margin: null, leading: null, status_badge: null, elected: false,
+    }));
+    positionsOut.push({ id: 0, title: 'Other Candidates', total: null, candidates: oc });
+  }
+
   const total_voters = (await sb.from('locked_voter_list').select('*', { count: 'exact', head: true }).eq('election_id', e.id)).count || 0;
   const votes_cast = (votes || []).length;
 
