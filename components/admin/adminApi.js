@@ -15,3 +15,9 @@ export const aGet   = (u) => req('GET', u);
 export const aPost  = (u, b) => req('POST', u, b);
 export const aPatch = (u, b) => req('PATCH', u, b);
 export const aDel   = (u) => req('DELETE', u);
+
+export function getAdminRole() {
+  const t = getToken(); if (!t) return null;
+  try { const seg = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return (JSON.parse(atob(seg)).role) || null; } catch { return null; }
+}
+export function isSuper() { const r = getAdminRole(); return r === 'super_admin' || r === 'superadmin'; }

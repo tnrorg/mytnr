@@ -1,5 +1,5 @@
 -- ============================================================================
---  Tehreek Naujawanan Roundu (TNR) — Election Portal
+--  Tahreek-e-Nojawanan Roundu (TNR) — Election Portal
 --  PostgreSQL / Supabase schema + seed
 --  Run this in Supabase → SQL Editor (or via the Supabase CLI).
 -- ============================================================================
@@ -9,7 +9,7 @@ create extension if not exists "pgcrypto";
 -- ─── organizations ──────────────────────────────────────────────────────────
 create table if not exists organizations (
   id           uuid primary key default gen_random_uuid(),
-  name         text not null default 'Tehreek Naujawanan Roundu',
+  name         text not null default 'Tahreek-e-Nojawanan Roundu',
   short_name   text not null default 'TNR',
   logo_url     text,
   values_ur    text default 'اتحاد، شعور، عمل',
@@ -163,6 +163,18 @@ create table if not exists result_settings (
   updated_at             timestamptz not null default now()
 );
 
+-- ─── committee vote entries (Super Admin only) ──────────────────────────────
+create table if not exists committee_vote_entries (
+  id            uuid primary key default gen_random_uuid(),
+  election_id   uuid not null references elections(id) on delete cascade,
+  member_id     uuid not null references members(id) on delete cascade,
+  candidate_id  uuid not null references candidates(id) on delete cascade,
+  position_id   int,
+  entered_by    text not null,
+  created_at    timestamptz not null default now(),
+  constraint uq_committee_once unique (election_id, member_id)
+);
+
 -- ─── audit logs ─────────────────────────────────────────────────────────────
 create table if not exists audit_logs (
   id           uuid primary key default gen_random_uuid(),
@@ -195,4 +207,5 @@ alter table votes               enable row level security;
 alter table vote_receipts       enable row level security;
 alter table result_settings     enable row level security;
 alter table audit_logs          enable row level security;
+alter table committee_vote_entries enable row level security;
 

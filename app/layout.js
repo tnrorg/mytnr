@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'TNR Election Portal 2026 — Tehreek Naujawanan Roundu',
-  description: 'Secure internal election portal for Tehreek Naujawanan Roundu. Your Vote, Your Voice.',
+  title: 'TNR Election Portal 2026 — Tahreek-e-Nojawanan Roundu',
+  description: 'Secure internal election portal for Tahreek-e-Nojawanan Roundu. Your Vote, Your Voice.',
   icons: { icon: '/tnr-logo.png' },
 };
 

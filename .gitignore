@@ -5,3 +5,9 @@ node_modules
 npm-debug.log*
 .DS_Store
 /out
+# extra safety
+.env*.local
+*.local.example
+whatsapp-service/auth
+whatsapp-service/node_modules
+node_modules_REMOVE_ME_run_npm_install

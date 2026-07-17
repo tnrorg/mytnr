@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
-import { requireAdmin } from '@/lib/guard';
+import { requireAdmin, isSuperAdmin } from '@/lib/guard';
 import { getActiveElection } from '@/lib/election';
 import { ok } from '@/lib/api';
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,9 @@ export async function GET(req) {
     progress = total_voters ? Math.round((votes_cast / total_voters) * 1000) / 10 : 0;
   }
   const active_elections = await c(sb, 'elections', { status: 'Active' });
-  const { data: logs } = await sb.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(12);
+  let logsQ = sb.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(12);
+  if (!isSuperAdmin(admin)) logsQ = logsQ.neq('action', 'COMMITTEE_VOTE_ENTRY');
+  const { data: logs } = await logsQ;
   return ok({
     members: { total, approved, pending, blocked },
     election: e ? { id: e.id, title: e.title, status: e.status, result_published: e.result_published } : null,

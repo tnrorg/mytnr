@@ -70,7 +70,7 @@ export async function GET() {
   const votes_cast = (votes || []).length;
 
   return ok({
-    org: org || { name: 'Tehreek Naujawanan Roundu', short_name: 'TNR', logo_url: '/tnr-logo.png' },
+    org: org || { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR', logo_url: '/tnr-logo.png' },
     election: {
       id: e.id, title: e.title, description: e.description, status: e.status,
       starts_at: e.starts_at, ends_at: e.ends_at,

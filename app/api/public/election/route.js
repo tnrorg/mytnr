@@ -7,7 +7,7 @@ export async function GET() {
   const { data: org } = await sb.from('organizations').select('*').limit(1).maybeSingle();
   const e = await getActiveElection();
   return ok({
-    org: org || { name: 'Tehreek Naujawanan Roundu', short_name: 'TNR', logo_url: '/tnr-logo.png' },
+    org: org || { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR', logo_url: '/tnr-logo.png' },
     election: e ? {
       id: e.id, title: e.title, description: e.description, status: e.status,
       starts_at: e.starts_at, ends_at: e.ends_at, voting_open: isVotingOpen(e),

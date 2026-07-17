@@ -6,7 +6,7 @@
 
 -- Organization
 insert into organizations (name, short_name, values_ur, logo_url)
-select 'Tehreek Naujawanan Roundu', 'TNR', 'اتحاد، شعور، عمل', '/tnr-logo.png'
+select 'Tahreek-e-Nojawanan Roundu', 'TNR', 'اتحاد، شعور، عمل', '/tnr-logo.png'
 where not exists (select 1 from organizations);
 
 -- Unions / areas
@@ -20,13 +20,13 @@ on conflict (union_code) do nothing;
 
 -- Default admin (bcrypt via pgcrypto)
 insert into admin_users (username, password_hash, full_name, role)
-select 'admin', crypt('admin123', gen_salt('bf', 10)), 'TNR Administrator', 'superadmin'
+select 'admin', crypt('admin123', gen_salt('bf', 10)), 'TNR Administrator', 'super_admin'
 where not exists (select 1 from admin_users where username = 'admin');
 
 -- Sample election (Draft) so the dashboard is not empty on first run
 insert into elections (title, description, status, starts_at, ends_at)
 select 'TNR General Council Election 2026',
-       'Internal election for the executive council of Tehreek Naujawanan Roundu.',
+       'Internal election for the executive council of Tahreek-e-Nojawanan Roundu.',
        'Draft',
        now() + interval '1 day',
        now() + interval '3 day'
