@@ -18,6 +18,7 @@ export default function CandidatesTab({ toast, elections }) {
   async function pickPhoto(e) { const f = e.target.files?.[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => setForm(s => ({ ...s, photo_data: rd.result, photo_url: rd.result })); rd.readAsDataURL(f); }
   async function pickSymbol(e) { const f = e.target.files?.[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => setForm(s => ({ ...s, symbol_data: rd.result, symbol_url: rd.result })); rd.readAsDataURL(f); }
   async function save() {
+    if (!form.position_id) return toast('Please select a Position for this candidate — candidates without a position do not show on the site.', 'err');
     const body = { ...form, election_id: electionId, position_id: form.position_id ? Number(form.position_id) : null, union_id: form.union_id ? Number(form.union_id) : null };
     const r = form.id ? await aPatch('/api/admin/candidates/' + form.id, body) : await aPost('/api/admin/candidates', body);
     if (!r.ok) return toast(r.message, 'err'); toast('Saved'); setForm(null); load();
@@ -42,7 +43,7 @@ export default function CandidatesTab({ toast, elections }) {
             <div className="font-bold text-tnr-cream truncate">{c.name}</div>
             <div className="text-xs text-tnr-cream/60">{pname(c.position_id)}</div>
             <div className="text-xs text-tnr-cream/50">{c.symbol || '—'} · {uname(c.union_id)}</div>
-            <div className="mt-1"><Badge>{c.status}</Badge></div>
+            <div className="mt-1 flex gap-1 flex-wrap"><Badge>{c.status}</Badge>{!c.position_id && <span className="chip bg-red-500/20 text-red-300">⚠ No position — hidden on site</span>}</div>
           </div>
         </div>
         <div className="flex gap-2 mt-3">
@@ -65,7 +66,7 @@ export default function CandidatesTab({ toast, elections }) {
         </div>
         <Field label="Name *"><input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></Field>
         <div className="grid grid-cols-2 gap-x-3">
-          <Field label="Position"><select className="input" value={form.position_id || ''} onChange={e => setForm({ ...form, position_id: e.target.value })}>
+          <Field label="Position *"><select className="input" value={form.position_id || ''} onChange={e => setForm({ ...form, position_id: e.target.value })}>
             <option value="">—</option>{positions.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></Field>
           <Field label="Symbol (name)"><input className="input" value={form.symbol || ''} onChange={e => setForm({ ...form, symbol: e.target.value })} /></Field>
           <Field label="Union / Area"><select className="input" value={form.union_id || ''} onChange={e => setForm({ ...form, union_id: e.target.value })}>
