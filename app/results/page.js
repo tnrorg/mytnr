@@ -8,7 +8,7 @@ export default function Results() {
   const { lang, toggle, t } = useLang();
   const rtl = lang === 'ur';
   const [r, setR] = useState(null);
-  useEffect(() => { fetch('/api/public/results').then(x => x.json()).then(setR).catch(() => {}); }, []);
+  useEffect(() => { fetch('/api/public/results', { cache: 'no-store' }).then(x => x.json()).then(setR).catch(() => {}); }, []);
 
   return (
     <main className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'}>

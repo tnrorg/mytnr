@@ -9,7 +9,7 @@ export default function Home() {
   const [data, setData] = useState(null);
   const [profile, setProfile] = useState(null);
   const [rules, setRules] = useState(false);
-  const load = () => fetch(API).then(r => r.json()).then(setData).catch(() => {});
+  const load = () => fetch(API, { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
   useEffect(() => { load(); const id = setInterval(load, 20000); return () => clearInterval(id); }, []);
 
   const e = data?.election, stats = data?.stats, vis = data?.visibility;
