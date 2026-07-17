@@ -2,9 +2,11 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { getActiveElection, isVotingOpen } from '@/lib/election';
 import { ok } from '@/lib/api';
 export const dynamic = 'force-dynamic';
+const CANONICAL_ORG = { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR' };
 export async function GET() {
   const sb = supabaseAdmin();
   const { data: org } = await sb.from('organizations').select('*').limit(1).maybeSingle();
+  if (org) { org.name = CANONICAL_ORG.name; org.short_name = CANONICAL_ORG.short_name; }
   const e = await getActiveElection();
   return ok({
     org: org || { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR', logo_url: '/tnr-logo.png' },

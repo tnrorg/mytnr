@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { getActiveElection, getSettings, isVotingOpen } from '@/lib/election';
 import { ok } from '@/lib/api';
 export const dynamic = 'force-dynamic';
+const CANONICAL_ORG = { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR' };
 
 // Effective public visibility of vote data given the admin mode + election state.
 // Returns one of: 'full' | 'percent' | 'leading' | 'hidden'
@@ -15,6 +16,7 @@ function effectiveVisibility(mode, { ended, votingOpen, published }) {
 export async function GET() {
   const sb = supabaseAdmin();
   const { data: org } = await sb.from('organizations').select('*').limit(1).maybeSingle();
+  if (org) { org.name = CANONICAL_ORG.name; org.short_name = CANONICAL_ORG.short_name; }
   const e = await getActiveElection();
   if (!e) return ok({ org: org || null, election: null });
 
