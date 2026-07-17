@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(1100px 600px at 50% -12%, rgba(30,122,82,0.28), transparent 60%),
+    linear-gradient(180deg, #071410 0%, #0A0F0C 100%);
+  color: #F7F5EE;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+}
+
+/* Urdu text helper */
+.urdu { font-family: '"Noto Nastaliq Urdu"', serif; direction: rtl; line-height: 2.2; }
+
+/* Reusable component layer */
+@layer components {
+  .card {
+    @apply rounded-2xl border border-tnr-line bg-[#0E1A14]/80 backdrop-blur shadow-card;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-gold {
+    @apply btn bg-gradient-to-b from-tnr-goldLight to-tnr-gold text-tnr-black shadow-gold hover:brightness-105;
+  }
+  .btn-green {
+    @apply btn bg-tnr-green2 text-white border border-tnr-line hover:bg-tnr-greenLight;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-tnr-cream border border-tnr-line hover:bg-white/5;
+  }
+  .input {
+    @apply w-full rounded-xl border border-tnr-line bg-black/30 px-4 py-3 text-white placeholder-white/40
+           outline-none focus:border-tnr-gold focus:ring-2 focus:ring-tnr-gold/30 transition;
+  }
+  .label { @apply block text-sm font-medium text-tnr-cream/80 mb-1.5; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold; }
+  .stat { @apply card p-5 flex flex-col gap-1; }
+  .gold-divider { @apply h-px w-full bg-gold-line; }
+  .heading-gold {
+    @apply bg-gradient-to-r from-tnr-goldLight via-tnr-gold to-tnr-goldLight bg-clip-text text-transparent;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.35); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* OTP boxes */
+.otp-input { @apply w-12 h-14 text-center text-2xl font-bold; }
