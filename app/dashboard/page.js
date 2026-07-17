@@ -8,7 +8,7 @@ export default function Dashboard() {
   const { lang, toggle, t } = useLang();
   const rtl = lang === 'ur';
   const [s, setS] = useState(null);
-  const load = () => fetch('/api/public/stats', { cache: 'no-store' }).then(r => r.json()).then(setS).catch(() => {});
+  const load = () => fetch('/api/public/stats?t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()).then(setS).catch(() => {});
   useEffect(() => { load(); const id = setInterval(load, 15000); return () => clearInterval(id); }, []);
   const pct = s?.participation || 0;
 

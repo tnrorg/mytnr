@@ -2,6 +2,8 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { getActiveElection, getSettings, isVotingOpen } from '@/lib/election';
 import { ok } from '@/lib/api';
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 const CANONICAL_ORG = { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR' };
 
 // Effective public visibility of vote data given the admin mode + election state.

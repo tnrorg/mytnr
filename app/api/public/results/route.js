@@ -2,6 +2,8 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { getActiveElection, getSettings, isVotingOpen } from '@/lib/election';
 import { ok, fail } from '@/lib/api';
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET() {
   const sb = supabaseAdmin();

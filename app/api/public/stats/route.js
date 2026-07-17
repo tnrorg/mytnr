@@ -2,6 +2,8 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { getActiveElection, getSettings, isVotingOpen } from '@/lib/election';
 import { ok } from '@/lib/api';
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 async function count(sb, table, filter) {
   let q = sb.from(table).select('*', { count: 'exact', head: true });
