@@ -92,7 +92,6 @@ function Navbar({ e, org }) {
           {live && <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: C.green }}>
             <span className="w-2 h-2 rounded-full bg-[#D4A72C] animate-pulse" /> ELECTION IS LIVE
           </span>}
-          {live && e?.ends_at && <div className="hidden md:block"><Countdown target={e.ends_at} /></div>}
           <a href="/vote" className="px-4 py-2 rounded-xl text-sm font-bold text-[#063D2B] shadow" style={{ background: `linear-gradient(180deg,#F3E4B3,#D4A72C)` }}>Vote Now</a>
           <button className="lg:hidden p-2 text-gray-600" onClick={() => setOpen(!open)} aria-label="menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
