@@ -11,14 +11,18 @@ export default function Home() {
   const [data, setData] = useState(null);
   const [profile, setProfile] = useState(null);
   const [rules, setRules] = useState(false);
+  const [committee, setCommittee] = useState([]);
   const load = () => fetch(API + '?t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
   useEffect(() => { load(); const id = setInterval(load, 20000); return () => clearInterval(id); }, []);
+  useEffect(() => { fetch('/api/public/committee?t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()).then(r => setCommittee(r.members || [])).catch(() => {}); }, []);
 
   const e = data?.election, stats = data?.stats, vis = data?.visibility;
   return (
     <main style={{ background: C.bg, color: C.ink, fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }} className="min-h-screen">
       <Navbar e={e} org={data?.org} />
       <Hero e={e} stats={stats} org={data?.org} onRules={() => setRules(true)} />
+
+      <CommitteeSection members={committee} />
 
       <section id="candidates" className="max-w-6xl mx-auto px-4 py-14">
         <SectionTitle kicker="THE CANDIDATES" title="Choose Your Representatives" />
@@ -77,7 +81,7 @@ function Countdown({ target, tone = 'light' }) {
 function Navbar({ e, org }) {
   const [open, setOpen] = useState(false);
   const live = e?.voting_open;
-  const links = [['Home', '#top'], ['Candidates', '#candidates'], ['Election Process', '#process'], ['Results', '/results'], ['About', '#about'], ['Contact', '#contact']];
+  const links = [['Home', '#top'], ['Candidates', '#candidates'], ['Committee', '#committee'], ['Election Process', '#process'], ['Results', '/results'], ['About', '#about'], ['Contact', '#contact']];
   return (
     <header id="top" className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-4">
@@ -345,6 +349,32 @@ function Contact() {
       </div>
     </div>
   </section>;
+}
+function CommitteeSection({ members }) {
+  if (!members || !members.length) return null;
+  return (
+    <section id="committee" className="max-w-6xl mx-auto px-4 py-12 animate-fade-up">
+      <SectionTitle kicker="WHO RUNS THIS ELECTION" title="TNR Election Committee" />
+      <p className="text-center text-gray-500 mt-3 max-w-2xl mx-auto font-medium">
+        The committee members responsible for conducting a free, fair and transparent election.
+      </p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+        {members.map(m => (
+          <div key={m.id}
+            className="rounded-3xl p-5 text-center text-white shadow-2xl transition-transform hover:-translate-y-1"
+            style={{ background: `linear-gradient(165deg,${C.deep},${C.black})`, border: '1px solid rgba(212,167,44,0.35)' }}>
+            <div className="w-24 h-24 mx-auto rounded-full overflow-hidden ring-2 ring-[#D4A72C]/70 bg-white/5">
+              <img src={m.photo_url || '/tnr-logo.png'} alt={m.full_name} className="w-full h-full object-cover" />
+            </div>
+            <h4 style={mont} className="mt-3 font-extrabold text-base leading-tight">{m.full_name}</h4>
+            {m.role && <div className="mt-1 inline-block px-3 py-1 rounded-full text-[11px] font-bold"
+              style={{ background: 'rgba(212,167,44,0.16)', color: C.softGold }}>{m.role}</div>}
+            {m.bio && <p className="mt-2 text-xs text-white/70 line-clamp-3">{m.bio}</p>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 function Footer2({ org }) {
   return <footer className="border-t border-gray-100 py-6 text-center text-gray-400 text-xs">

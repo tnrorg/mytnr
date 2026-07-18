@@ -54,8 +54,14 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
   async function del(e) {
     if (!confirm('Delete "' + e.title + '"?\nThis removes its positions and candidates.')) return;
     let r = await aDel('/api/admin/elections/' + e.id);
-    if (!r.ok && r.error === 'HAS_VOTES') {
-      if (!confirm('This election has ' + r.votes + ' votes.\nPermanently delete EVERYTHING including votes? This cannot be undone.')) return;
+    if (!r.ok && (r.error === 'HAS_DATA' || r.error === 'HAS_VOTES')) {
+      const msg = 'WARNING — this election contains:\n\n'
+        + '  • ' + (r.candidates ?? 0) + ' candidate(s)\n'
+        + '  • ' + (r.votes ?? 0) + ' vote(s)\n\n'
+        + 'Deleting the election permanently removes them too.\n'
+        + 'If you only want to remove a candidate, cancel and delete it from the Candidates tab instead.\n\n'
+        + 'Delete everything anyway?';
+      if (!confirm(msg)) return;
       r = await aDel('/api/admin/elections/' + e.id + '?force=1');
     }
     if (!r.ok) return toast(r.message, 'err'); toast('Election deleted'); load(); reloadElections?.();

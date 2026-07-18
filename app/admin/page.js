@@ -11,11 +11,12 @@ import ElectionsTab from '@/components/admin/ElectionsTab';
 import RecordsTab from '@/components/admin/RecordsTab';
 import ResultsTab from '@/components/admin/ResultsTab';
 import LogsTab from '@/components/admin/LogsTab';
+import CommitteeTab from '@/components/admin/CommitteeTab';
 import CommitteeVoteTab from '@/components/admin/CommitteeVoteTab';
 
 const BASE_TABS = [
   ['dashboard', 'Dashboard', '📊'], ['members', 'Members', '👥'], ['candidates', 'Candidates', '🎖️'],
-  ['elections', 'Elections', '🗳️'], ['records', 'Voting Records', '📋'], ['results', 'Results', '🏆'], ['logs', 'Audit Logs', '🧾'],
+  ['elections', 'Elections', '🗳️'], ['committee', 'Committee', '🤝'], ['records', 'Voting Records', '📋'], ['results', 'Results', '🏆'], ['logs', 'Audit Logs', '🧾'],
 ];
 const SUPER_TAB = ['committee', 'Committee Vote Entry', '🔐'];
 
@@ -70,6 +71,7 @@ export default function Admin() {
       {tab === 'records' && <RecordsTab />}
       {tab === 'results' && <ResultsTab elections={elections} />}
       {tab === 'logs' && <LogsTab />}
+      {tab === 'committee' && <CommitteeTab toast={toast} />}
       {tab === 'committee' && superAdmin && <CommitteeVoteTab toast={toast} />}
     </main>
     <Toast msg={toastMsg} tone={toastTone} />

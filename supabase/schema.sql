@@ -176,6 +176,20 @@ create table if not exists committee_vote_entries (
   constraint uq_committee_once unique (election_id, member_id)
 );
 
+-- ─── election committee (public homepage section) ───────────────────────────
+create table if not exists committee_members (
+  id          uuid primary key default gen_random_uuid(),
+  full_name   text not null,
+  role        text,
+  photo_url   text,
+  phone       text,
+  email       text,
+  bio         text,
+  sort_order  int  not null default 0,
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+
 -- ─── audit logs ─────────────────────────────────────────────────────────────
 create table if not exists audit_logs (
   id           uuid primary key default gen_random_uuid(),
@@ -208,5 +222,6 @@ alter table votes               enable row level security;
 alter table vote_receipts       enable row level security;
 alter table result_settings     enable row level security;
 alter table audit_logs          enable row level security;
+alter table committee_members   enable row level security;
 alter table committee_vote_entries enable row level security;
 
