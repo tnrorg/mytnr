@@ -18,7 +18,10 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
   const setOf = eid => settings.find(s => s.election_id === eid) || {};
 
   async function save() {
-    const body = { title: form.title, description: form.description, starts_at: form.starts_at || null, ends_at: form.ends_at || null };
+    // datetime-local gives a naive LOCAL time; convert to a proper UTC instant so
+    // storage and display always agree (prevents the timezone shift / drift-on-re-edit bug).
+    const toIso = v => (v ? new Date(v).toISOString() : null);
+    const body = { title: form.title, description: form.description, starts_at: toIso(form.starts_at), ends_at: toIso(form.ends_at) };
     const r = form.id
       ? await aPatch('/api/admin/elections/' + form.id, body)
       : await aPost('/api/admin/elections', { ...body, positions: form.positions });
