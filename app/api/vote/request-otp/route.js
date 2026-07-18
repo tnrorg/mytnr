@@ -22,9 +22,13 @@ export async function POST(req) {
   const election = await getActiveElection();
   if (!election) return fail('NO_ELECTION', 400, { message: 'No election is currently available.' });
 
-  // Member lookup by email (case-insensitive) or mobile
-  const mq = sb.from('members').select('*');
-  const { data: member } = await (isEmail ? mq.ilike('email', contact) : mq.eq('mobile', contact)).maybeSingle();
+  // Member lookup by email (case-insensitive) or mobile.
+  // Use limit(1) (not maybeSingle) so a duplicate email/mobile can't blank the result.
+  const q = isEmail
+    ? sb.from('members').select('*').ilike('email', contact)
+    : sb.from('members').select('*').eq('mobile', contact);
+  const { data: rows } = await q.limit(1);
+  const member = rows && rows[0];
   if (!member) {
     await logAudit({ action: 'OTP_REJECTED_UNREGISTERED', actor: 'member', details: contact, election_id: election.id, ip });
     return fail('NOT_REGISTERED', 404, { message: isEmail ? 'This email is not registered for voting.' : 'This mobile number is not registered for voting.' });
