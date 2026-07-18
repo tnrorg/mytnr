@@ -52,7 +52,9 @@ export async function GET() {
       const margin = other ? v - other.v : 0;
       let statusBadge = null;
       if (showLeading) {
-        if (ended || e.result_published) statusBadge = (v === max && max > 0 && !tie) ? 'ELECTED' : (tie ? 'TIED' : null);
+        // ELECTED only after the election has actually ENDED. While voting is open
+        // (even if results are published), show LEADING / TRAILING / TIED.
+        if (ended) statusBadge = (v === max && max > 0 && !tie) ? 'ELECTED' : (tie ? 'TIED' : null);
         else statusBadge = tie ? 'TIED' : (v === max ? 'LEADING' : 'TRAILING');
       }
       return {
@@ -64,7 +66,7 @@ export async function GET() {
         margin: showCounts ? Math.abs(margin) : null,
         leading: showLeading ? (v === max && !tie) : null,
         status_badge: statusBadge,
-        elected: (ended || e.result_published) && v === max && max > 0 && !tie,
+        elected: ended && v === max && max > 0 && !tie,
       };
     });
     return { id: p.id, title: p.title, total: showCounts ? total : null, candidates: out };
