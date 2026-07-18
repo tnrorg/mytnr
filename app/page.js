@@ -188,18 +188,13 @@ function PositionSection({ p, i, vis, ended, onProfile }) {
   const two = cands.length === 2;
   return (
     <div className="animate-fade-up">
-      <div className="rounded-2xl px-5 py-4 flex items-center gap-3 text-white shadow-lg" style={{ background: `linear-gradient(120deg,${C.deep},${C.green})`, border: '1px solid rgba(212,167,44,0.35)' }}>
-        <span className="w-11 h-11 rounded-xl grid place-items-center shrink-0" style={{ background: 'rgba(212,167,44,0.18)' }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d={POS_ICONS[i % POS_ICONS.length]} stroke="#F3E4B3" strokeWidth="1.7" strokeLinejoin="round" /></svg>
-        </span>
-        <div>
-          <div className="text-[11px] uppercase tracking-widest text-[#F3E4B3]/80">Position {i + 1}</div>
-          <h3 style={mont} className="text-xl sm:text-2xl font-extrabold uppercase">{p.title} Election</h3>
-        </div>
+      <div className="rounded-2xl px-5 py-4 text-center text-white shadow-lg" style={{ background: `linear-gradient(120deg,${C.deep},${C.green})`, border: '1px solid rgba(212,167,44,0.35)' }}>
+        <div className="text-[11px] uppercase tracking-widest text-[#F3E4B3]/80">Position {i + 1}</div>
+        <h3 style={mont} className="text-xl sm:text-2xl font-extrabold uppercase">{p.title}</h3>
       </div>
 
       {two ? (
-        <div className="mt-5 grid grid-cols-[1fr_auto_1fr] gap-2 sm:gap-4 items-center">
+        <div className="mt-6 grid grid-cols-[1fr_auto_1fr] gap-2 sm:gap-4 items-stretch">
           <CandidateCard c={cands[0]} vis={vis} ended={ended} onProfile={onProfile} />
           <VS />
           <CandidateCard c={cands[1]} vis={vis} ended={ended} onProfile={onProfile} />
@@ -226,7 +221,7 @@ function CandidateCard({ c, vis, ended, onProfile }) {
   const badge = c.status_badge;
   const glow = elected ? { boxShadow: '0 0 0 2px #D4A72C, 0 20px 60px -18px rgba(212,167,44,0.6)' } : {};
   return (
-    <div className="relative rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-white transition-transform hover:-translate-y-1 shadow-2xl"
+    <div className="relative h-full flex flex-col rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-white transition-transform hover:-translate-y-1 shadow-2xl"
       style={{ background: `linear-gradient(165deg,${C.deep},${C.black})`, border: '1px solid rgba(212,167,44,0.35)', ...glow }}>
       {badge && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -237,7 +232,7 @@ function CandidateCard({ c, vis, ended, onProfile }) {
           </span>
         </div>
       )}
-      <div className="flex flex-col items-center text-center pt-2">
+      <div className="flex flex-col items-center text-center pt-6 sm:pt-4">
         <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl overflow-hidden ring-2 ring-[#D4A72C]/60 bg-white/5">
           <img src={c.photo_url || '/tnr-logo.png'} alt={c.name} className="w-full h-full object-cover" />
         </div>
@@ -272,7 +267,7 @@ function CandidateCard({ c, vis, ended, onProfile }) {
         )}
       </div>
 
-      <div className="mt-4 flex flex-col sm:flex-row gap-2">
+      <div className="mt-auto pt-4 flex flex-col sm:flex-row gap-2">
         <button onClick={() => onProfile(c)} className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-white/15 hover:bg-white/5 transition">View Profile</button>
         <a href="/vote" className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold text-center text-[#063D2B]" style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>Vote Now</a>
       </div>
