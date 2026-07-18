@@ -12,7 +12,7 @@ export default function Login({ onIn }) {
   return <div className="min-h-screen grid place-items-center px-4">
     <form onSubmit={submit} className="card p-8 w-full max-w-sm animate-fade-up">
       <div className="flex flex-col items-center gap-2 mb-6"><Logo size={64} />
-        <h1 className="text-xl font-bold">TNR Admin</h1><p className="text-xs text-tnr-cream/50">Tahreek-e-Nojawanan Roundu</p></div>
+        <h1 className="text-xl font-bold">TNR Admin</h1><p className="text-xs text-tnr-cream/50">Tehreek-e-Nojawanan Roundu</p></div>
       <input className="input mb-3" placeholder="Username" value={u} onChange={e => setU(e.target.value)} autoFocus />
       <input className="input mb-3" type="password" placeholder="Password" value={p} onChange={e => setP(e.target.value)} />
       {err && <p className="text-red-400 text-sm mb-3">{err}</p>}

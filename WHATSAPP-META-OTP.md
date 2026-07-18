@@ -32,7 +32,7 @@ Meta requires a pre-approved template to send OTPs.
 
 Sample content the template produces:
 ```
-TAHREEK-E-NOJAWANAN ROUNDU
+TEHREEK-E-NOJAWANAN ROUNDU
 Your Election Verification Code is: 482913
 This code will expire in 5 minutes. Do not share this code with anyone.
 ```

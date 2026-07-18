@@ -47,18 +47,21 @@ export async function POST(req) {
   const { data: onList } = await sb.from('locked_voter_list').select('id').eq('election_id', e.id).eq('member_id', member_id).maybeSingle();
   if (!onList) return fail('NOT_ON_LIST', 403, { message: 'Voter is not on the locked voter list.' });
 
-  // Not already voted (single vote per election).
-  const { data: already } = await sb.from('votes').select('id').eq('election_id', e.id).eq('member_id', member_id).maybeSingle();
-  if (already) return fail('ALREADY_VOTED', 409, { message: 'This voter has already voted.' });
-
   // Candidate must belong to this election and be active.
   const { data: cand } = await sb.from('candidates').select('id, position_id, status').eq('id', candidate_id).eq('election_id', e.id).maybeSingle();
   if (!cand || cand.status !== 'Active') return fail('BAD_CANDIDATE', 400, { message: 'Invalid candidate.' });
+  if (!cand.position_id) return fail('BAD_CANDIDATE', 400, { message: 'That candidate is not assigned to a position.' });
 
-  // Insert the real ballot (counts in combined public totals). Unique(election, member) enforces one vote.
+  // One vote per voter PER POSITION — the same voter may still vote for other positions.
+  const { data: already } = await sb.from('votes').select('id')
+    .eq('election_id', e.id).eq('member_id', member_id).eq('position_id', cand.position_id).limit(1);
+  if (already && already.length)
+    return fail('ALREADY_VOTED', 409, { message: 'This voter has already voted for that position.' });
+
+  // Insert the real ballot. Unique(election, member, position) enforces one vote per position.
   const { error: insErr } = await sb.from('votes').insert({ election_id: e.id, member_id, candidate_id, position_id: cand.position_id });
   if (insErr) {
-    if (insErr.code === '23505') return fail('ALREADY_VOTED', 409, { message: 'This voter has already voted.' });
+    if (insErr.code === '23505') return fail('ALREADY_VOTED', 409, { message: 'This voter has already voted for that position.' });
     return fail('VOTE_FAILED', 500, { message: 'Could not record the ballot.' });
   }
   const receipt_code = makeReceiptCode();

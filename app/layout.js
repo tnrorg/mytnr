@@ -9,8 +9,8 @@ const mulish = Mulish({
 });
 
 export const metadata = {
-  title: 'Tahreek-e-Nojawanan Roundu — Election Portal',
-  description: 'Official online election portal of Tahreek-e-Nojawanan Roundu. Your Vote, Your Voice.',
+  title: 'Tehreek-e-Nojawanan Roundu — Election Portal',
+  description: 'Official online election portal of Tehreek-e-Nojawanan Roundu. Your Vote, Your Voice.',
   icons: { icon: '/tnr-logo.png' },
 };
 

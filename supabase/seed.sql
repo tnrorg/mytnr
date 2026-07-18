@@ -6,7 +6,7 @@
 
 -- Organization
 insert into organizations (name, short_name, values_ur, logo_url)
-select 'Tahreek-e-Nojawanan Roundu', 'TNR', 'اتحاد، شعور، عمل', '/tnr-logo.png'
+select 'Tehreek-e-Nojawanan Roundu', 'TNR', 'اتحاد، شعور، عمل', '/tnr-logo.png'
 where not exists (select 1 from organizations);
 
 -- Unions / areas
@@ -26,7 +26,7 @@ where not exists (select 1 from admin_users where username = 'admin');
 -- Sample election (Draft) so the dashboard is not empty on first run
 insert into elections (title, description, status, starts_at, ends_at)
 select 'TNR General Council Election 2026',
-       'Internal election for the executive council of Tahreek-e-Nojawanan Roundu.',
+       'Internal election for the executive council of Tehreek-e-Nojawanan Roundu.',
        'Draft',
        now() + interval '1 day',
        now() + interval '3 day'

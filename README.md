@@ -1,4 +1,4 @@
-# 🗳️ TNR Election Portal — Tehreek Naujawanan Roundu
+# 🗳️ TNR Election Portal — Tehreek-e-Nojawanan Roundu
 
 A premium, secure, mobile-first **internal organization election portal**.
 Members vote with their **registered mobile number + OTP** (WhatsApp primary, SMS backup) — no passwords.
@@ -81,4 +81,4 @@ Deploy to **Vercel** (recommended). Add all `.env.local` variables in the Vercel
 Set `NEXT_PUBLIC_SUPABASE_URL`, keys, `JWT_SECRET`, and Twilio vars as project env vars.
 
 ---
-© Tehreek Naujawanan Roundu (TNR) · اتحاد • شعور • عمل
+© Tehreek-e-Nojawanan Roundu (TNR) · اتحاد • شعور • عمل

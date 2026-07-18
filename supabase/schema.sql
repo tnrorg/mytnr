@@ -1,5 +1,5 @@
 -- ============================================================================
---  Tahreek-e-Nojawanan Roundu (TNR) — Election Portal
+--  Tehreek-e-Nojawanan Roundu (TNR) — Election Portal
 --  PostgreSQL / Supabase schema + seed
 --  Run this in Supabase → SQL Editor (or via the Supabase CLI).
 -- ============================================================================
@@ -9,7 +9,7 @@ create extension if not exists "pgcrypto";
 -- ─── organizations ──────────────────────────────────────────────────────────
 create table if not exists organizations (
   id           uuid primary key default gen_random_uuid(),
-  name         text not null default 'Tahreek-e-Nojawanan Roundu',
+  name         text not null default 'Tehreek-e-Nojawanan Roundu',
   short_name   text not null default 'TNR',
   logo_url     text,
   values_ur    text default 'اتحاد، شعور، عمل',

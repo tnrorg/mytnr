@@ -4,7 +4,7 @@ import { ok } from '@/lib/api';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
-const CANONICAL_ORG = { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR' };
+const CANONICAL_ORG = { name: 'Tehreek-e-Nojawanan Roundu', short_name: 'TNR' };
 
 // Effective public visibility of vote data given the admin mode + election state.
 // Returns one of: 'full' | 'percent' | 'leading' | 'hidden'
@@ -30,7 +30,7 @@ export async function GET() {
 
   const { data: positions } = await sb.from('positions').select('*').eq('election_id', e.id).order('sort_order');
   const { data: candidates } = await sb.from('candidates').select('*').eq('election_id', e.id).eq('status', 'Active').order('sort_order');
-  const { data: votes } = await sb.from('votes').select('candidate_id').eq('election_id', e.id);
+  const { data: votes } = await sb.from('votes').select('candidate_id, member_id').eq('election_id', e.id);
   const { data: unions } = await sb.from('unions').select('id, union_name');
   const umap = Object.fromEntries((unions || []).map(u => [u.id, u.union_name]));
   const tally = {}; for (const v of votes || []) tally[v.candidate_id] = (tally[v.candidate_id] || 0) + 1;
@@ -86,10 +86,11 @@ export async function GET() {
   }
 
   const total_voters = (await sb.from('locked_voter_list').select('*', { count: 'exact', head: true }).eq('election_id', e.id)).count || 0;
-  const votes_cast = (votes || []).length;
+  // One voter now produces one row per position, so turnout counts DISTINCT voters.
+  const votes_cast = new Set((votes || []).map(v => v.member_id)).size;
 
   return ok({
-    org: org || { name: 'Tahreek-e-Nojawanan Roundu', short_name: 'TNR', logo_url: '/tnr-logo.png' },
+    org: org || { name: 'Tehreek-e-Nojawanan Roundu', short_name: 'TNR', logo_url: '/tnr-logo.png' },
     election: {
       id: e.id, title: e.title, description: e.description, status: e.status,
       starts_at: e.starts_at, ends_at: e.ends_at,

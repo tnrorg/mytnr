@@ -126,7 +126,7 @@ function Hero({ e, stats, org, onRules }) {
             <span className="w-2 h-2 rounded-full bg-[#D4A72C] animate-pulse" /> ELECTION IS LIVE
           </span>}
           <h1 style={mont} className="text-4xl sm:text-5xl font-black leading-[1.05] text-[#063D2B]">
-            {(org?.name || 'Tahreek-e-Nojawanan Roundu')}<br /><span style={{ color: C.gold }}>Online Election</span>
+            {(org?.name || 'Tehreek-e-Nojawanan Roundu')}<br /><span style={{ color: C.gold }}>Online Election</span>
           </h1>
           <p className="mt-4 text-gray-600 text-lg max-w-xl">Choose your representatives and help shape the future of our youth movement.</p>
 
@@ -334,7 +334,7 @@ function Process({ onRules }) {
 }
 function About() {
   return <section id="about" className="max-w-4xl mx-auto px-4 py-12 text-center">
-    <SectionTitle kicker="ABOUT" title="Tahreek-e-Nojawanan Roundu" />
+    <SectionTitle kicker="ABOUT" title="Tehreek-e-Nojawanan Roundu" />
     <p className="mt-6 text-gray-600 text-lg leading-relaxed">A youth movement built on <b className="text-[#0B6B4F]">unity</b>, <b className="text-[#0B6B4F]">awareness</b>, and <b className="text-[#0B6B4F]">action</b>. This portal ensures every member's voice is heard through a secure, transparent, and fair internal election — one member, one vote.</p>
   </section>;
 }
@@ -378,7 +378,7 @@ function CommitteeSection({ members }) {
 }
 function Footer2({ org }) {
   return <footer className="border-t border-gray-100 py-6 text-center text-gray-400 text-xs">
-    © {new Date().getFullYear()} {org?.name || 'Tahreek-e-Nojawanan Roundu'} ({org?.short_name || 'TNR'}) · Secure & private voting · <a href="/admin" className="text-[#0B6B4F] hover:underline">Admin</a>
+    © {new Date().getFullYear()} {org?.name || 'Tehreek-e-Nojawanan Roundu'} ({org?.short_name || 'TNR'}) · Secure & private voting · <a href="/admin" className="text-[#0B6B4F] hover:underline">Admin</a>
   </footer>;
 }
 
@@ -430,6 +430,6 @@ function RulesModal({ onClose }) {
 /* keep dark-theme pages working (results/dashboard import Footer from here) */
 export function Footer({ t, rtl }) {
   return <footer className="border-t border-tnr-line py-6 text-center text-tnr-cream/50 text-xs">
-    © {new Date().getFullYear()} {t?.org || 'Tahreek-e-Nojawanan Roundu'} ({t?.short || 'TNR'}) · <a href="/admin" className="text-tnr-gold hover:underline">Admin</a>
+    © {new Date().getFullYear()} {t?.org || 'Tehreek-e-Nojawanan Roundu'} ({t?.short || 'TNR'}) · <a href="/admin" className="text-tnr-gold hover:underline">Admin</a>
   </footer>;
 }

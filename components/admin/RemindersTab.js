@@ -11,7 +11,7 @@ const PRESETS = [
     message:
 `Assalam-o-Alaikum {{name}},
 
-Voting in the Tahreek-e-Nojawanan Roundu election is currently open and our records show that you have not cast your vote yet.
+Voting in the Tehreek-e-Nojawanan Roundu election is currently open and our records show that you have not cast your vote yet.
 
 Please take a moment to vote. You will need the email address registered with TNR — a 6-digit verification code will be sent to it.
 
@@ -28,7 +28,7 @@ TNR Election Committee`,
     message:
 `Assalam-o-Alaikum {{name}},
 
-Voting in the Tahreek-e-Nojawanan Roundu election is now open.
+Voting in the Tehreek-e-Nojawanan Roundu election is now open.
 
 Click the button below, enter your registered email address, and you will receive a 6-digit verification code. After verifying, confirm your details and select your candidates.
 

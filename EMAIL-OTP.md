@@ -15,7 +15,7 @@ Any SMTP works. Two easy free options:
    - `SMTP_PORT=587`
    - `SMTP_USER=your@gmail.com`
    - `SMTP_PASS=<the 16-char app password>`
-   - `SMTP_FROM=Tahreek-e-Nojawanan Roundu <your@gmail.com>`
+   - `SMTP_FROM=Tehreek-e-Nojawanan Roundu <your@gmail.com>`
 
 **Brevo / SendGrid** (better deliverability for ~375 emails):
 - Sign up (free tier), create an SMTP key, and use their host/port/user/pass.
@@ -27,7 +27,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your@gmail.com
 SMTP_PASS=your-app-password
-SMTP_FROM=Tahreek-e-Nojawanan Roundu <your@gmail.com>
+SMTP_FROM=Tehreek-e-Nojawanan Roundu <your@gmail.com>
 ```
 Then **Redeploy**.
 
