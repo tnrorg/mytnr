@@ -15,6 +15,7 @@ export default function VotePage() {
   const [devCode, setDevCode] = useState(null);
   const [channel, setChannel] = useState(null);
   const [voteToken, setVoteToken] = useState(null);
+  const [memberInfo, setMemberInfo] = useState(null);
   const [data, setData] = useState({ positions: [], candidates: [] });
   const [selected, setSelected] = useState(null);
   const [confirmCand, setConfirmCand] = useState(null);
@@ -35,10 +36,11 @@ export default function VotePage() {
     const r = await api('/api/vote/verify-otp', { otp_id: otpId, code });
     if (!r.ok) { setLoading(false); return { error: r.message }; }
     setVoteToken(r.vote_token);
+    setMemberInfo(r.member || null);
     const cr = await api('/api/public/candidates', { vote_token: r.vote_token });
     setLoading(false);
     if (!cr.ok) return { error: cr.message };
-    setData({ positions: cr.positions, candidates: cr.candidates }); setStep('candidates');
+    setData({ positions: cr.positions, candidates: cr.candidates }); setStep('member');
     return {};
   }
   async function castVote() {
@@ -71,6 +73,7 @@ export default function VotePage() {
           )}
           {step === 'otp' && <OtpStep t={t} rtl={rtl} channel={channel} devCode={devCode} loading={loading}
             onVerify={verifyOtp} onResend={requestOtp} />}
+          {step === 'member' && <MemberDetails t={t} rtl={rtl} member={memberInfo} onContinue={() => setStep('candidates')} />}
           {step === 'candidates' && <Candidates t={t} rtl={rtl} data={data} onPick={setConfirmCand} onDetail={setDetailCand} />}
           {step === 'success' && <Success t={t} rtl={rtl} receipt={receipt} />}
           {step === 'error' && <ErrorState t={t} rtl={rtl} kind={errKind} msg={errMsg} />}
@@ -87,7 +90,8 @@ export default function VotePage() {
 function Steps({ step, rtl }) {
   const order = ['mobile', 'otp', 'candidates', 'success'];
   const labels = rtl ? ['نمبر','او ٹی پی','امیدوار','رسید'] : ['Number','OTP','Candidate','Receipt'];
-  const idx = Math.max(0, order.indexOf(step === 'error' ? 'mobile' : step));
+  const key = step === 'error' ? 'mobile' : (step === 'member' ? 'otp' : step);
+  const idx = Math.max(0, order.indexOf(key));
   return <div className="flex items-center justify-center gap-2 mb-6">
     {labels.map((l, i) => (<div key={i} className="flex items-center gap-2">
       <div className={`w-8 h-8 rounded-full grid place-items-center text-xs font-bold border ${i <= idx ? 'bg-tnr-gold text-tnr-black border-tnr-gold' : 'border-tnr-line text-tnr-cream/40'}`}>{i + 1}</div>
@@ -127,6 +131,31 @@ function OtpStep({ t, rtl, channel, devCode, loading, onVerify, onResend }) {
   );
 }
 
+function MemberDetails({ t, rtl, member, onContinue }) {
+  const verified = rtl ? 'تصدیق شدہ — ووٹ کے اہل' : 'IDENTITY VERIFIED — ELIGIBLE TO VOTE';
+  const Row = ({ k, v }) => v ? <div className="flex justify-between gap-3 py-2 border-b border-tnr-line/50 text-sm">
+    <span className="text-tnr-cream/50">{k}</span><span className="text-tnr-cream font-semibold text-right">{v}</span></div> : null;
+  return (
+    <div className="card p-6 sm:p-8 animate-pop text-center">
+      <div className="w-16 h-16 rounded-full bg-tnr-green2 grid place-items-center mx-auto mb-3 border-2 border-tnr-gold">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#E4C25B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div className="chip bg-tnr-green2/50 text-tnr-goldLight border border-tnr-line mx-auto mb-4 text-[11px]">{verified}</div>
+      <h2 className={`text-2xl font-bold text-tnr-cream ${rtl ? 'urdu' : ''}`}>{member?.full_name || (rtl ? 'رکن' : 'Member')}</h2>
+      <p className={`text-sm text-tnr-cream/50 mb-4 ${rtl ? 'urdu' : ''}`}>{rtl ? 'براہ کرم اپنی تفصیلات کی تصدیق کریں' : 'Please confirm your details before voting'}</p>
+      <div className="text-left rounded-2xl bg-black/30 border border-tnr-line px-4 py-2 mb-5">
+        <Row k={rtl ? 'رکن نمبر' : 'Member ID'} v={member?.member_code} />
+        <Row k={rtl ? 'موبائل' : 'Mobile'} v={member?.mobile} />
+        <Row k={rtl ? 'گاؤں / علاقہ' : 'Village / Area'} v={member?.village} />
+        <Row k={rtl ? 'یونین' : 'Union'} v={member?.union_name} />
+      </div>
+      <button className="btn-gold w-full text-lg" onClick={onContinue}>
+        {rtl ? 'جاری رکھیں اور امیدوار منتخب کریں' : 'Continue to Choose Candidate'} →
+      </button>
+      <p className="mt-3 text-xs text-tnr-cream/40">{rtl ? 'اگر تفصیلات غلط ہیں تو انتظامیہ سے رابطہ کریں۔' : 'If any detail is wrong, contact the administration.'}</p>
+    </div>
+  );
+}
 function Candidates({ t, rtl, data, onPick, onDetail }) {
   const posName = Object.fromEntries(data.positions.map(p => [p.id, p.title]));
   const groups = {};

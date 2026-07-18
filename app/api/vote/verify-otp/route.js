@@ -33,5 +33,20 @@ export async function POST(req) {
 
   // Short-lived signed token authorizing exactly one cast for this member+election.
   const token = signVoteToken({ election_id: otp.election_id, member_id: otp.member_id });
-  return ok({ vote_token: token });
+
+  // Return the member's own details for the identity-confirmation screen.
+  const { data: member } = await sb.from('members')
+    .select('full_name, member_code, mobile, village, union_id, gender').eq('id', otp.member_id).maybeSingle();
+  let union_name = null;
+  if (member?.union_id) {
+    const { data: u } = await sb.from('unions').select('union_name').eq('id', member.union_id).maybeSingle();
+    union_name = u?.union_name || null;
+  }
+  return ok({
+    vote_token: token,
+    member: member ? {
+      full_name: member.full_name, member_code: member.member_code,
+      mobile: member.mobile, village: member.village, gender: member.gender, union_name,
+    } : null,
+  });
 }
