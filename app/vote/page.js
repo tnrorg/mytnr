@@ -23,12 +23,13 @@ export default function VotePage() {
   const [receipt, setReceipt] = useState(null);
   const [errMsg, setErrMsg] = useState('');
   const [errKind, setErrKind] = useState('');
+  const [errDetail, setErrDetail] = useState('');
 
   async function requestOtp(e) {
     e?.preventDefault(); setLoading(true); setErrMsg('');
     const r = await api('/api/vote/request-otp', { mobile });
     setLoading(false);
-    if (!r.ok) { setErrKind(r.error); setErrMsg(r.message || 'Error'); setStep('error'); return; }
+    if (!r.ok) { setErrKind(r.error); setErrMsg(r.message || 'Error'); setErrDetail(r.detail || ''); setStep('error'); return; }
     setOtpId(r.otp_id); setChannel(r.channel); setDevCode(r.dev_code || null); setStep('otp');
   }
   async function verifyOtp(code) {
@@ -76,7 +77,7 @@ export default function VotePage() {
           {step === 'member' && <MemberDetails t={t} rtl={rtl} member={memberInfo} onContinue={() => setStep('candidates')} />}
           {step === 'candidates' && <Candidates t={t} rtl={rtl} data={data} onPick={setConfirmCand} onDetail={setDetailCand} />}
           {step === 'success' && <Success t={t} rtl={rtl} receipt={receipt} />}
-          {step === 'error' && <ErrorState t={t} rtl={rtl} kind={errKind} msg={errMsg} />}
+          {step === 'error' && <ErrorState t={t} rtl={rtl} kind={errKind} msg={errMsg} detail={errDetail} />}
         </div>
       </section>
 
@@ -226,12 +227,13 @@ function Success({ t, rtl, receipt }) {
     <a href="/" className="btn-gold w-full">{t.backHome}</a>
   </div>;
 }
-function ErrorState({ t, rtl, kind, msg }) {
+function ErrorState({ t, rtl, kind, msg, detail }) {
   const voted = kind === 'ALREADY_VOTED';
   return <div className="card p-8 text-center animate-pop">
     <div className={`w-20 h-20 rounded-full grid place-items-center mx-auto mb-4 border-2 ${voted ? 'bg-tnr-green2 border-tnr-gold' : 'bg-red-900/40 border-red-500/60'}`}>
       <span className="text-4xl">{voted ? '✓' : '!'}</span></div>
     <p className={`text-lg text-tnr-cream ${rtl ? 'urdu' : ''}`}>{msg}</p>
+    {detail && <p className="mt-3 text-xs text-red-300/80 break-words font-mono bg-black/30 border border-red-500/20 rounded-lg px-3 py-2">{detail}</p>}
     <a href="/" className="btn-ghost w-full mt-6">{t.backHome}</a>
   </div>;
 }
