@@ -62,9 +62,12 @@ export async function POST(req) {
     await logAudit({ action: 'OTP_SENT', actor: 'member', details: `${phone} via ${channel}`, election_id: election.id, ip });
     return ok({ otp_id: otpRow.id, channel, expires_at, member_name: member.full_name });
   } catch (e) {
-    // Dev fallback: if Twilio isn't configured, expose the code so the flow is testable.
-    if (process.env.NODE_ENV !== 'production' && (e.dev || /not configured|not set|dev/i.test(e.message))) {
-      await logAudit({ action: 'OTP_SENT', actor: 'system', details: `${phone} DEV-MODE (twilio off)`, election_id: election.id, ip });
+    // Test mode: when OTP_PROVIDER=dev (opt-in), show the code on screen instead of sending it.
+    // e.dev is set only when the provider is explicitly 'dev', so this never leaks for a
+    // misconfigured real provider in production.
+    const testMode = e.dev || (process.env.NODE_ENV !== 'production' && /not configured|not set|dev/i.test(e.message));
+    if (testMode) {
+      await logAudit({ action: 'OTP_SENT', actor: 'system', details: `${phone} TEST-MODE (on-screen code)`, election_id: election.id, ip });
       return ok({ otp_id: otpRow.id, channel: 'dev', expires_at, member_name: member.full_name, dev_code: code });
     }
     // Log the REAL provider error so it's visible in Vercel logs + Admin → Audit Logs.
