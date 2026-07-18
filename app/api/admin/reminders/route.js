@@ -14,8 +14,9 @@ const MAX_BATCH = 25; // keep each request inside the serverless time limit
 // Returns the recipient list for the chosen audience (approved members with an email).
 async function recipients(audience, election) {
   const sb = supabaseAdmin();
-  const { data: members } = await sb.from('members')
-    .select('id, full_name, member_code, email, village, status').order('full_name');
+  // select('*') so a missing optional column can never blank the whole query
+  const { data: members, error: memErr } = await sb.from('members').select('*');
+  if (memErr) { const e = new Error('members query failed: ' + memErr.message); e.dbError = true; throw e; }
   // Status match is case-insensitive so 'approved' / 'APPROVED' still count.
   let list = (members || [])
     .filter(m => String(m.status || '').trim().toLowerCase() === 'approved')
@@ -41,14 +42,17 @@ async function recipients(audience, election) {
 export async function GET(req) {
   const { res } = requireAdmin(req);
   if (res) return res;
+  try {
   const election = await getActiveElection();
   const [all, notVoted, voted] = await Promise.all([
     recipients('all', election), recipients('not_voted', election), recipients('voted', election),
   ]);
   // Diagnostics so a zero count explains itself in the UI
   const sb = supabaseAdmin();
-  const { data: raw } = await sb.from('members').select('status, email');
+  const { data: raw, error: rawErr } = await sb.from('members').select('*');
+  if (rawErr) return fail('DB_ERROR', 500, { message: 'Could not read members table.', detail: rawErr.message });
   const rows = raw || [];
+  const sample = rows[0] ? Object.keys(rows[0]) : [];
   const approved = rows.filter(m => String(m.status || '').trim().toLowerCase() === 'approved');
   const noEmail = approved.filter(m => !String(m.email || '').trim().includes('@')).length;
   const statuses = {};
@@ -57,9 +61,12 @@ export async function GET(req) {
   return ok({
     election: election ? { id: election.id, title: election.title, voting_open: !!election.voting_open } : null,
     counts: { all: all.length, not_voted: notVoted.length, voted: voted.length, missing_email: noEmail },
-    diagnostics: { total_members: rows.length, approved: approved.length, statuses },
+    diagnostics: { total_members: rows.length, approved: approved.length, statuses, columns: sample, has_email_column: sample.includes('email') },
     smtp_configured: !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS),
   });
+  } catch (e) {
+    return fail('DIAG_FAILED', 500, { message: 'Could not build recipient list.', detail: e.message });
+  }
 }
 
 // POST → send one batch. The client loops with `offset` until done:true.

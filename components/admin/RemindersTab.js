@@ -157,7 +157,14 @@ export default function RemindersTab({ toast }) {
           SMTP is not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS in your environment, then redeploy.
         </div>
       )}
-      {info && !counts.all && (
+      {info?.error && (
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
+          <div className="font-semibold">Could not read members.</div>
+          <div className="text-red-200/80 text-xs mt-1">{info.detail || info.message}</div>
+        </div>
+      )}
+
+      {info && !info.error && !counts.all && (
         <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm space-y-1">
           <div className="font-semibold">No recipients found.</div>
           <div className="text-amber-200/80">
@@ -168,6 +175,11 @@ export default function RemindersTab({ toast }) {
           {info.diagnostics?.statuses && (
             <div className="text-xs text-amber-200/60">
               Statuses in database: {Object.entries(info.diagnostics.statuses).map(([k, v]) => `${k} (${v})`).join(', ') || 'none'}
+            </div>
+          )}
+          {info.diagnostics && !info.diagnostics.has_email_column && (
+            <div className="text-xs text-red-300">
+              The members table has no &ldquo;email&rdquo; column. Columns found: {(info.diagnostics.columns || []).join(', ') || 'none'}
             </div>
           )}
           <div className="text-xs text-amber-200/60">
