@@ -15,9 +15,12 @@ const MAX_BATCH = 25; // keep each request inside the serverless time limit
 async function recipients(audience, election) {
   const sb = supabaseAdmin();
   const { data: members } = await sb.from('members')
-    .select('id, full_name, member_code, email, village, status')
-    .eq('status', 'Approved').order('full_name');
-  let list = (members || []).filter(m => m.email && m.email.includes('@'));
+    .select('id, full_name, member_code, email, village, status').order('full_name');
+  // Status match is case-insensitive so 'approved' / 'APPROVED' still count.
+  let list = (members || [])
+    .filter(m => String(m.status || '').trim().toLowerCase() === 'approved')
+    .map(m => ({ ...m, email: String(m.email || '').trim() }))
+    .filter(m => m.email.includes('@'));
 
   if (!election || audience === 'all') return list;
 
@@ -42,12 +45,19 @@ export async function GET(req) {
   const [all, notVoted, voted] = await Promise.all([
     recipients('all', election), recipients('not_voted', election), recipients('voted', election),
   ]);
+  // Diagnostics so a zero count explains itself in the UI
   const sb = supabaseAdmin();
-  const { count: noEmail } = await sb.from('members')
-    .select('*', { count: 'exact', head: true }).eq('status', 'Approved').is('email', null);
+  const { data: raw } = await sb.from('members').select('status, email');
+  const rows = raw || [];
+  const approved = rows.filter(m => String(m.status || '').trim().toLowerCase() === 'approved');
+  const noEmail = approved.filter(m => !String(m.email || '').trim().includes('@')).length;
+  const statuses = {};
+  rows.forEach(m => { const k = String(m.status || '(blank)').trim(); statuses[k] = (statuses[k] || 0) + 1; });
+
   return ok({
     election: election ? { id: election.id, title: election.title, voting_open: !!election.voting_open } : null,
-    counts: { all: all.length, not_voted: notVoted.length, voted: voted.length, missing_email: noEmail || 0 },
+    counts: { all: all.length, not_voted: notVoted.length, voted: voted.length, missing_email: noEmail },
+    diagnostics: { total_members: rows.length, approved: approved.length, statuses },
     smtp_configured: !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS),
   });
 }

@@ -157,6 +157,25 @@ export default function RemindersTab({ toast }) {
           SMTP is not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS in your environment, then redeploy.
         </div>
       )}
+      {info && !counts.all && (
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm space-y-1">
+          <div className="font-semibold">No recipients found.</div>
+          <div className="text-amber-200/80">
+            Database has {info.diagnostics?.total_members ?? 0} member(s), of which{' '}
+            {info.diagnostics?.approved ?? 0} have status &ldquo;Approved&rdquo;
+            {info.diagnostics?.approved ? ` and ${(info.diagnostics.approved - (counts.missing_email || 0))} of those have an email address` : ''}.
+          </div>
+          {info.diagnostics?.statuses && (
+            <div className="text-xs text-amber-200/60">
+              Statuses in database: {Object.entries(info.diagnostics.statuses).map(([k, v]) => `${k} (${v})`).join(', ') || 'none'}
+            </div>
+          )}
+          <div className="text-xs text-amber-200/60">
+            Fix in Members: set status to Approved and make sure the Email field is filled.
+          </div>
+        </div>
+      )}
+
       {!!counts.missing_email && (
         <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm">
           {counts.missing_email} approved member(s) have no email address and will be skipped.
