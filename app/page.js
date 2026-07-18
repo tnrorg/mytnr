@@ -199,7 +199,7 @@ function PositionSection({ p, i, vis, ended, onProfile }) {
       </div>
 
       {two ? (
-        <div className="mt-5 grid md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
+        <div className="mt-5 grid grid-cols-[1fr_auto_1fr] gap-2 sm:gap-4 items-center">
           <CandidateCard c={cands[0]} vis={vis} ended={ended} onProfile={onProfile} />
           <VS />
           <CandidateCard c={cands[1]} vis={vis} ended={ended} onProfile={onProfile} />
@@ -215,7 +215,7 @@ function PositionSection({ p, i, vis, ended, onProfile }) {
 }
 function VS() {
   return <div className="flex md:flex-col items-center justify-center gap-2 py-1">
-    <span className="w-14 h-14 rounded-full grid place-items-center text-white font-black shadow-lg" style={{ background: C.black, border: '2px solid #D4A72C', ...mont }}>VS</span>
+    <span className="w-9 h-9 sm:w-14 sm:h-14 text-xs sm:text-base rounded-full grid place-items-center text-white font-black shadow-lg" style={{ background: C.black, border: '2px solid #D4A72C', ...mont }}>VS</span>
   </div>;
 }
 
@@ -226,7 +226,7 @@ function CandidateCard({ c, vis, ended, onProfile }) {
   const badge = c.status_badge;
   const glow = elected ? { boxShadow: '0 0 0 2px #D4A72C, 0 20px 60px -18px rgba(212,167,44,0.6)' } : {};
   return (
-    <div className="relative rounded-3xl p-5 text-white transition-transform hover:-translate-y-1 shadow-2xl"
+    <div className="relative rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-white transition-transform hover:-translate-y-1 shadow-2xl"
       style={{ background: `linear-gradient(165deg,${C.deep},${C.black})`, border: '1px solid rgba(212,167,44,0.35)', ...glow }}>
       {badge && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -238,17 +238,17 @@ function CandidateCard({ c, vis, ended, onProfile }) {
         </div>
       )}
       <div className="flex flex-col items-center text-center pt-2">
-        <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-[#D4A72C]/60 bg-white/5">
+        <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl overflow-hidden ring-2 ring-[#D4A72C]/60 bg-white/5">
           <img src={c.photo_url || '/tnr-logo.png'} alt={c.name} className="w-full h-full object-cover" />
         </div>
-        <h4 style={mont} className="mt-3 text-lg font-extrabold">{c.name}</h4>
+        <h4 style={mont} className="mt-2 sm:mt-3 text-sm sm:text-lg font-extrabold leading-tight">{c.name}</h4>
         <div className="flex items-center gap-2 mt-1 text-xs">
           <span className="px-2 py-0.5 rounded-full font-bold" style={{ color: C.gold, background: 'rgba(212,167,44,0.14)' }}>#{c.number}</span>
           {c.symbol_url && <img src={c.symbol_url} alt="symbol" className="w-6 h-6 rounded object-cover border border-[#D4A72C]/60 bg-white" />}
           {c.symbol && <span className="px-2 py-0.5 rounded-full text-[#F3E4B3]" style={{ background: 'rgba(212,167,44,0.10)' }}>{c.symbol}</span>}
         </div>
         {(c.region || c.qualification) && <div className="mt-2 text-xs text-white/60">{[c.region, c.qualification].filter(Boolean).join(' · ')}</div>}
-        {c.manifesto && <p className="mt-2 text-sm text-white/75 line-clamp-2">{c.manifesto}</p>}
+        {c.manifesto && <p className="mt-2 text-[11px] sm:text-sm text-white/75 line-clamp-2">{c.manifesto}</p>}
       </div>
 
       <div className="mt-4">
@@ -272,9 +272,9 @@ function CandidateCard({ c, vis, ended, onProfile }) {
         )}
       </div>
 
-      <div className="mt-4 flex gap-2">
-        <button onClick={() => onProfile(c)} className="flex-1 py-2 rounded-xl text-sm font-semibold border border-white/15 hover:bg-white/5 transition">View Profile</button>
-        <a href="/vote" className="flex-1 py-2 rounded-xl text-sm font-bold text-center text-[#063D2B]" style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>Vote Now</a>
+      <div className="mt-4 flex flex-col sm:flex-row gap-2">
+        <button onClick={() => onProfile(c)} className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-white/15 hover:bg-white/5 transition">View Profile</button>
+        <a href="/vote" className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold text-center text-[#063D2B]" style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>Vote Now</a>
       </div>
     </div>
   );
