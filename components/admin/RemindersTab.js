@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { aGet, aPost } from './adminApi';
 
 const PRESETS = [
   {
@@ -66,8 +67,7 @@ export default function RemindersTab({ toast }) {
   const [mode, setMode] = useState('quick');
   const [quick, setQuick] = useState('');
 
-  const load = () => fetch('/api/admin/reminders?t=' + Date.now(), { cache: 'no-store' })
-    .then(r => r.json()).then(setInfo).catch(() => {});
+  const load = () => aGet('/api/admin/reminders?t=' + Date.now()).then(setInfo).catch(() => {});
   useEffect(() => { load(); }, []);
 
   const applyPreset = (k) => {
@@ -83,10 +83,8 @@ export default function RemindersTab({ toast }) {
     if (!testTo.trim()) return toast?.('Enter a test email address first.', 'error');
     setBusy(true);
     try {
-      const r = await fetch('/api/admin/reminders', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject, heading, message, audience, include_button: button, test_email: testTo.trim() }),
-      }).then(x => x.json());
+      const r = await aPost('/api/admin/reminders',
+        { subject, heading, message, audience, include_button: button, test_email: testTo.trim() });
       if (r.error) toast?.(r.detail || r.message || 'Test failed.', 'error');
       else toast?.('Test email sent to ' + testTo.trim(), 'success');
     } finally { setBusy(false); }
@@ -105,10 +103,8 @@ export default function RemindersTab({ toast }) {
     let offset = 0, sent = 0, failed = 0, errors = [];
     try {
       for (let guard = 0; guard < 500; guard++) {
-        const r = await fetch('/api/admin/reminders', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subject: payloadSubject, heading: payloadHeading, message: payloadMessage, audience, include_button: button, offset }),
-        }).then(x => x.json());
+        const r = await aPost('/api/admin/reminders',
+          { subject: payloadSubject, heading: payloadHeading, message: payloadMessage, audience, include_button: button, offset });
         if (r.error) { toast?.(r.detail || r.message || 'Sending failed.', 'error'); break; }
         sent += r.sent || 0; failed += r.failed || 0;
         if (r.errors?.length) errors = errors.concat(r.errors).slice(0, 8);
