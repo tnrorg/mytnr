@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import ResultsAnalytics from '@/components/ResultsAnalytics';
+import VictorySign from '@/components/VictorySign';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', softGold: '#F3E4B3', ink: '#15231D', bg: '#FDFDFD', black: '#0B120F' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -28,6 +30,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <ResultsAnalytics data={data} />
 
       <LiveOverview e={e} stats={stats} />
       <Process onRules={() => setRules(true)} />
@@ -226,9 +230,8 @@ function CandidateCard({ c, vis, ended, onProfile }) {
       {badge && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black shadow"
-            style={{ background: elected || badge === 'ELECTED' ? 'linear-gradient(180deg,#F3E4B3,#D4A72C)' : (badge === 'LEADING' ? 'linear-gradient(180deg,#F3E4B3,#D4A72C)' : 'rgba(255,255,255,0.12)'),
-              color: badge === 'TRAILING' ? '#fff' : '#063D2B', ...mont }}>
-            {badge === 'LEADING' && <TrendIcon />}{badge === 'ELECTED' && '🏆 '}{badge}
+            style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)', color: '#063D2B', ...mont }}>
+            {badge === 'LEADING' && <TrendIcon />}{badge === 'ELECTED' && <VictorySign size={13} className="mr-0.5" />}{badge}
           </span>
         </div>
       )}
