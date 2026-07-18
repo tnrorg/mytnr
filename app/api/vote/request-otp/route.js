@@ -67,6 +67,12 @@ export async function POST(req) {
       await logAudit({ action: 'OTP_SENT', actor: 'system', details: `${phone} DEV-MODE (twilio off)`, election_id: election.id, ip });
       return ok({ otp_id: otpRow.id, channel: 'dev', expires_at, member_name: member.full_name, dev_code: code });
     }
-    return fail('DELIVERY_FAILED', 502, { message: 'Could not send OTP. Please try again shortly.' });
+    // Log the REAL provider error so it's visible in Vercel logs + Admin → Audit Logs.
+    console.error('OTP delivery failed:', e.message);
+    await logAudit({ action: 'OTP_DELIVERY_FAILED', actor: 'system', details: `${phone}: ${e.message}`, election_id: election.id, ip });
+    return fail('DELIVERY_FAILED', 502, {
+      message: 'Could not send OTP. Please try again shortly.',
+      detail: e.message,   // real reason (visible in the browser Network tab for debugging)
+    });
   }
 }
