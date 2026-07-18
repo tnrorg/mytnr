@@ -38,6 +38,11 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
     const r = await aPost('/api/admin/lock', { election_id: e.id });
     if (!r.ok) return toast(r.message, 'err'); toast('Locked ' + r.locked_count + ' voters'); load();
   }
+  async function syncVoters(e) {
+    const r = await aPost('/api/admin/lock/sync', { election_id: e.id });
+    if (!r.ok) return toast(r.message, 'err');
+    toast(r.added ? ('Added ' + r.added + ' new voter(s)') : 'No new approved voters to add'); load();
+  }
   async function saveSettings(eid, patch) {
     const r = await aPatch('/api/admin/settings', { election_id: eid, ...patch });
     if (!r.ok) return toast(r.message, 'err'); toast('Settings saved'); load();
@@ -96,6 +101,7 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
         <div className="gold-divider my-3" />
         <div className="flex flex-wrap gap-2">
           {!e.voter_list_locked && <button className="btn-gold !py-2 text-sm" onClick={() => lock(e)}>🔒 Lock Voter List</button>}
+          {e.voter_list_locked && <button className="btn-green !py-2 text-sm" onClick={() => syncVoters(e)}>➕ Sync New Voters</button>}
           {e.status !== 'Active' && <button className="btn-green !py-2 text-sm" onClick={() => setStatus(e, 'Active')}>▶ Start</button>}
           {e.status === 'Active' && <button className="btn-ghost !py-2 text-sm" onClick={() => setStatus(e, 'Paused')}>⏸ Pause</button>}
           {e.status !== 'Ended' && <button className="btn-ghost !py-2 text-sm" onClick={() => setStatus(e, 'Ended')}>⏹ End</button>}
