@@ -12,7 +12,9 @@ export async function GET() {
 
   const settings = await getSettings(e.id);
   const votingOpen = isVotingOpen(e);
-  const allowed = e.result_published || (!votingOpen && settings.show_full_after_end) || e.status === 'Ended';
+  // Show live results when the admin picks a live mode (full/percent/leading), or when published/ended.
+  const liveMode = ['full', 'percent', 'leading'].includes(settings.result_mode);
+  const allowed = liveMode || e.result_published || (!votingOpen && settings.show_full_after_end) || e.status === 'Ended';
   if (!allowed) {
     return ok({ election: { id: e.id, title: e.title, status: e.status }, results_visible: false,
       message: 'Candidate results are hidden during voting for fairness. Only participation is shown live.' });
