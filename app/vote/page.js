@@ -63,8 +63,8 @@ export default function VotePage() {
                 <h1 className={`text-2xl font-bold ${rtl ? 'urdu' : ''}`}>{t.enterMobile}</h1></div>
               <form onSubmit={requestOtp} className="space-y-4">
                 <input className="input text-center text-lg tracking-wider" value={mobile} onChange={e => setMobile(e.target.value)}
-                  placeholder={t.mobilePlaceholder} inputMode="tel" autoFocus />
-                <button className="btn-gold w-full text-lg" disabled={loading || mobile.length < 7}>
+                  placeholder={t.mobilePlaceholder} inputMode="email" autoCapitalize="none" autoFocus />
+                <button className="btn-gold w-full text-lg" disabled={loading || mobile.length < 5}>
                   {loading ? '…' : t.sendOtp}</button>
               </form>
               <p className={`mt-4 text-xs text-center text-tnr-cream/50 ${rtl ? 'urdu' : ''}`}>
@@ -114,7 +114,7 @@ function OtpStep({ t, rtl, channel, devCode, loading, onVerify, onResend }) {
   return (
     <div className="card p-6 sm:p-8 animate-fade-up text-center">
       <h1 className={`text-2xl font-bold mb-1 ${rtl ? 'urdu' : ''}`}>{t.enterOtp}</h1>
-      <p className="text-xs text-tnr-cream/50 mb-5">{channel === 'dev' ? 'DEV MODE (Twilio off)' : (channel === 'whatsapp' ? 'Sent via WhatsApp' : 'Sent via SMS')}</p>
+      <p className="text-xs text-tnr-cream/50 mb-5">{channel === 'dev' ? 'TEST MODE (on-screen code)' : channel === 'email' ? 'Sent to your registered email' : channel === 'whatsapp' ? 'Sent via WhatsApp' : 'Sent via SMS'}</p>
       {devCode && <div className="mb-4 chip bg-tnr-gold/20 text-tnr-goldLight border border-tnr-line mx-auto">Dev code: <b className="tracking-widest">{devCode}</b></div>}
       <div className="flex justify-center gap-2 mb-4" dir="ltr">
         {digits.map((d, i) => <input key={i} ref={el => refs.current[i] = el} value={d} onChange={e => setD(i, e.target.value)}

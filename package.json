@@ -21,7 +21,8 @@
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
     "papaparse": "^5.4.1",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "nodemailer": "^6.9.14"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
