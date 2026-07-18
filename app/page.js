@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', softGold: '#F3E4B3', ink: '#15231D', bg: '#FDFDFD', black: '#0B120F' };
-const mont = { fontFamily: 'Montserrat, ui-sans-serif, sans-serif' };
+const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
 const API = '/api/public/overview';
 
 export default function Home() {
@@ -14,7 +14,7 @@ export default function Home() {
 
   const e = data?.election, stats = data?.stats, vis = data?.visibility;
   return (
-    <main style={{ background: C.bg, color: C.ink, fontFamily: 'Inter, sans-serif' }} className="min-h-screen">
+    <main style={{ background: C.bg, color: C.ink, fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }} className="min-h-screen">
       <Navbar e={e} org={data?.org} />
       <Hero e={e} stats={stats} org={data?.org} onRules={() => setRules(true)} />
 

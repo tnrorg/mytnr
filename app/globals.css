@@ -5,14 +5,22 @@
 :root { color-scheme: dark; }
 
 html, body { height: 100%; }
+html {
+  font-family: var(--font-mulish), Mulish, system-ui, sans-serif;
+}
 body {
   background:
     radial-gradient(1100px 600px at 50% -12%, rgba(30,122,82,0.28), transparent 60%),
     linear-gradient(180deg, #071410 0%, #0A0F0C 100%);
   color: #F7F5EE;
+  font-family: var(--font-mulish), Mulish, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv01", "cv11";
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100%;
 }
+button, input, textarea, select, option { font-family: inherit; }
 
 /* Urdu text helper */
 .urdu { font-family: '"Noto Nastaliq Urdu"', serif; direction: rtl; line-height: 2.2; }

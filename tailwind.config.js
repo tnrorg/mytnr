@@ -21,7 +21,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['var(--font-mulish)', 'Mulish', 'system-ui', 'sans-serif'],
+        mulish: ['var(--font-mulish)', 'Mulish', 'system-ui', 'sans-serif'],
         urdu: ['"Noto Nastaliq Urdu"', 'serif'],
       },
       boxShadow: {
