@@ -378,7 +378,7 @@ function CommitteeSection({ members }) {
 }
 function Footer2({ org }) {
   return <footer className="border-t border-gray-100 py-6 text-center text-gray-400 text-xs">
-    © {new Date().getFullYear()} {org?.name || 'Tehreek-e-Nojawanan Roundu'} ({org?.short_name || 'TNR'}) · Secure & private voting · <a href="/admin" className="text-[#0B6B4F] hover:underline">Admin</a>
+    © {new Date().getFullYear()} {org?.name || 'Tehreek-e-Nojawanan Roundu'} ({org?.short_name || 'TNR'}) · Secure & private voting · Developed by: Shabbir Hussain
   </footer>;
 }
 
@@ -433,6 +433,6 @@ function RulesModal({ onClose }) {
 /* keep dark-theme pages working (results/dashboard import Footer from here) */
 export function Footer({ t, rtl }) {
   return <footer className="border-t border-tnr-line py-6 text-center text-tnr-cream/50 text-xs">
-    © {new Date().getFullYear()} {t?.org || 'Tehreek-e-Nojawanan Roundu'} ({t?.short || 'TNR'}) · <a href="/admin" className="text-tnr-gold hover:underline">Admin</a>
+    © {new Date().getFullYear()} {t?.org || 'Tehreek-e-Nojawanan Roundu'} ({t?.short || 'TNR'}) · Developed by: Shabbir Hussain
   </footer>;
 }
