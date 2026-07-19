@@ -14,12 +14,15 @@ import LogsTab from '@/components/admin/LogsTab';
 import CommitteeTab from '@/components/admin/CommitteeTab';
 import RemindersTab from '@/components/admin/RemindersTab';
 import CommitteeVoteTab from '@/components/admin/CommitteeVoteTab';
+import AdminsTab from '@/components/admin/AdminsTab';
 
 const BASE_TABS = [
   ['dashboard', 'Dashboard', '📊'], ['members', 'Members', '👥'], ['candidates', 'Candidates', '🎖️'],
   ['elections', 'Elections', '🗳️'], ['ecommittee', 'Committee', '🤝'], ['reminders', 'Reminders', '📧'], ['records', 'Voting Records', '📋'], ['results', 'Results', '🏆'], ['logs', 'Audit Logs', '🧾'],
 ];
+// Super-Admin-only tabs
 const SUPER_TAB = ['committee', 'Committee Vote Entry', '🔐'];
+const SUPER_TAB_ADMINS = ['admins', 'Admin Accounts', '🛡️'];
 
 export default function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -42,7 +45,7 @@ export default function Admin() {
 
   if (!authed) return <Login onIn={a => { setAdmin(a); setAuthed(true); setSuperAdmin(a?.role === 'super_admin' || a?.role === 'superadmin'); }} />;
 
-  const TABS = superAdmin ? [...BASE_TABS, SUPER_TAB] : BASE_TABS;
+  const TABS = superAdmin ? [...BASE_TABS, SUPER_TAB, SUPER_TAB_ADMINS] : BASE_TABS;
   const activeTab = TABS.find(t => t[0] === tab) || TABS[0];
 
   return <div className="min-h-screen flex flex-col md:flex-row">
@@ -75,6 +78,7 @@ export default function Admin() {
       {tab === 'ecommittee' && <CommitteeTab toast={toast} />}
       {tab === 'reminders' && <RemindersTab toast={toast} />}
       {tab === 'committee' && superAdmin && <CommitteeVoteTab toast={toast} />}
+      {tab === 'admins' && superAdmin && <AdminsTab toast={toast} me={admin} />}
     </main>
     <Toast msg={toastMsg} tone={toastTone} />
   </div>;
