@@ -9,7 +9,7 @@ const PRESETS = [
     subject: 'Reminder: Cast your vote in the TNR Election',
     heading: 'Your vote is still pending',
     message:
-`Assalam-o-Alaikum {{name}},
+`Assalam-o-Alaikum Dear {{name}},
 
 Voting in the Tehreek-e-Nojawanan Roundu election is currently open and our records show that you have not cast your vote yet.
 
@@ -26,7 +26,7 @@ TNR Election Committee`,
     subject: 'Voting is now OPEN — TNR Election',
     heading: 'Voting is now open',
     message:
-`Assalam-o-Alaikum {{name}},
+`Assalam-o-Alaikum Dear {{name}},
 
 Voting in the Tehreek-e-Nojawanan Roundu election is now open.
 
@@ -42,7 +42,7 @@ TNR Election Committee`,
     subject: 'Last chance — TNR Election closes soon',
     heading: 'Voting closes soon',
     message:
-`Assalam-o-Alaikum {{name}},
+`Assalam-o-Alaikum Dear {{name}},
 
 This is a final reminder that voting in the TNR election closes shortly. Your vote has not been recorded yet.
 
@@ -139,7 +139,7 @@ export default function RemindersTab({ toast }) {
       heading: audience === 'candidates'
         ? 'Notice for Candidates'
         : 'Notice from the TNR Election Committee',
-      message: `Assalam-o-Alaikum {{name}},\n\n${body}\n\nTNR Election Committee`,
+      message: `Assalam-o-Alaikum Dear {{name}},\n\n${body}\n\nTNR Election Committee`,
     });
   };
 
