@@ -12,7 +12,7 @@ export const maxDuration = 60;
 const MAX_BATCH = 25; // keep each request inside the serverless time limit
 
 // Returns the recipient list for the chosen audience (approved members with an email).
-async function recipients(audience, election) {
+async function recipients(audience, election, member_ids) {
   const sb = supabaseAdmin();
   // select('*') so a missing optional column can never blank the whole query
   const { data: members, error: memErr } = await sb.from('members').select('*');
@@ -22,6 +22,12 @@ async function recipients(audience, election) {
     .filter(m => String(m.status || '').trim().toLowerCase() === 'approved')
     .map(m => ({ ...m, email: String(m.email || '').trim() }))
     .filter(m => m.email.includes('@'));
+
+  // Hand-picked recipients (from the admin's member search) override everything.
+  if (Array.isArray(member_ids) && member_ids.length) {
+    const chosen = new Set(member_ids);
+    return list.filter(m => chosen.has(m.id));
+  }
 
   if (audience === 'candidates') {
     if (!election) return [];
@@ -69,7 +75,15 @@ export async function GET(req) {
   const statuses = {};
   rows.forEach(m => { const k = String(m.status || '(blank)').trim(); statuses[k] = (statuses[k] || 0) + 1; });
 
+  // Small directory for the recipient search box (names only, no email addresses).
+  const { data: dir } = await sb.from('members')
+    .select('id, full_name, member_code, village, email, status').order('full_name').limit(2000);
+  const members_directory = (dir || [])
+    .filter(m => String(m.status || '').trim().toLowerCase() === 'approved')
+    .map(m => ({ id: m.id, full_name: m.full_name, member_code: m.member_code, village: m.village, has_email: !!String(m.email || '').trim().includes('@') }));
+
   return ok({
+    members_directory,
     election: election ? { id: election.id, title: election.title, voting_open: !!election.voting_open } : null,
     counts: { all: all.length, not_voted: notVoted.length, voted: voted.length, candidates: candidates.length, missing_email: noEmail },
     diagnostics: { total_members: rows.length, approved: approved.length, statuses, columns: sample, has_email_column: sample.includes('email') },
@@ -114,7 +128,8 @@ export async function POST(req) {
     }
   }
 
-  const all = await recipients(audience, election);
+  const member_ids = Array.isArray(b.member_ids) ? b.member_ids : null;
+  const all = await recipients(audience, election, member_ids);
   const batch = all.slice(offset, offset + MAX_BATCH);
   if (!batch.length)
     return ok({ done: true, total: all.length, sent: 0, failed: 0, next_offset: offset, errors: [] });

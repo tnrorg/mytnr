@@ -65,6 +65,8 @@ export default function RemindersTab({ toast }) {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(null);
   const [mode, setMode] = useState('quick');
+  const [picked, setPicked] = useState([]);      // hand-selected members [{id, full_name, ...}]
+  const [search, setSearch] = useState('');
   const [quick, setQuick] = useState('');
 
   const load = () => aGet('/api/admin/reminders?t=' + Date.now()).then(setInfo).catch(() => {});
@@ -77,7 +79,7 @@ export default function RemindersTab({ toast }) {
   };
 
   const counts = info?.counts || {};
-  const target = counts[audience] ?? 0;
+  const target = picked.length ? picked.filter(p => p.has_email).length : (counts[audience] ?? 0);
 
   const sendTest = async () => {
     if (!testTo.trim()) return toast?.('Enter a test email address first.', 'error');
@@ -95,7 +97,8 @@ export default function RemindersTab({ toast }) {
     const payloadHeading = override?.heading ?? heading;
     const payloadMessage = (override?.message ?? message).trim();
     if (!payloadSubject || !payloadMessage) return toast?.('Subject and message are required.', 'error');
-    const label = audience === 'all' ? 'ALL approved members'
+    const label = picked.length ? `your ${picked.length} selected member(s)`
+      : audience === 'all' ? 'ALL approved members'
       : audience === 'not_voted' ? 'members who have NOT voted yet'
       : audience === 'candidates' ? 'CANDIDATES of the current election' : 'members who have already voted';
     if (!confirm(`Send this email to ${target} recipient(s) — ${label}?\n\nThis cannot be undone.`)) return;
@@ -105,7 +108,8 @@ export default function RemindersTab({ toast }) {
     try {
       for (let guard = 0; guard < 500; guard++) {
         const r = await aPost('/api/admin/reminders',
-          { subject: payloadSubject, heading: payloadHeading, message: payloadMessage, audience, include_button: button, offset });
+          { subject: payloadSubject, heading: payloadHeading, message: payloadMessage, audience, include_button: button, offset,
+            member_ids: picked.length ? picked.map(p => p.id) : undefined });
         if (r.error) { toast?.(r.detail || r.message || 'Sending failed.', 'error'); break; }
         sent += r.sent || 0; failed += r.failed || 0;
         if (r.errors?.length) errors = errors.concat(r.errors).slice(0, 8);
@@ -216,6 +220,66 @@ export default function RemindersTab({ toast }) {
           <Pill k="voted" label="Already voted" n={counts.voted} />
           <Pill k="candidates" label="Candidates" n={counts.candidates} />
         </div>
+      </div>
+
+
+      <div className="rounded-2xl border border-white/10 p-4 space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <label className="text-xs uppercase tracking-wide text-tnr-cream/50">
+            Or pick exact members (single or multiple)
+          </label>
+          {!!picked.length && (
+            <button onClick={() => setPicked([])} className="text-xs text-red-300 hover:underline">
+              Clear selection ({picked.length})
+            </button>
+          )}
+        </div>
+
+        {!!picked.length && (
+          <div className="flex flex-wrap gap-2">
+            {picked.map(m => (
+              <span key={m.id} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                m.has_email ? 'bg-tnr-gold text-tnr-black' : 'bg-red-500/20 text-red-300 border border-red-500/30'}`}>
+                {m.full_name}{m.member_code ? ` · ${m.member_code}` : ''}{!m.has_email && ' (no email)'}
+                <button onClick={() => setPicked(picked.filter(x => x.id !== m.id))} className="font-bold">×</button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search member by name, code or village…"
+          className="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-sm text-tnr-cream" />
+
+        {search.trim().length >= 2 && (
+          <div className="rounded-xl border border-white/10 divide-y divide-white/10 max-h-56 overflow-auto">
+            {(info?.members_directory || [])
+              .filter(m => {
+                const q = search.trim().toLowerCase();
+                return [m.full_name, m.member_code, m.village].some(v => String(v || '').toLowerCase().includes(q));
+              })
+              .slice(0, 12)
+              .map(m => {
+                const on = picked.some(x => x.id === m.id);
+                return (
+                  <button key={m.id} onClick={() => setPicked(on ? picked.filter(x => x.id !== m.id) : [...picked, m])}
+                    className={`w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition ${
+                      on ? 'bg-tnr-gold/15' : 'hover:bg-white/5'}`}>
+                    <span className={`w-5 h-5 rounded grid place-items-center text-[11px] font-bold shrink-0 ${
+                      on ? 'bg-tnr-gold text-tnr-black' : 'border border-white/20 text-transparent'}`}>✓</span>
+                    <span className="flex-1 min-w-0">
+                      <span className="text-tnr-cream font-semibold">{m.full_name}</span>
+                      <span className="text-tnr-cream/40 text-xs"> {m.member_code ? `· ${m.member_code}` : ''}{m.village ? ` · ${m.village}` : ''}</span>
+                    </span>
+                    {!m.has_email && <span className="text-[10px] text-red-300 shrink-0">no email</span>}
+                  </button>
+                );
+              })}
+          </div>
+        )}
+        <p className="text-[11px] text-tnr-cream/40">
+          When members are selected here, the message goes ONLY to them — the audience buttons above are ignored.
+        </p>
       </div>
 
       {mode === 'quick' && (
