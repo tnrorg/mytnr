@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import ResultsAnalytics from '@/components/ResultsAnalytics';
+import GenderPie from '@/components/GenderPie';
 import VictorySign from '@/components/VictorySign';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', softGold: '#F3E4B3', ink: '#15231D', bg: '#FDFDFD', black: '#0B120F' };
@@ -36,6 +37,8 @@ export default function Home() {
       </section>
 
       <ResultsAnalytics data={data} />
+
+      <GenderPie stats={stats} />
 
       <LiveOverview e={e} stats={stats} />
       <Process onRules={() => setRules(true)} />

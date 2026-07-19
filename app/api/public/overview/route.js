@@ -86,6 +86,19 @@ export async function GET() {
   }
 
   const total_voters = (await sb.from('locked_voter_list').select('*', { count: 'exact', head: true }).eq('election_id', e.id)).count || 0;
+
+  // Public-awareness gender split of REGISTERED voters (locked list, or all approved members before locking)
+  const { data: lockedRows } = await sb.from('locked_voter_list').select('member_id').eq('election_id', e.id);
+  const lockedIds = new Set((lockedRows || []).map(r => r.member_id));
+  let gender = { male: 0, female: 0, other: 0 };
+  {
+    const { data: gm } = await sb.from('members').select('id, gender, status');
+    for (const m of gm || []) {
+      if (lockedIds.size ? !lockedIds.has(m.id) : String(m.status || '').trim().toLowerCase() !== 'approved') continue;
+      const g = String(m.gender || '').trim().toLowerCase();
+      gender[g.startsWith('m') ? 'male' : g.startsWith('f') ? 'female' : 'other'] += 1;
+    }
+  }
   // One voter now produces one row per position, so turnout counts DISTINCT voters.
   const votes_cast = new Set((votes || []).map(v => v.member_id)).size;
 
@@ -101,6 +114,7 @@ export async function GET() {
       total_voters, votes_cast,
       remaining: Math.max(0, total_voters - votes_cast),
       turnout: total_voters ? Math.round((votes_cast / total_voters) * 1000) / 10 : 0,
+      gender,
     },
     positions: positionsOut,
   });
