@@ -133,7 +133,7 @@ export default function VotePage() {
   }, [ballotLocked]);
 
   return (
-    <main className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'}>
+    <main className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'} style={{ background: '#FDFDFD', color: '#15231D' }}>
       <BrandHeader lang={lang} onToggle={toggle} t={t} />
       <section className="flex-1 flex items-start sm:items-center justify-center px-4 py-8">
         <div className="w-full max-w-xl">
@@ -177,9 +177,9 @@ function Steps({ step, rtl }) {
   const idx = Math.max(0, order.indexOf(key));
   return <div className="flex items-center justify-center gap-2 mb-6">
     {labels.map((l, i) => (<div key={i} className="flex items-center gap-2">
-      <div className={`w-8 h-8 rounded-full grid place-items-center text-xs font-bold border ${i <= idx ? 'bg-tnr-gold text-tnr-black border-tnr-gold' : 'border-tnr-line text-tnr-cream/40'}`}>{i + 1}</div>
-      <span className={`text-xs ${i <= idx ? 'text-tnr-goldLight' : 'text-tnr-cream/40'} ${rtl ? 'urdu' : ''} hidden sm:inline`}>{l}</span>
-      {i < labels.length - 1 && <div className={`w-6 h-px ${i < idx ? 'bg-tnr-gold' : 'bg-tnr-line'}`} />}
+      <div className={`w-8 h-8 rounded-full grid place-items-center text-xs font-bold border ${i <= idx ? 'bg-tnr-gold text-tnr-black border-tnr-gold' : 'border-gray-300 text-gray-400'}`}>{i + 1}</div>
+      <span className={`text-xs ${i <= idx ? 'text-tnr-goldLight' : 'text-gray-400'} ${rtl ? 'urdu' : ''} hidden sm:inline`}>{l}</span>
+      {i < labels.length - 1 && <div className={`w-6 h-px ${i < idx ? 'bg-tnr-gold' : 'bg-gray-200'}`} />}
     </div>))}
   </div>;
 }
@@ -277,7 +277,7 @@ function Ballot({ t, rtl, data, selections, onPick, onDetail, filled, total, com
   return (
     <div className="animate-fade-up pb-28">
       <h1 className={`text-2xl font-bold text-center mb-1 ${rtl ? 'urdu' : ''}`}>{rtl ? 'اپنا بیلٹ مکمل کریں' : 'Complete Your Ballot'}</h1>
-      <p className="text-center text-xs text-tnr-cream/50 mb-5">
+      <p className="text-center text-xs text-gray-500 mb-5">
         {rtl ? 'ہر عہدے کے لیے ایک امیدوار منتخب کریں' : 'Select one candidate for every position'}
       </p>
 
@@ -292,7 +292,7 @@ function Ballot({ t, rtl, data, selections, onPick, onDetail, filled, total, com
               <div className="chip bg-tnr-green2/50 text-tnr-goldLight border border-tnr-line">{p.title}</div>
               {chosen
                 ? <span className="text-xs text-tnr-gold font-semibold">✓ {rtl ? 'منتخب' : 'Selected'}</span>
-                : <span className="text-xs text-tnr-cream/40">{rtl ? 'ابھی منتخب نہیں' : 'Not selected yet'}</span>}
+                : <span className="text-xs text-gray-400">{rtl ? 'ابھی منتخب نہیں' : 'Not selected yet'}</span>}
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               {cands.map(c => {
@@ -321,7 +321,7 @@ function Ballot({ t, rtl, data, selections, onPick, onDetail, filled, total, com
                   </button>
                 );
               })}
-              {!cands.length && <p className="text-sm text-tnr-cream/40">No candidates for this position yet.</p>}
+              {!cands.length && <p className="text-sm text-gray-400">No candidates for this position yet.</p>}
             </div>
           </div>
         );

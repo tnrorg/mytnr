@@ -417,7 +417,7 @@ function RulesModal({ onClose }) {
     'Once you begin voting you must finish your ballot before leaving the page.',
     'Candidate details are shown only after successful email verification.',
     'Voting is only possible between the official start and end times.',
-    'For fairness, exact vote totals may be hidden until the election closes.',
+    'Results are live and fully automatic — the moment a ballot is submitted, the vote counts and graphs update instantly.',
     'Your vote is secret — no one can see which candidate you chose.',
   ];
   return <Modal onClose={onClose}>
