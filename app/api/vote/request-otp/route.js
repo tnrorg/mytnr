@@ -45,12 +45,14 @@ export async function POST(req) {
   // Voting window
   if (!isVotingOpen(election)) return fail('NOT_ACTIVE', 403, { message: 'Voting is not currently open for this election.' });
 
-  // Already voted?
-  const { data: existing } = await sb.from('votes').select('id')
-    .eq('election_id', election.id).eq('member_id', member.id).maybeSingle();
+  // Already voted? Checked BEFORE any email is sent, so a completed voter never
+  // consumes an OTP message. count works regardless of how many position rows exist.
+  const { count: existing } = await sb.from('votes')
+    .select('*', { count: 'exact', head: true })
+    .eq('election_id', election.id).eq('member_id', member.id);
   if (existing) {
     await logAudit({ action: 'DUPLICATE_VOTE_ATTEMPT', actor: 'member', details: contact, election_id: election.id, ip });
-    return fail('ALREADY_VOTED', 409, { message: 'You have already cast your vote. Duplicate voting is not allowed.' });
+    return fail('ALREADY_VOTED', 409, { message: 'Your vote has already been successfully submitted. Duplicate voting is not allowed.' });
   }
 
   // Server-side resend cooldown
