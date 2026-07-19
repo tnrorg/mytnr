@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { getToken, isSuper } from '@/components/admin/adminApi';
+import dynamicImport from 'next/dynamic';
+import { getToken, aGet } from '@/components/admin/adminApi';
 import { Toast } from '@/components/admin/ui';
 import { Logo } from '@/components/Brand';
-import CommitteeVoteTab from '@/components/admin/CommitteeVoteTab';
+const CommitteeVoteTab = dynamicImport(() => import('@/components/admin/CommitteeVoteTab'), { ssr: false });
 
 export default function CommitteeVoteEntryPage() {
   const [state, setState] = useState('checking'); // checking | ok | denied | anon
@@ -11,7 +12,10 @@ export default function CommitteeVoteEntryPage() {
   const toast = (m, t = 'ok') => { setToastMsg(m); setToastTone(t); setTimeout(() => setToastMsg(''), 2600); };
   useEffect(() => {
     if (!getToken()) return setState('anon');
-    setState(isSuper() ? 'ok' : 'denied');
+    // The server decides — the browser cannot grant itself this page.
+    aGet('/api/admin/me')
+      .then(r => setState(r?.ok && (r.extra_tabs || []).some(t => t[0] === 'committee') ? 'ok' : 'denied'))
+      .catch(() => setState('denied'));
   }, []);
 
   if (state === 'checking') return <div className="min-h-screen grid place-items-center text-tnr-cream/50">…</div>;

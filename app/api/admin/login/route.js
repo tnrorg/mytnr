@@ -12,5 +12,6 @@ export async function POST(req) {
     return fail('BAD_CREDENTIALS', 401, { message: 'Invalid username or password.' });
   const token = signAdmin(admin);
   await logAudit({ action: 'ADMIN_LOGIN', actor: admin.username, ip: clientIp(req) });
-  return ok({ token, admin: { id: admin.id, username: admin.username, full_name: admin.full_name, role: admin.role } });
+  // The role stays out of the response body — the client asks /api/admin/me instead.
+  return ok({ token, admin: { id: admin.id, username: admin.username, full_name: admin.full_name } });
 }
