@@ -21,9 +21,6 @@ export default function GenderPie({ stats }) {
   return (
     <section className="max-w-6xl mx-auto px-4 pb-14">
       <div className="text-center">
-        <div style={mont} className="text-[11px] tracking-[0.25em] font-bold" >
-          <span style={{ color: C.gold }}>PUBLIC AWARENESS</span>
-        </div>
         <h2 style={{ ...mont, color: C.deep }} className="text-3xl font-black mt-1">Registered Voters by Gender</h2>
         <div className="w-14 h-1 mx-auto mt-3 rounded-full" style={{ background: `linear-gradient(90deg,${C.green},${C.gold})` }} />
       </div>
