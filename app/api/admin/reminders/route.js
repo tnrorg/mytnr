@@ -23,6 +23,16 @@ async function recipients(audience, election) {
     .map(m => ({ ...m, email: String(m.email || '').trim() }))
     .filter(m => m.email.includes('@'));
 
+  if (audience === 'candidates') {
+    if (!election) return [];
+    const { data: cands } = await sb.from('candidates')
+      .select('name, status').eq('election_id', election.id);
+    const names = new Set((cands || [])
+      .filter(c => c.status === 'Active')
+      .map(c => String(c.name || '').trim().toLowerCase()));
+    return list.filter(m => names.has(String(m.full_name || '').trim().toLowerCase()));
+  }
+
   if (!election || audience === 'all') return list;
 
   // Restrict to the locked voter list for this election
@@ -44,8 +54,9 @@ export async function GET(req) {
   if (res) return res;
   try {
   const election = await getActiveElection();
-  const [all, notVoted, voted] = await Promise.all([
-    recipients('all', election), recipients('not_voted', election), recipients('voted', election),
+  const [all, notVoted, voted, candidates] = await Promise.all([
+    recipients('all', election), recipients('not_voted', election),
+    recipients('voted', election), recipients('candidates', election),
   ]);
   // Diagnostics so a zero count explains itself in the UI
   const sb = supabaseAdmin();
@@ -60,7 +71,7 @@ export async function GET(req) {
 
   return ok({
     election: election ? { id: election.id, title: election.title, voting_open: !!election.voting_open } : null,
-    counts: { all: all.length, not_voted: notVoted.length, voted: voted.length, missing_email: noEmail },
+    counts: { all: all.length, not_voted: notVoted.length, voted: voted.length, candidates: candidates.length, missing_email: noEmail },
     diagnostics: { total_members: rows.length, approved: approved.length, statuses, columns: sample, has_email_column: sample.includes('email') },
     smtp_configured: !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS),
   });
@@ -77,7 +88,7 @@ export async function POST(req) {
   const subject = String(b.subject || '').trim();
   const message = String(b.message || '').trim();
   const heading = String(b.heading || '').trim();
-  const audience = ['all', 'not_voted', 'voted'].includes(b.audience) ? b.audience : 'not_voted';
+  const audience = ['all', 'not_voted', 'voted', 'candidates'].includes(b.audience) ? b.audience : 'not_voted';
   const offset = Math.max(0, Number(b.offset || 0));
   const ip = clientIp(req);
 

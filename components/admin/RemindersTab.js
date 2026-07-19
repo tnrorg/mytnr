@@ -96,7 +96,8 @@ export default function RemindersTab({ toast }) {
     const payloadMessage = (override?.message ?? message).trim();
     if (!payloadSubject || !payloadMessage) return toast?.('Subject and message are required.', 'error');
     const label = audience === 'all' ? 'ALL approved members'
-      : audience === 'not_voted' ? 'members who have NOT voted yet' : 'members who have already voted';
+      : audience === 'not_voted' ? 'members who have NOT voted yet'
+      : audience === 'candidates' ? 'CANDIDATES of the current election' : 'members who have already voted';
     if (!confirm(`Send this email to ${target} recipient(s) — ${label}?\n\nThis cannot be undone.`)) return;
 
     setBusy(true); setProgress({ sent: 0, failed: 0, total: target, errors: [] });
@@ -115,7 +116,11 @@ export default function RemindersTab({ toast }) {
     } finally { setBusy(false); load(); }
   };
 
-  const QUICK_LINES = [
+  const QUICK_LINES = audience === 'candidates' ? [
+    'Your candidacy has been confirmed. Best of luck in the election.',
+    'Candidate briefing: please attend the meeting arranged by the Election Committee.',
+    'Reminder for all candidates: campaigning must stop before voting begins.',
+  ] : [
     'Voting is now OPEN. Please cast your vote today.',
     'Reminder: your vote has not been recorded yet. Please vote before the deadline.',
     'Voting closes soon — this is your final reminder to vote.',
@@ -124,14 +129,18 @@ export default function RemindersTab({ toast }) {
     const body = quick.trim();
     if (!body) return toast?.('Type a short message first.', 'error');
     sendAll({
-      subject: 'TNR Election — Message from the Election Committee',
-      heading: 'Notice from the TNR Election Committee',
+      subject: audience === 'candidates'
+        ? 'TNR Election — Notice for Candidates'
+        : 'TNR Election — Message from the Election Committee',
+      heading: audience === 'candidates'
+        ? 'Notice for Candidates'
+        : 'Notice from the TNR Election Committee',
       message: `Assalam-o-Alaikum {{name}},\n\n${body}\n\nTNR Election Committee`,
     });
   };
 
   const Pill = ({ k, label, n }) => (
-    <button onClick={() => setAudience(k)}
+    <button onClick={() => { setAudience(k); if (k === 'candidates') setButton(false); }}
       className={`px-3 py-2 rounded-xl text-sm border transition ${audience === k
         ? 'bg-tnr-gold text-tnr-black border-tnr-gold font-semibold'
         : 'border-white/10 text-tnr-cream/70 hover:bg-white/5'}`}>
@@ -205,6 +214,7 @@ export default function RemindersTab({ toast }) {
           <Pill k="not_voted" label="Not voted yet" n={counts.not_voted} />
           <Pill k="all" label="All members" n={counts.all} />
           <Pill k="voted" label="Already voted" n={counts.voted} />
+          <Pill k="candidates" label="Candidates" n={counts.candidates} />
         </div>
       </div>
 
