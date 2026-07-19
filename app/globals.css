@@ -62,3 +62,10 @@ button, input, textarea, select, option { font-family: inherit; }
 
 /* OTP boxes */
 .otp-input { @apply w-12 h-14 text-center text-2xl font-bold; }
+
+/* Voting flow: mountain-green cards on the snow-white page */
+.vote-green .card {
+  background: linear-gradient(165deg, #0B6B4F 0%, #063D2B 100%);
+  border-color: rgba(212, 167, 44, 0.35);
+  color: #F7F5EE; /* text inside green cards stays cream, even where no color class is set */
+}

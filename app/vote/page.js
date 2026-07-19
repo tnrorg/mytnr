@@ -133,7 +133,7 @@ export default function VotePage() {
   }, [ballotLocked]);
 
   return (
-    <main className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'} style={{ background: '#FDFDFD', color: '#15231D' }}>
+    <main className="min-h-screen flex flex-col vote-green" dir={rtl ? 'rtl' : 'ltr'} style={{ background: '#FDFDFD', color: '#15231D' }}>
       <BrandHeader lang={lang} onToggle={toggle} t={t} />
       <section className="flex-1 flex items-start sm:items-center justify-center px-4 py-8">
         <div className="w-full max-w-xl">
@@ -141,7 +141,7 @@ export default function VotePage() {
           {step === 'mobile' && (
             <div className="card p-6 sm:p-8 animate-fade-up">
               <div className="flex flex-col items-center text-center gap-2 mb-6"><Logo size={64} />
-                <h1 className={`text-2xl font-bold ${rtl ? 'urdu' : ''}`}>{t.enterMobile}</h1></div>
+                <h1 className={`text-2xl font-bold text-white ${rtl ? 'urdu' : ''}`}>{t.enterMobile}</h1></div>
               <form onSubmit={requestOtp} className="space-y-4">
                 <input className="input text-center text-lg tracking-wider" value={mobile} onChange={e => setMobile(e.target.value)}
                   placeholder={t.mobilePlaceholder} inputMode="email" autoCapitalize="none" autoFocus />
@@ -196,7 +196,7 @@ function OtpStep({ t, rtl, channel, devCode, loading, onVerify, onResend }) {
   useEffect(() => { if (digits.join('').length === 6) submit(); /* eslint-disable-next-line */ }, [digits]);
   return (
     <div className="card p-6 sm:p-8 animate-fade-up text-center">
-      <h1 className={`text-2xl font-bold mb-1 ${rtl ? 'urdu' : ''}`}>{t.enterOtp}</h1>
+      <h1 className={`text-2xl font-bold text-white mb-1 ${rtl ? 'urdu' : ''}`}>{t.enterOtp}</h1>
       <p className="text-xs text-tnr-cream/50 mb-5">{channel === 'dev' ? 'TEST MODE (on-screen code)' : channel === 'email' ? 'Sent to your registered email' : channel === 'whatsapp' ? 'Sent via WhatsApp' : 'Sent via SMS'}</p>
       {devCode && <div className="mb-4 chip bg-tnr-gold/20 text-tnr-goldLight border border-tnr-line mx-auto">Dev code: <b className="tracking-widest">{devCode}</b></div>}
       <div className="flex justify-center gap-2 mb-4" dir="ltr">
@@ -346,7 +346,7 @@ function Ballot({ t, rtl, data, selections, onPick, onDetail, filled, total, com
 function ReviewBallot({ t, rtl, positions, selections, loading, err, onEdit, onSubmit }) {
   return (
     <div className="card p-6 sm:p-8 animate-pop">
-      <h1 className={`text-2xl font-bold text-center ${rtl ? 'urdu' : ''}`}>{rtl ? 'اپنے بیلٹ کا جائزہ لیں' : 'Review Your Ballot'}</h1>
+      <h1 className={`text-2xl font-bold text-white text-center ${rtl ? 'urdu' : ''}`}>{rtl ? 'اپنے بیلٹ کا جائزہ لیں' : 'Review Your Ballot'}</h1>
       <p className="text-center text-xs text-tnr-cream/50 mt-1 mb-5">
         {rtl ? 'جمع کرانے کے بعد تبدیلی ممکن نہیں' : 'You cannot change your ballot after submitting'}
       </p>

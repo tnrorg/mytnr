@@ -14,7 +14,7 @@ export function Logo({ size = 44, badge = true }) {
 }
 export function BrandHeader({ lang, onToggle, t }) {
   return (
-    <header className="w-full sticky top-0 z-30 backdrop-blur bg-tnr-black/40 border-b border-tnr-line">
+    <header className="w-full sticky top-0 z-30 border-b border-[#D4A72C]/30" style={{ background: '#063D2B' }}>
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <a href="/" className="flex items-center gap-3">
           <Logo size={40} />
