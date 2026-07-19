@@ -149,7 +149,7 @@ export default function VotePage() {
                   {loading ? '…' : t.sendOtp}</button>
               </form>
               <p className={`mt-4 text-xs text-center text-tnr-cream/50 ${rtl ? 'urdu' : ''}`}>
-                {rtl ? 'صرف رجسٹرڈ اور منظور شدہ اراکین ووٹ ڈال سکتے ہیں۔' : 'Only registered & approved members can vote.'}</p>
+                {rtl ? 'صرف رجسٹرڈ اور منظور شدہ اراکین ووٹ ڈال سکتے ہیں۔ کوڈ آپ کے ای میل پر بھیجا جائے گا۔' : 'Only registered & approved members can vote. Your code is sent to your registered email.'}</p>
             </div>
           )}
           {step === 'otp' && <OtpStep t={t} rtl={rtl} channel={channel} devCode={devCode} loading={loading}
@@ -228,7 +228,7 @@ function MemberDetails({ t, rtl, member, onContinue }) {
       <p className={`text-sm text-tnr-cream/50 mb-4 ${rtl ? 'urdu' : ''}`}>{rtl ? 'براہ کرم اپنی تفصیلات کی تصدیق کریں' : 'Please confirm your details before voting'}</p>
       <div className="text-left rounded-2xl bg-black/30 border border-tnr-line px-4 py-2 mb-5">
         <Row k={rtl ? 'رکن نمبر' : 'Member ID'} v={member?.member_code} />
-        <Row k={rtl ? 'موبائل' : 'Mobile'} v={member?.mobile} />
+        <Row k={rtl ? 'ای میل' : 'Email'} v={member?.email || member?.mobile} />
         <Row k={rtl ? 'گاؤں / علاقہ' : 'Village / Area'} v={member?.village} />
         <Row k={rtl ? 'یونین' : 'Union'} v={member?.union_name} />
       </div>

@@ -46,7 +46,8 @@ export async function POST(req) {
     vote_token: token,
     member: member ? {
       full_name: member.full_name, member_code: member.member_code,
-      mobile: member.mobile, village: member.village, gender: member.gender, union_name,
+      email: member.email, mobile: member.mobile,
+      village: member.village, gender: member.gender, union_name,
     } : null,
   });
 }

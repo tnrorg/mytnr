@@ -313,10 +313,10 @@ function LiveOverview({ e, stats }) {
 /* ─────────────────────────── Process / About / Contact ─────────────────────────── */
 function Process({ onRules }) {
   const steps = [
-    ['Verify', 'Enter your registered mobile number and confirm the OTP sent to your WhatsApp.'],
-    ['Review', 'See every candidate — profile, symbol, and manifesto — for each position.'],
-    ['Vote', 'Select one candidate per position and confirm. Your vote is final and private.'],
-    ['Receipt', 'Get a unique receipt code confirming your vote was securely recorded.'],
+    ['Verify Email', 'Enter your registered email address. A 6-digit code is emailed to you and expires in 5 minutes.'],
+    ['Confirm Identity', 'Check your member details, then review every candidate — profile, symbol and manifesto — for each position.'],
+    ['Complete Ballot', 'Select one candidate for every position, then review your full ballot and submit it in one step.'],
+    ['Receipt', 'Get a unique receipt code confirming your ballot was securely recorded.'],
   ];
   return <section id="process" className="max-w-6xl mx-auto px-4 py-12">
     <SectionTitle kicker="HOW IT WORKS" title="The Election Process" />
@@ -410,9 +410,12 @@ function ProfileModal({ c, onClose }) {
 function RulesModal({ onClose }) {
   const rules = [
     'Only registered and approved TNR members may vote.',
-    'Each member votes using their registered mobile number and a one-time OTP.',
+    'Each member votes using their registered email address and a one-time code (OTP) sent to that email.',
+    'The code expires in 5 minutes and can be used only once.',
+    'You must select one candidate for every position — an incomplete ballot cannot be submitted.',
     'One member = one vote per position. Votes cannot be changed once submitted.',
-    'Candidate details are shown only after successful OTP verification.',
+    'Once you begin voting you must finish your ballot before leaving the page.',
+    'Candidate details are shown only after successful email verification.',
     'Voting is only possible between the official start and end times.',
     'For fairness, exact vote totals may be hidden until the election closes.',
     'Your vote is secret — no one can see which candidate you chose.',
