@@ -30,15 +30,16 @@ export default function DashboardTab() {
         <p className="text-right text-xs text-tnr-goldLight mt-1">{d.progress}% turnout</p>
       </> : <p className="text-tnr-cream/50 text-sm">No active election.</p>}
     </Card>
-    <Card>
+    {/* Recent Activity is visible to Super Admins only. */}
+    {d.show_activity && <Card>
       <h3 className="font-bold text-tnr-goldLight mb-3">Recent Activity</h3>
       <div className="space-y-1.5 max-h-72 overflow-auto">
-        {d.recent_logs.map(l => <div key={l.id} className="flex items-center justify-between text-sm border-b border-tnr-line/50 py-1.5">
+        {(d.recent_logs || []).map(l => <div key={l.id} className="flex items-center justify-between text-sm border-b border-tnr-line/50 py-1.5">
           <span className="text-tnr-cream/80"><b className="text-tnr-goldLight">{l.action}</b> {l.details ? `— ${l.details}` : ''}</span>
           <span className="text-tnr-cream/40 text-xs whitespace-nowrap ml-3">{new Date(l.created_at).toLocaleString()}</span>
         </div>)}
-        {!d.recent_logs.length && <p className="text-tnr-cream/40 text-sm">No activity yet.</p>}
+        {!(d.recent_logs || []).length && <p className="text-tnr-cream/40 text-sm">No activity yet.</p>}
       </div>
-    </Card>
+    </Card>}
   </div>;
 }

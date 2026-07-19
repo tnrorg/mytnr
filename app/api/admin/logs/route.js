@@ -1,15 +1,23 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireAdmin, isSuperAdmin } from '@/lib/guard';
+import { superAdminActors, filterForNormalAdmin } from '@/lib/auditVisibility';
 import { ok } from '@/lib/api';
+
 export const dynamic = 'force-dynamic';
+
 export async function GET(req) {
   const { admin, res } = requireAdmin(req); if (res) return res;
   const sb = supabaseAdmin();
   const url = new URL(req.url);
   const action = url.searchParams.get('action') || '';
+
   let q = sb.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(500);
-  if (!isSuperAdmin(admin)) q = q.neq('action', 'COMMITTEE_VOTE_ENTRY');
   if (action) q = q.eq('action', action);
   const { data } = await q;
-  return ok({ logs: data || [] });
+
+  if (isSuperAdmin(admin)) return ok({ logs: data || [], scope: 'all' });
+
+  // Normal admin: hide Super-Admin-only actions and anything a Super Admin did.
+  const actors = await superAdminActors();
+  return ok({ logs: filterForNormalAdmin(data, actors), scope: 'limited' });
 }
