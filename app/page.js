@@ -97,20 +97,20 @@ function Navbar({ e, org }) {
           </span>
         </a>
         <nav className="hidden lg:flex items-center gap-1 mx-auto">
-          {links.map(([l, h]) => <a key={l} href={h} className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-[#0B6B4F] hover:bg-[#0B6B4F]/5 transition">{l}</a>)}
+          {links.map(([l, h]) => <a key={l} href={h} className="px-3 py-2 rounded-lg text-sm font-semibold uppercase tracking-wide text-gray-600 hover:text-[#0B6B4F] hover:bg-[#0B6B4F]/5 transition">{l}</a>)}
         </nav>
         <div className="flex items-center gap-2 ml-auto lg:ml-0">
           {live && <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: C.green }}>
             <span className="w-2 h-2 rounded-full bg-[#D4A72C] animate-pulse" /> ELECTION IS LIVE
           </span>}
-          <a href="/vote" className="px-4 py-2 rounded-xl text-sm font-bold text-[#063D2B] shadow" style={{ background: `linear-gradient(180deg,#F3E4B3,#D4A72C)` }}>Vote Now</a>
+          <a href="/vote" className="px-4 py-2 rounded-xl text-sm font-bold text-[#063D2B] shadow" style={{ background: `linear-gradient(180deg,#F3E4B3,#D4A72C)` }}>VOTE NOW</a>
           <button className="lg:hidden p-2 text-gray-600" onClick={() => setOpen(!open)} aria-label="menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
         </div>
       </div>
       {open && <div className="lg:hidden border-t border-gray-100 bg-white px-4 py-2">
-        {links.map(([l, h]) => <a key={l} href={h} onClick={() => setOpen(false)} className="block px-2 py-2.5 text-sm font-medium text-gray-700">{l}</a>)}
+        {links.map(([l, h]) => <a key={l} href={h} onClick={() => setOpen(false)} className="block px-2 py-2.5 text-sm font-semibold uppercase tracking-wide text-gray-700">{l}</a>)}
       </div>}
     </header>
   );
