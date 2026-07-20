@@ -51,6 +51,14 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
     const r = await aPost('/api/admin/elections/duplicate', { election_id: e.id });
     if (!r.ok) return toast(r.message, 'err'); toast('Duplicated as draft'); load(); reloadElections?.();
   }
+  async function unlockVoters(e) {
+    if (!confirm('Unlock the voter list for "' + e.title + '"?\n\nEvery approved member will be able to vote.\nVotes already cast are NOT affected.')) return;
+    const r = await aPost('/api/admin/lock/unlock', { election_id: e.id });
+    if (!r.ok) return toast(r.message || 'Unlock failed', 'err');
+    toast('Voter list unlocked — all approved members can vote');
+    load(); reloadElections?.();
+  }
+
   async function resetElection(e) {
     const probe = await aPost('/api/admin/elections/' + e.id + '/reset', {});
     const votes = probe?.votes ?? 0;
@@ -62,7 +70,10 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
     const answer = prompt(msg);
     if (answer !== 'RESET') return;
     const reopen = confirm('Also set this election back to ACTIVE so voting starts immediately?\n\nOK = reopen now   ·   Cancel = leave status unchanged');
-    const r = await aPost('/api/admin/elections/' + e.id + '/reset', { confirm: 'RESET', reopen });
+    const unlock = e.voter_list_locked
+      ? confirm('Also UNLOCK the voter list?\n\nOK = unlock, every approved member can vote\nCancel = keep the current locked list')
+      : false;
+    const r = await aPost('/api/admin/elections/' + e.id + '/reset', { confirm: 'RESET', reopen, unlock });
     if (!r.ok) return toast(r.message || 'Reset failed', 'err');
     toast('Election reset — ' + (r.cleared_votes || 0) + ' vote(s) cleared');
     load(); reloadElections?.();
@@ -128,6 +139,7 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
         <div className="flex flex-wrap gap-2">
           {!e.voter_list_locked && <button className="btn-ghost !py-2 text-sm" onClick={() => lock(e)}>🔒 Lock Voter List (optional)</button>}
           {e.voter_list_locked && <button className="btn-green !py-2 text-sm" onClick={() => syncVoters(e)}>➕ Sync New Voters</button>}
+          {e.voter_list_locked && <button className="btn-ghost !py-2 text-sm text-amber-300 border-amber-500/30" onClick={() => unlockVoters(e)}>🔓 Unlock Voter List</button>}
           {e.status !== 'Active' && <button className="btn-green !py-2 text-sm" onClick={() => setStatus(e, 'Active')}>▶ Start</button>}
           {e.status === 'Active' && <button className="btn-ghost !py-2 text-sm" onClick={() => setStatus(e, 'Paused')}>⏸ Pause</button>}
           {e.status !== 'Ended' && <button className="btn-ghost !py-2 text-sm" onClick={() => setStatus(e, 'Ended')}>⏹ End</button>}

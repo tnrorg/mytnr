@@ -37,16 +37,20 @@ export async function POST(req, { params }) {
       .eq('voting_status', 'Voted');
   }
 
-  // Optionally reopen the election
+  // Optionally reopen the election and/or unlock the voter list
   const patch = { result_published: false };
   if (b.reopen) patch.status = 'Active';
+  if (b.unlock) {
+    await sb.from('locked_voter_list').delete().eq('election_id', id);
+    patch.voter_list_locked = false; patch.locked_by = null; patch.locked_at = null;
+  }
   await sb.from('elections').update(patch).eq('id', id);
 
   await logAudit({
     action: 'ELECTION_RESET', actor: admin?.username || 'super_admin',
-    details: `${election.title} · ${voteCount || 0} vote(s) cleared${b.reopen ? ' · reopened' : ''}`,
+    details: `${election.title} · ${voteCount || 0} vote(s) cleared${b.reopen ? ' · reopened' : ''}${b.unlock ? ' · voter list unlocked' : ''}`,
     election_id: id, ip,
   });
 
-  return ok({ cleared_votes: voteCount || 0, reopened: !!b.reopen });
+  return ok({ cleared_votes: voteCount || 0, reopened: !!b.reopen, unlocked: !!b.unlock });
 }
