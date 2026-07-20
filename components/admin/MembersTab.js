@@ -4,11 +4,18 @@ import { aGet, aPost, aPatch, aDel } from './adminApi';
 import { parseFile, exportExcel } from './exporters';
 import { Card, Badge, Field } from './ui';
 
+// A member can only receive an OTP if this passes.
+function validEmail(v) {
+  const e = String(v || '').trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+}
+
 const empty = { member_code: '', full_name: '', email: '', mobile: '', village: '', gender: '', status: 'Pending' };
 
 export default function MembersTab({ toast }) {
   const [members, setMembers] = useState([]);
   const [search, setSearch] = useState(''); const [status, setStatus] = useState('');
+  const [emailIssue, setEmailIssue] = useState(false);   // show only members who cannot receive an OTP
   const [form, setForm] = useState(null);
   const load = () => { const q = new URLSearchParams({ search, status }); aGet('/api/admin/members?' + q).then(r => r.ok && setMembers(r.members)); };
   useEffect(() => { const id = setTimeout(load, 250); return () => clearTimeout(id); /* eslint-disable-next-line */ }, [search, status]);
@@ -43,6 +50,12 @@ export default function MembersTab({ toast }) {
       <input className="input max-w-xs" placeholder="Search name / mobile / email" value={search} onChange={e => setSearch(e.target.value)} />
       <select className="input max-w-[160px]" value={status} onChange={e => setStatus(e.target.value)}>
         <option value="">All status</option><option>Pending</option><option>Approved</option><option>Blocked</option></select>
+      <button onClick={() => setEmailIssue(v => !v)}
+        className={`px-3 py-2 rounded-xl text-sm border transition ${emailIssue
+          ? 'bg-red-500/20 border-red-500/40 text-red-200 font-semibold'
+          : 'border-tnr-line text-tnr-cream/70 hover:bg-white/5'}`}>
+        ⚠ No / invalid email ({members.filter(m => !validEmail(m.email)).length})
+      </button>
       <div className="flex-1" />
       <button className="btn-green" onClick={() => setForm({ ...empty })}>+ Add Member</button>
       <button className="btn-ghost" onClick={approveAll}>Approve All Pending</button>
@@ -56,10 +69,19 @@ export default function MembersTab({ toast }) {
           <thead className="bg-black/30 sticky top-0"><tr className="text-tnr-cream/60 text-left">
             {['TNR-MN','Name','Email','Mobile','Status','Voting',''].map(h => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}</tr></thead>
           <tbody>
-            {members.map(m => <tr key={m.id} className="border-t border-tnr-line/40 hover:bg-white/5">
+            {members.filter(m => !emailIssue || !validEmail(m.email)).map(m => <tr key={m.id} className="border-t border-tnr-line/40 hover:bg-white/5">
               <td className="px-3 py-2 text-tnr-gold/90 font-mono text-xs whitespace-nowrap">{m.member_code || '—'}</td>
               <td className="px-3 py-2"><div className="font-medium text-tnr-cream">{m.full_name}</div></td>
-              <td className="px-3 py-2 text-tnr-cream/70">{m.email || '—'}</td>
+              <td className="px-3 py-2">
+                {validEmail(m.email)
+                  ? <span className="text-tnr-cream/70">{m.email}</span>
+                  : <span className="inline-flex items-center gap-1.5 text-red-300">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 border border-red-500/30 font-bold">
+                        {String(m.email || '').trim() ? 'INVALID' : 'NO EMAIL'}
+                      </span>
+                      {String(m.email || '').trim() || ''}
+                    </span>}
+              </td>
               <td className="px-3 py-2 text-tnr-cream/80">{m.mobile}</td>
               <td className="px-3 py-2"><Badge>{m.status}</Badge></td>
               <td className="px-3 py-2"><Badge>{m.voting_status}</Badge></td>
