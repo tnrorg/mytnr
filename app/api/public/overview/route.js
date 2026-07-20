@@ -85,7 +85,10 @@ export async function GET() {
     positionsOut.push({ id: 0, title: 'Other Candidates', total: null, candidates: oc });
   }
 
-  const total_voters = (await sb.from('locked_voter_list').select('*', { count: 'exact', head: true }).eq('election_id', e.id)).count || 0;
+  // Electorate = locked list when one exists, otherwise every approved member
+  const lockedCount = (await sb.from('locked_voter_list').select('*', { count: 'exact', head: true }).eq('election_id', e.id)).count || 0;
+  const approvedCount = (await sb.from('members').select('*', { count: 'exact', head: true }).eq('status', 'Approved')).count || 0;
+  const total_voters = lockedCount || approvedCount;
 
   // Public-awareness gender split of REGISTERED voters (locked list, or all approved members before locking)
   const { data: lockedRows } = await sb.from('locked_voter_list').select('member_id').eq('election_id', e.id);

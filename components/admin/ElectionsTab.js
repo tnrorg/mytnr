@@ -51,6 +51,23 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
     const r = await aPost('/api/admin/elections/duplicate', { election_id: e.id });
     if (!r.ok) return toast(r.message, 'err'); toast('Duplicated as draft'); load(); reloadElections?.();
   }
+  async function resetElection(e) {
+    const probe = await aPost('/api/admin/elections/' + e.id + '/reset', {});
+    const votes = probe?.votes ?? 0;
+    const msg = 'RESET "' + e.title + '"\n\n'
+      + 'This permanently deletes ' + votes + ' vote(s) and all receipts,\n'
+      + 'so every member can vote again from the beginning.\n\n'
+      + 'Candidates, positions and members are NOT deleted.\n\n'
+      + 'Type RESET to confirm:';
+    const answer = prompt(msg);
+    if (answer !== 'RESET') return;
+    const reopen = confirm('Also set this election back to ACTIVE so voting starts immediately?\n\nOK = reopen now   ·   Cancel = leave status unchanged');
+    const r = await aPost('/api/admin/elections/' + e.id + '/reset', { confirm: 'RESET', reopen });
+    if (!r.ok) return toast(r.message || 'Reset failed', 'err');
+    toast('Election reset — ' + (r.cleared_votes || 0) + ' vote(s) cleared');
+    load(); reloadElections?.();
+  }
+
   async function del(e) {
     if (!confirm('Delete "' + e.title + '"?\nThis removes its positions and candidates.')) return;
     let r = await aDel('/api/admin/elections/' + e.id);
@@ -92,11 +109,14 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
               <span className="chip bg-tnr-green2/40 text-tnr-goldLight">{(e.candidate_count?.active ?? 0)} active candidates</span>
               {e.candidate_count?.no_position > 0 && <span className="chip bg-red-500/20 text-red-300">{e.candidate_count.no_position} without a position</span>}
             </div>
-            {e.voter_list_locked && <p className="text-xs text-tnr-goldLight mt-2">Locked by {e.locked_by} · {e.locked_at ? new Date(e.locked_at).toLocaleString() : ''}</p>}
+            {e.voter_list_locked
+              ? <p className="text-xs text-tnr-goldLight mt-2">Locked by {e.locked_by} · {e.locked_at ? new Date(e.locked_at).toLocaleString() : ''} — only these members may vote.</p>
+              : <p className="text-xs text-tnr-cream/40 mt-2">Voter list not locked — every approved member can vote.</p>}
           </div>
           <div className="flex gap-2 shrink-0">
             <button className="btn-ghost !py-1.5 !px-3 text-sm" onClick={() => setForm({ id: e.id, title: e.title, description: e.description || '', starts_at: toLocalInput(e.starts_at), ends_at: toLocalInput(e.ends_at) })}>✏️ Edit</button>
             <button className="btn-ghost !py-1.5 !px-3 text-sm" onClick={() => duplicate(e)}>⧉ Duplicate</button>
+            <button className="btn-ghost !py-1.5 !px-3 text-sm text-amber-300 border-amber-500/30" onClick={() => resetElection(e)}>↺ Reset Votes</button>
             <button className="btn-ghost !py-1.5 !px-3 text-sm text-red-300 border-red-500/30" onClick={() => del(e)}>🗑 Delete</button>
           </div>
         </div>
@@ -106,7 +126,7 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
 
         <div className="gold-divider my-3" />
         <div className="flex flex-wrap gap-2">
-          {!e.voter_list_locked && <button className="btn-gold !py-2 text-sm" onClick={() => lock(e)}>🔒 Lock Voter List</button>}
+          {!e.voter_list_locked && <button className="btn-ghost !py-2 text-sm" onClick={() => lock(e)}>🔒 Lock Voter List (optional)</button>}
           {e.voter_list_locked && <button className="btn-green !py-2 text-sm" onClick={() => syncVoters(e)}>➕ Sync New Voters</button>}
           {e.status !== 'Active' && <button className="btn-green !py-2 text-sm" onClick={() => setStatus(e, 'Active')}>▶ Start</button>}
           {e.status === 'Active' && <button className="btn-ghost !py-2 text-sm" onClick={() => setStatus(e, 'Paused')}>⏸ Pause</button>}
