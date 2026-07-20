@@ -165,6 +165,8 @@ function Hero({ e, stats, org, onRules }) {
             <div className="h-px my-3" style={{ background: 'linear-gradient(90deg,transparent,#D4A72C,transparent)' }} />
             {e?.voting_open && e?.ends_at ? (
               <div><div className="text-xs text-white/60 mb-2">Time remaining to vote</div><Countdown target={e.ends_at} tone="dark" /></div>
+            ) : !e?.ended && e?.starts_at ? (
+              <div><div className="text-xs text-white/60 mb-2">Voting starts in</div><Countdown target={e.starts_at} tone="dark" /></div>
             ) : <div className="text-sm text-white/70">{e?.ended ? 'Voting has closed.' : 'Voting has not opened yet.'}</div>}
           </div>
         </div>
