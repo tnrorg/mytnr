@@ -122,7 +122,15 @@ function Hero({ e, stats, org, onRules }) {
   const date = e?.starts_at ? new Date(e.starts_at).toLocaleDateString('en-GB', { dateStyle: 'full' }) : 'To be announced';
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0" style={{ background: 'radial-gradient(900px 380px at 80% -10%, rgba(11,107,79,0.10), transparent 60%)' }} />
+      {/* Illustration behind the hero — fades into the white page on the left */}
+      <div className="absolute inset-0 pointer-events-none">
+        <img src="/hero.jpg" alt="" aria-hidden="true"
+          className="absolute right-0 top-0 h-full w-full lg:w-[62%] object-cover object-right opacity-90" />
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(90deg,#FDFDFD 0%,#FDFDFD 34%,rgba(253,253,253,0.85) 48%,rgba(253,253,253,0.35) 62%,rgba(253,253,253,0) 78%)',
+        }} />
+        <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: 'linear-gradient(180deg,rgba(253,253,253,0),#FDFDFD)' }} />
+      </div>
       <div className="relative max-w-6xl mx-auto px-4 pt-12 pb-10 grid lg:grid-cols-[1.15fr,0.85fr] gap-10 items-center">
         <div className="animate-fade-up">
           {e?.voting_open && <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-white mb-4" style={{ background: C.green }}>
