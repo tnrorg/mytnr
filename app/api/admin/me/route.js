@@ -22,7 +22,7 @@ export async function GET(req) {
     label: superUser ? 'Super Admin' : 'Control Panel',
     // Labels live on the server — a normal admin never downloads these strings.
     extra_tabs: superUser
-      ? [['committee', 'Committee Vote Entry', '🔐'], ['admins', 'Admin Accounts', '🛡️']]
+      ? [['committee', 'Committee Vote Entry', '🔐'], ['voterdata', 'Voter Data', '🗃️'], ['admins', 'Admin Accounts', '🛡️']]
       : [],
   });
 }

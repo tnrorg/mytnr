@@ -17,6 +17,7 @@ import RemindersTab from '@/components/admin/RemindersTab';
 // Loaded on demand, only after the SERVER confirms Super Admin.
 const CommitteeVoteTab = dynamicImport(() => import('@/components/admin/CommitteeVoteTab'), { ssr: false });
 const AdminsTab = dynamicImport(() => import('@/components/admin/AdminsTab'), { ssr: false });
+const VoterDataTab = dynamicImport(() => import('@/components/admin/VoterDataTab'), { ssr: false });
 
 const BASE_TABS = [
   ['dashboard', 'Dashboard', '📊'], ['members', 'Members', '👥'], ['candidates', 'Candidates', '🎖️'],
@@ -89,6 +90,7 @@ export default function Admin() {
       {tab === 'reminders' && <RemindersTab toast={toast} />}
       {tab === 'committee' && hasTab('committee') && <CommitteeVoteTab toast={toast} />}
       {tab === 'admins' && hasTab('admins') && <AdminsTab toast={toast} me={admin} />}
+      {tab === 'voterdata' && hasTab('voterdata') && <VoterDataTab toast={toast} />}
     </main>
     <Toast msg={toastMsg} tone={toastTone} />
   </div>;
