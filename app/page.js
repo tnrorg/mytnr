@@ -391,7 +391,7 @@ function CommitteeSection({ members }) {
 }
 function Footer2({ org }) {
   return <footer className="py-6 text-center text-xs text-white" style={{ background: '#000000' }}>
-    © {new Date().getFullYear()} {org?.name || 'Tehreek-e-Nojawanan Roundu'} ({org?.short_name || 'TNR'}) · Secure & private voting · Developed by: <span className="font-semibold" style={{ color: '#4FC3F7' }}>Shabbir Hussain</span>
+    © {new Date().getFullYear()} {org?.name || 'Tehreek-e-Nojawanan Roundu'} ({org?.short_name || 'TNR'}) · Secure & private voting · Developed by: <a href="https://www.northdigitaltech.com/" target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline" style={{ color: '#4FC3F7' }}>Shabbir Hussain</a>
   </footer>;
 }
 
@@ -446,6 +446,6 @@ function RulesModal({ onClose }) {
 /* keep dark-theme pages working (results/dashboard import Footer from here) */
 export function Footer({ t, rtl }) {
   return <footer className="border-t border-tnr-line py-6 text-center text-tnr-cream/50 text-xs">
-    © {new Date().getFullYear()} {t?.org || 'Tehreek-e-Nojawanan Roundu'} ({t?.short || 'TNR'}) · Developed by: <span className="font-semibold" style={{ color: '#4FC3F7' }}>Shabbir Hussain</span>
+    © {new Date().getFullYear()} {t?.org || 'Tehreek-e-Nojawanan Roundu'} ({t?.short || 'TNR'}) · Developed by: <a href="https://www.northdigitaltech.com/" target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline" style={{ color: '#4FC3F7' }}>Shabbir Hussain</a>
   </footer>;
 }
