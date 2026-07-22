@@ -15,7 +15,8 @@ export async function GET(req) {
 
   const { data: positions } = await sb.from('positions').select('*').eq('election_id', e.id).order('sort_order');
   const { data: candidates } = await sb.from('candidates').select('id, name, symbol, position_id, status').eq('election_id', e.id).eq('status', 'Active').order('sort_order');
-  const { data: locked } = await sb.from('locked_voter_list').select('member_id, full_name, mobile').eq('election_id', e.id);
+  const { data: appr } = await sb.from('members').select('id, full_name, mobile').eq('status', 'Approved');
+  const locked = (appr || []).map(m => ({ member_id: m.id, full_name: m.full_name, mobile: m.mobile }));
   const { data: voted } = await sb.from('votes').select('member_id').eq('election_id', e.id);
   const votedSet = new Set((voted || []).map(v => v.member_id));
   const remaining = (locked || []).filter(m => !votedSet.has(m.member_id))
@@ -44,8 +45,6 @@ export async function POST(req) {
   const { data: member } = await sb.from('members').select('id, status').eq('id', member_id).maybeSingle();
   if (!member) return fail('NO_VOTER', 404, { message: 'Voter not found.' });
   if (member.status !== 'Approved') return fail('NOT_ELIGIBLE', 403, { message: 'Voter is not approved/eligible.' });
-  const { data: onList } = await sb.from('locked_voter_list').select('id').eq('election_id', e.id).eq('member_id', member_id).maybeSingle();
-  if (!onList) return fail('NOT_ON_LIST', 403, { message: 'Voter is not on the locked voter list.' });
 
   // Candidate must belong to this election and be active.
   const { data: cand } = await sb.from('candidates').select('id, position_id, status').eq('id', candidate_id).eq('election_id', e.id).maybeSingle();

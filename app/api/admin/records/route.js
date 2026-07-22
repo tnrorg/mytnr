@@ -11,13 +11,10 @@ export async function GET(req) {
   if (!election_id) { const e = await getActiveElection(); election_id = e?.id; }
   if (!election_id) return ok({ voted: [], not_voted: [] });
 
-  let { data: locked } = await sb.from('locked_voter_list').select('member_id, full_name, mobile, union_id').eq('election_id', election_id);
-  if (!locked || !locked.length) {
-    // No locked list — every approved member is eligible
-    const { data: approved } = await sb.from('members')
-      .select('id, full_name, mobile, union_id').eq('status', 'Approved');
-    locked = (approved || []).map(m => ({ member_id: m.id, full_name: m.full_name, mobile: m.mobile, union_id: m.union_id }));
-  }
+  // Eligible voters = every approved member
+  const { data: approved } = await sb.from('members')
+    .select('id, full_name, mobile, union_id').eq('status', 'Approved');
+  const locked = (approved || []).map(m => ({ member_id: m.id, full_name: m.full_name, mobile: m.mobile, union_id: m.union_id }));
   const { data: votes } = await sb.from('votes').select('member_id, created_at').eq('election_id', election_id);
   const votedMap = Object.fromEntries((votes || []).map(v => [v.member_id, v.created_at]));
   const voted = [], not_voted = [];

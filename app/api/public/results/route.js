@@ -51,9 +51,7 @@ export async function GET() {
   const unionShare = Object.entries(unionTally).map(([uid, n]) => ({ union: umap[uid] || 'Unknown', votes: n }))
     .sort((a, b) => b.votes - a.votes);
 
-  const lockedCount = (await sb.from('locked_voter_list').select('*', { count: 'exact', head: true }).eq('election_id', e.id)).count || 0;
-  const approvedCount = (await sb.from('members').select('*', { count: 'exact', head: true }).eq('status', 'Approved')).count || 0;
-  const total_voters = lockedCount || approvedCount;
+  const total_voters = (await sb.from('members').select('*', { count: 'exact', head: true }).eq('status', 'Approved')).count || 0;
 
   return ok({
     election: { id: e.id, title: e.title, status: e.status, result_published: e.result_published },

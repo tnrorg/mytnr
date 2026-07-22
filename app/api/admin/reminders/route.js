@@ -41,11 +41,6 @@ async function recipients(audience, election, member_ids) {
 
   if (!election || audience === 'all') return list;
 
-  // Restrict to the locked voter list for this election
-  const { data: locked } = await sb.from('locked_voter_list').select('member_id').eq('election_id', election.id);
-  const onList = new Set((locked || []).map(r => r.member_id));
-  if (election.voter_list_locked && onList.size) list = list.filter(m => onList.has(m.id));
-
   if (audience === 'voted' || audience === 'not_voted') {
     const { data: votes } = await sb.from('votes').select('member_id').eq('election_id', election.id);
     const voted = new Set((votes || []).map(v => v.member_id));

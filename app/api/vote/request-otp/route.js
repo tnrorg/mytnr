@@ -36,14 +36,7 @@ export async function POST(req) {
   if (member.status === 'Blocked')  return fail('BLOCKED', 403, { message: 'Your membership has been blocked. Please contact the administration.' });
   if (member.status !== 'Approved') return fail('NOT_APPROVED', 403, { message: 'Your membership is not approved yet.' });
 
-  // Any registered + approved member may vote. If a voter list HAS been locked,
-  // it is still honoured; otherwise approval alone is enough.
-  if (election.voter_list_locked) {
-    const { data: locked } = await sb.from('locked_voter_list').select('id')
-      .eq('election_id', election.id).eq('member_id', member.id).limit(1);
-    if (!(locked && locked.length))
-      return fail('NOT_ON_LIST', 403, { message: 'You are not on the voter list for this election.' });
-  }
+  // Every registered + approved member may vote — no voter-list lock.
 
   // Voting window
   if (!isVotingOpen(election)) return fail('NOT_ACTIVE', 403, { message: 'Voting is not currently open for this election.' });

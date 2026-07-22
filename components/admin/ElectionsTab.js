@@ -33,16 +33,6 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
     if (!r.ok) return toast(r.message, 'err'); toast('Status: ' + status); load(); reloadElections?.();
   }
   async function publish(e, val) { const r = await aPatch('/api/admin/elections/' + e.id, { result_published: val }); if (!r.ok) return toast(r.message, 'err'); toast(val ? 'Results published' : 'Results hidden'); load(); }
-  async function lock(e) {
-    if (!confirm('Lock the voter list? All Approved members will be added and can no longer be edited for this election.')) return;
-    const r = await aPost('/api/admin/lock', { election_id: e.id });
-    if (!r.ok) return toast(r.message, 'err'); toast('Locked ' + r.locked_count + ' voters'); load();
-  }
-  async function syncVoters(e) {
-    const r = await aPost('/api/admin/lock/sync', { election_id: e.id });
-    if (!r.ok) return toast(r.message, 'err');
-    toast(r.added ? ('Added ' + r.added + ' new voter(s)') : 'No new approved voters to add'); load();
-  }
   async function saveSettings(eid, patch) {
     const r = await aPatch('/api/admin/settings', { election_id: eid, ...patch });
     if (!r.ok) return toast(r.message, 'err'); toast('Settings saved'); load();
@@ -50,13 +40,6 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
   async function duplicate(e) {
     const r = await aPost('/api/admin/elections/duplicate', { election_id: e.id });
     if (!r.ok) return toast(r.message, 'err'); toast('Duplicated as draft'); load(); reloadElections?.();
-  }
-  async function unlockVoters(e) {
-    if (!confirm('Unlock the voter list for "' + e.title + '"?\n\nEvery approved member will be able to vote.\nVotes already cast are NOT affected.')) return;
-    const r = await aPost('/api/admin/lock/unlock', { election_id: e.id });
-    if (!r.ok) return toast(r.message || 'Unlock failed', 'err');
-    toast('Voter list unlocked — all approved members can vote');
-    load(); reloadElections?.();
   }
 
   async function resetElection(e) {
@@ -70,10 +53,7 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
     const answer = prompt(msg);
     if (answer !== 'RESET') return;
     const reopen = confirm('Also set this election back to ACTIVE so voting starts immediately?\n\nOK = reopen now   ·   Cancel = leave status unchanged');
-    const unlock = e.voter_list_locked
-      ? confirm('Also UNLOCK the voter list?\n\nOK = unlock, every approved member can vote\nCancel = keep the current locked list')
-      : false;
-    const r = await aPost('/api/admin/elections/' + e.id + '/reset', { confirm: 'RESET', reopen, unlock });
+    const r = await aPost('/api/admin/elections/' + e.id + '/reset', { confirm: 'RESET', reopen, unlock: true });
     if (!r.ok) return toast(r.message || 'Reset failed', 'err');
     toast('Election reset — ' + (r.cleared_votes || 0) + ' vote(s) cleared');
     load(); reloadElections?.();
@@ -113,16 +93,14 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap"><h3 className="font-bold text-tnr-cream text-lg">{e.title}</h3><Badge>{e.status}</Badge>
-              {e.voter_list_locked && <Badge tone="gold">🔒 Locked</Badge>}{e.result_published && <Badge>📢 Published</Badge>}</div>
+              {e.result_published && <Badge>📢 Published</Badge>}</div>
             <p className="text-sm text-tnr-cream/60 mt-1">{e.description}</p>
             <p className="text-xs text-tnr-cream/40 mt-1">{e.starts_at ? new Date(e.starts_at).toLocaleString() : '—'} → {e.ends_at ? new Date(e.ends_at).toLocaleString() : '—'}</p>
             <div className="flex items-center gap-2 mt-2 text-xs">
               <span className="chip bg-tnr-green2/40 text-tnr-goldLight">{(e.candidate_count?.active ?? 0)} active candidates</span>
               {e.candidate_count?.no_position > 0 && <span className="chip bg-red-500/20 text-red-300">{e.candidate_count.no_position} without a position</span>}
             </div>
-            {e.voter_list_locked
-              ? <p className="text-xs text-tnr-goldLight mt-2">Locked by {e.locked_by} · {e.locked_at ? new Date(e.locked_at).toLocaleString() : ''} — only these members may vote.</p>
-              : <p className="text-xs text-tnr-cream/40 mt-2">Voter list not locked — every approved member can vote.</p>}
+            <p className="text-xs text-tnr-cream/40 mt-2">Every approved member can vote.</p>
           </div>
           <div className="flex gap-2 shrink-0">
             <button className="btn-ghost !py-1.5 !px-3 text-sm" onClick={() => setForm({ id: e.id, title: e.title, description: e.description || '', starts_at: toLocalInput(e.starts_at), ends_at: toLocalInput(e.ends_at) })}>✏️ Edit</button>
@@ -133,13 +111,11 @@ export default function ElectionsTab({ toast, admin, reloadElections }) {
         </div>
 
         {/* Positions manager */}
-        <PositionManager positions={posOf(e.id)} locked={e.voter_list_locked} onAdd={t => addPosition(e, t)} onDel={delPosition} />
+        <PositionManager positions={posOf(e.id)} locked={false} onAdd={t => addPosition(e, t)} onDel={delPosition} />
 
         <div className="gold-divider my-3" />
         <div className="flex flex-wrap gap-2">
-          {!e.voter_list_locked && <button className="btn-ghost !py-2 text-sm" onClick={() => lock(e)}>🔒 Lock Voter List (optional)</button>}
-          {e.voter_list_locked && <button className="btn-green !py-2 text-sm" onClick={() => syncVoters(e)}>➕ Sync New Voters</button>}
-          {e.voter_list_locked && <button className="btn-ghost !py-2 text-sm text-amber-300 border-amber-500/30" onClick={() => unlockVoters(e)}>🔓 Unlock Voter List</button>}
+
           {e.status !== 'Active' && <button className="btn-green !py-2 text-sm" onClick={() => setStatus(e, 'Active')}>▶ Start</button>}
           {e.status === 'Active' && <button className="btn-ghost !py-2 text-sm" onClick={() => setStatus(e, 'Paused')}>⏸ Pause</button>}
           {e.status !== 'Ended' && <button className="btn-ghost !py-2 text-sm" onClick={() => setStatus(e, 'Ended')}>⏹ End</button>}

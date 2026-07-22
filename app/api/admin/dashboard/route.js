@@ -20,7 +20,7 @@ export async function GET(req) {
   let votes_cast = 0, total_voters = 0, progress = 0;
   if (e) {
     votes_cast   = await c(sb, 'votes', { election_id: e.id });
-    total_voters = (await c(sb, 'locked_voter_list', { election_id: e.id })) || approved;
+    total_voters = approved;
     progress = total_voters ? Math.round((votes_cast / total_voters) * 1000) / 10 : 0;
   }
   const active_elections = await c(sb, 'elections', { status: 'Active' });

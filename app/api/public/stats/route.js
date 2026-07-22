@@ -14,9 +14,7 @@ export async function GET() {
   const sb = supabaseAdmin();
   const e = await getActiveElection();
   if (!e) return ok({ election: null });
-  // Electorate = locked list if one exists, otherwise every approved member
-  const lockedCount = await count(sb, 'locked_voter_list', { election_id: e.id });
-  const total_voters = lockedCount || await count(sb, 'members', { status: 'Approved' });
+  const total_voters = await count(sb, 'members', { status: 'Approved' });
   const votes_cast   = await count(sb, 'votes', { election_id: e.id });
   const settings = await getSettings(e.id);
   const votingOpen = isVotingOpen(e);
