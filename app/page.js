@@ -431,7 +431,7 @@ function RulesModal({ onClose }) {
     'Candidate details are shown only after successful email verification.',
     'Voting is only possible between the official start and end times.',
     'Results are live and fully automatic — the moment a ballot is submitted, the vote counts and graphs update instantly.',
-    'Your vote is secret — no one can see which candidate you chose.',
+    'Your vote is secret — this system never shows it to the public, to candidates, or to other members.',
   ];
   return <Modal onClose={onClose}>
     <h3 style={mont} className="text-xl font-black text-[#063D2B]">Election Rules</h3>

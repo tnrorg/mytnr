@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { aGet } from './adminApi';
 import { exportExcel } from './exporters';
 
-// SUPER ADMIN ONLY — every member who has cast a ballot, with full details.
-// Shows who voted and when. Candidate choices are never shown (ballot secrecy).
+// SUPER ADMIN ONLY — every member who has cast a ballot, with full details
+// including the candidate chosen for each position.
 export default function VoterDataTab({ toast }) {
   const [voters, setVoters] = useState([]);
   const [search, setSearch] = useState('');
@@ -29,7 +29,7 @@ export default function VoterDataTab({ toast }) {
           <h2 className="text-xl font-bold text-tnr-cream">Voter Data</h2>
           <p className="text-sm text-tnr-cream/50 mt-1">
             Members who have cast their ballot — <b className="text-tnr-goldLight">{voters.length}</b> so far.
-            Candidate choices are never shown, only who voted and when.
+            Includes each voter&rsquo;s chosen candidates. Visible to Super Admins only — handle with care.
           </p>
         </div>
         <button className="btn-ghost !py-2 text-sm"
@@ -37,6 +37,7 @@ export default function VoterDataTab({ toast }) {
             'TNR-MN': v.member_code, Name: v.full_name, Gender: v.gender, Email: v.email,
             Mobile: v.mobile, Village: v.village, Union: v.union_name,
             'Voted At': fmt(v.voted_at), Positions: v.positions_voted, Receipt: v.receipt_code,
+            Choices: (v.choices || []).map(c => `${c.position}: ${c.candidate}`).join(' | '),
           })), 'Voter Data', 'tnr-voter-data.xlsx')}>
           ⬇ Export Excel
         </button>
@@ -52,7 +53,7 @@ export default function VoterDataTab({ toast }) {
               <th className="px-3 py-2.5">TNR-MN</th><th className="px-3 py-2.5">Name</th>
               <th className="px-3 py-2.5">Gender</th><th className="px-3 py-2.5">Email</th>
               <th className="px-3 py-2.5">Mobile</th><th className="px-3 py-2.5">Village</th>
-              <th className="px-3 py-2.5">Voted At</th><th className="px-3 py-2.5">Positions</th>
+              <th className="px-3 py-2.5">Voted At</th><th className="px-3 py-2.5">Choices</th>
               <th className="px-3 py-2.5">Receipt</th>
             </tr>
           </thead>
@@ -66,7 +67,17 @@ export default function VoterDataTab({ toast }) {
                 <td className="px-3 py-2 text-tnr-cream/70 whitespace-nowrap">{v.mobile || '—'}</td>
                 <td className="px-3 py-2 text-tnr-cream/70">{v.village || '—'}</td>
                 <td className="px-3 py-2 text-tnr-goldLight whitespace-nowrap">{fmt(v.voted_at)}</td>
-                <td className="px-3 py-2 text-center text-tnr-cream/80">{v.positions_voted}</td>
+                <td className="px-3 py-2">
+                  <div className="space-y-0.5 min-w-[220px]">
+                    {(v.choices || []).map((c, i) => (
+                      <div key={i} className="text-xs">
+                        <span className="text-tnr-cream/40">{c.position}:</span>{' '}
+                        <span className="text-tnr-cream font-semibold">{c.candidate}</span>
+                      </div>
+                    ))}
+                    {!(v.choices || []).length && <span className="text-tnr-cream/40 text-xs">—</span>}
+                  </div>
+                </td>
                 <td className="px-3 py-2 font-mono text-xs text-tnr-cream/60">{v.receipt_code || '—'}</td>
               </tr>
             ))}

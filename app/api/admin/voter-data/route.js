@@ -5,8 +5,8 @@ import { ok } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-// SUPER ADMIN ONLY — full details of every member who has cast a ballot.
-// Ballot secrecy: shows WHO voted and WHEN, never WHICH candidate.
+// SUPER ADMIN ONLY — full details of every member who has cast a ballot,
+// including the candidate chosen for each position.
 export async function GET(req) {
   const { res } = requireSuperAdmin(req); if (res) return res;
   const sb = supabaseAdmin();
@@ -16,13 +16,19 @@ export async function GET(req) {
   if (!election_id) return ok({ voters: [], total: 0 });
 
   const { data: votes } = await sb.from('votes')
-    .select('member_id, position_id, created_at').eq('election_id', election_id);
+    .select('member_id, position_id, candidate_id, created_at').eq('election_id', election_id);
+  const { data: positions } = await sb.from('positions').select('id, title, sort_order')
+    .eq('election_id', election_id).order('sort_order');
+  const pmap = Object.fromEntries((positions || []).map(p => [p.id, p.title]));
+  const { data: cands } = await sb.from('candidates').select('id, name').eq('election_id', election_id);
+  const cmap = Object.fromEntries((cands || []).map(c => [c.id, c.name]));
 
-  // first vote time + positions completed, per member
+  // first vote time + per-position choices, per member
   const byMember = {};
   for (const v of votes || []) {
-    const m = byMember[v.member_id] || (byMember[v.member_id] = { positions: 0, at: v.created_at });
+    const m = byMember[v.member_id] || (byMember[v.member_id] = { positions: 0, at: v.created_at, choices: [] });
     m.positions += 1;
+    m.choices.push({ position: pmap[v.position_id] || 'Position', candidate: cmap[v.candidate_id] || '—' });
     if (v.created_at < m.at) m.at = v.created_at;
   }
   const ids = Object.keys(byMember);
@@ -43,6 +49,7 @@ export async function GET(req) {
     union_name: umap[m.union_id] || null, status: m.status,
     voted_at: byMember[m.id]?.at || null,
     positions_voted: byMember[m.id]?.positions || 0,
+    choices: (byMember[m.id]?.choices || []).sort((a, b) => a.position.localeCompare(b.position)),
     receipt_code: rmap[m.id] || null,
   })).sort((a, b) => new Date(b.voted_at) - new Date(a.voted_at));
 
