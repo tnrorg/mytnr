@@ -39,9 +39,8 @@ export async function POST(req) {
   const e = await getActiveElection();
   if (!e) return fail('NO_ELECTION', 400, { message: 'No election available.' });
   if (!isVotingOpen(e)) return fail('NOT_ACTIVE', 403, { message: 'Election is not currently active.' });
-  if (!e.voter_list_locked) return fail('NOT_LOCKED', 403, { message: 'Voter list is not locked yet.' });
 
-  // Voter must be approved, active, and on the locked list.
+  // Voter must be approved and active.
   const { data: member } = await sb.from('members').select('id, status').eq('id', member_id).maybeSingle();
   if (!member) return fail('NO_VOTER', 404, { message: 'Voter not found.' });
   if (member.status !== 'Approved') return fail('NOT_ELIGIBLE', 403, { message: 'Voter is not approved/eligible.' });

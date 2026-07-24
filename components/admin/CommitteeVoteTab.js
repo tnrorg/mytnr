@@ -36,7 +36,6 @@ export default function CommitteeVoteTab({ toast }) {
 
   if (!data) return <p className="text-tnr-cream/50">Loading…</p>;
   if (!data.election) return <Card><p className="text-tnr-cream/60">No active election.</p></Card>;
-  if (!data.election.voter_list_locked) return <Card><p className="text-tnr-cream/60">Lock the voter list and start the election before entering committee votes.</p></Card>;
 
   const candName = id => (data.candidates.find(c => c.id === id) || {}).name;
   const posName = id => (data.positions.find(p => String(p.id) === String(id)) || {}).title;
