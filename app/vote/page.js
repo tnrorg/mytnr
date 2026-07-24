@@ -28,7 +28,7 @@ export default function VotePage() {
 
   async function requestOtp(e) {
     e?.preventDefault(); setLoading(true); setErrMsg('');
-    const r = await api('/api/vote/request-otp', { mobile });
+    const r = await api('/api/vote/request-otp', { email: mobile });
     setLoading(false);
     if (!r.ok) { setErrKind(r.error); setErrMsg(r.message || 'Error'); setErrDetail(r.detail || ''); setStep('error'); return; }
     setOtpId(r.otp_id); setChannel(r.channel); setDevCode(r.dev_code || null); setStep('otp');
@@ -197,7 +197,7 @@ function OtpStep({ t, rtl, channel, devCode, loading, onVerify, onResend }) {
   return (
     <div className="card p-6 sm:p-8 animate-fade-up text-center">
       <h1 className={`text-2xl font-bold text-white mb-1 ${rtl ? 'urdu' : ''}`}>{t.enterOtp}</h1>
-      <p className="text-xs text-tnr-cream/50 mb-5">{channel === 'dev' ? 'TEST MODE (on-screen code)' : channel === 'email' ? 'Sent to your registered email' : channel === 'whatsapp' ? 'Sent via WhatsApp' : 'Sent via SMS'}</p>
+      <p className="text-xs text-tnr-cream/50 mb-5">{channel === 'dev' ? 'TEST MODE (on-screen code)' : 'Sent to your registered email'}</p>
       {devCode && <div className="mb-4 chip bg-tnr-gold/20 text-tnr-goldLight border border-tnr-line mx-auto">Dev code: <b className="tracking-widest">{devCode}</b></div>}
       <div className="flex justify-center gap-2 mb-4" dir="ltr">
         {digits.map((d, i) => <input key={i} ref={el => refs.current[i] = el} value={d} onChange={e => setD(i, e.target.value)}

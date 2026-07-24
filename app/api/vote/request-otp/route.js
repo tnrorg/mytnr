@@ -1,5 +1,4 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
-import { normalizePhone } from '@/lib/phone';
 import { generateOtp, hashOtp, OTP_TTL_MS } from '@/lib/otp';
 import { deliverOtp } from '@/lib/otpSender';
 import { getActiveElection, isVotingOpen } from '@/lib/election';
@@ -12,26 +11,24 @@ const RESEND_COOLDOWN_MS = 45 * 1000; // server-side anti-spam between OTP reque
 export async function POST(req) {
   const sb = supabaseAdmin();
   const body = await readJson(req);
-  const raw = String(body.email ?? body.mobile ?? body.identifier ?? '').trim();
+  // EMAIL-ONLY: voters authenticate solely with their registered email address.
+  const raw = String(body.email ?? body.identifier ?? body.mobile ?? '').trim();
   const ip = clientIp(req);
-  const isEmail = raw.includes('@');
-  const contact = isEmail ? raw.toLowerCase() : normalizePhone(raw);
-  if (!contact || contact.length < 5)
-    return fail('INVALID', 400, { message: isEmail ? 'Please enter a valid email address.' : 'This mobile number is not registered for voting.' });
+  const contact = raw.toLowerCase();
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact);
+  if (!validEmail)
+    return fail('INVALID', 400, { message: 'Please enter a valid email address.' });
 
   const election = await getActiveElection();
   if (!election) return fail('NO_ELECTION', 400, { message: 'No election is currently available.' });
 
-  // Member lookup by email (case-insensitive) or mobile.
-  // Use limit(1) (not maybeSingle) so a duplicate email/mobile can't blank the result.
-  const q = isEmail
-    ? sb.from('members').select('*').ilike('email', contact)
-    : sb.from('members').select('*').eq('mobile', contact);
-  const { data: rows } = await q.limit(1);
+  // Member lookup by registered email only (case-insensitive).
+  // limit(1), not maybeSingle, so a duplicate email can't blank the result.
+  const { data: rows } = await sb.from('members').select('*').ilike('email', contact).limit(1);
   const member = rows && rows[0];
   if (!member) {
     await logAudit({ action: 'OTP_REJECTED_UNREGISTERED', actor: 'member', details: contact, election_id: election.id, ip });
-    return fail('NOT_REGISTERED', 404, { message: isEmail ? 'This email is not registered for voting.' : 'This mobile number is not registered for voting.' });
+    return fail('NOT_REGISTERED', 404, { message: 'This email is not registered for voting.' });
   }
   if (member.status === 'Blocked')  return fail('BLOCKED', 403, { message: 'Your membership has been blocked. Please contact the administration.' });
   if (member.status !== 'Approved') return fail('NOT_APPROVED', 403, { message: 'Your membership is not approved yet.' });
@@ -64,18 +61,15 @@ export async function POST(req) {
     .eq('election_id', election.id).eq('member_id', member.id).eq('consumed', false);
   const expires_at = new Date(Date.now() + OTP_TTL_MS).toISOString();
   const { data: otpRow, error: otpErr } = await sb.from('otp_verifications').insert({
-    election_id: election.id, member_id: member.id, mobile: contact,
+    election_id: election.id, member_id: member.id, mobile: contact, // stores the email identifier used
     code_hash: hashOtp(code), expires_at,
   }).select('id').single();
   if (otpErr) return fail('OTP_STORE_FAILED', 500, { message: 'Could not create OTP. Try again.' });
 
-  // Deliver via the configured provider (email by default; whatsapp/twilio/meta/dev supported)
+  // Deliver by EMAIL only. No phone / SMS / WhatsApp path is ever used.
   try {
-    const phone = isEmail ? null : contact;
     const { channel } = await deliverOtp({
-      mobile: phone,
-      whatsapp: member.whatsapp ? normalizePhone(member.whatsapp) : phone,
-      email: member.email || (isEmail ? contact : null),
+      email: member.email || contact,
       code,
     });
     await sb.from('otp_verifications').update({ channel }).eq('id', otpRow.id);
