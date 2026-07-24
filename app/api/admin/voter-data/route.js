@@ -46,15 +46,24 @@ export async function GET(req) {
     .select('member_id, receipt_code, created_at').eq('election_id', election_id);
   const rmap = Object.fromEntries((receipts || []).map(r => [r.member_id, r.receipt_code]));
 
-  const voters = (members || []).map(m => ({
-    member_code: m.member_code, full_name: m.full_name, gender: m.gender,
-    email: m.email, mobile: m.mobile, village: m.village,
-    union_name: umap[m.union_id] || null, status: m.status,
-    voted_at: byMember[m.id]?.at || null,
-    positions_voted: byMember[m.id]?.positions || 0,
-    choices: (byMember[m.id]?.choices || []).sort((a, b) => a.position.localeCompare(b.position)),
-    receipt_code: rmap[m.id] || null,
-  })).sort((a, b) => new Date(b.voted_at) - new Date(a.voted_at));
+  // Iterate over EVERY voter (each unique member_id that has votes), then attach
+  // member details when available. A voter whose member row is missing still appears,
+  // so the list count always matches the real number of ballots cast.
+  const mmap = Object.fromEntries((members || []).map(m => [m.id, m]));
+  const voters = ids.map(id => {
+    const m = mmap[id] || {};
+    const b = byMember[id] || {};
+    return {
+      member_code: m.member_code || '—', full_name: m.full_name || '(member record removed)',
+      gender: m.gender || null, email: m.email || null, mobile: m.mobile || null,
+      village: m.village || null, union_name: m.union_id ? (umap[m.union_id] || null) : null,
+      status: m.status || null,
+      voted_at: b.at || null,
+      positions_voted: b.positions || 0,
+      choices: (b.choices || []).sort((a, z) => a.position.localeCompare(z.position)),
+      receipt_code: rmap[id] || null,
+    };
+  }).sort((a, b) => new Date(b.voted_at) - new Date(a.voted_at));
 
   return ok({ voters, total: voters.length });
   } catch (e) {
