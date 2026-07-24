@@ -15,7 +15,10 @@ export async function GET() {
   const e = await getActiveElection();
   if (!e) return ok({ election: null });
   const total_voters = await count(sb, 'members', { status: 'Approved' });
-  const votes_cast   = await count(sb, 'votes', { election_id: e.id });
+  // Votes Cast = unique voters who completed a ballot (one ballot = one row per
+  // position, so counting rows would multiply by the number of positions).
+  const { data: voteRows } = await sb.from('votes').select('member_id').eq('election_id', e.id);
+  const votes_cast = new Set((voteRows || []).map(v => v.member_id)).size;
   const settings = await getSettings(e.id);
   const votingOpen = isVotingOpen(e);
   const resultsVisible = e.result_published || (e.status === 'Ended') || (!votingOpen && settings.show_full_after_end);
