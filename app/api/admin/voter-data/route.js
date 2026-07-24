@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireSuperAdmin } from '@/lib/guard';
 import { getActiveElection } from '@/lib/election';
-import { ok } from '@/lib/api';
+import { ok, fail } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,13 +10,15 @@ export const dynamic = 'force-dynamic';
 export async function GET(req) {
   const { res } = requireSuperAdmin(req); if (res) return res;
   const sb = supabaseAdmin();
+  try {
   const url = new URL(req.url);
   let election_id = url.searchParams.get('election_id');
   if (!election_id) { const e = await getActiveElection(); election_id = e?.id; }
-  if (!election_id) return ok({ voters: [], total: 0 });
+  if (!election_id) return ok({ voters: [], total: 0, note: 'No active election found.' });
 
-  const { data: votes } = await sb.from('votes')
+  const { data: votes, error: votesErr } = await sb.from('votes')
     .select('member_id, position_id, candidate_id, created_at').eq('election_id', election_id);
+  if (votesErr) return fail('VOTES_ERR', 500, { message: 'Could not read votes.', detail: votesErr.message });
   const { data: positions } = await sb.from('positions').select('id, title, sort_order')
     .eq('election_id', election_id).order('sort_order');
   const pmap = Object.fromEntries((positions || []).map(p => [p.id, p.title]));
@@ -32,11 +34,12 @@ export async function GET(req) {
     if (v.created_at < m.at) m.at = v.created_at;
   }
   const ids = Object.keys(byMember);
-  if (!ids.length) return ok({ voters: [], total: 0 });
+  if (!ids.length) return ok({ voters: [], total: 0, note: `Election ${election_id} has 0 vote rows.` });
 
-  const { data: members } = await sb.from('members')
+  const { data: members, error: memErr } = await sb.from('members')
     .select('id, member_code, full_name, gender, email, mobile, village, union_id, status, created_at')
     .in('id', ids);
+  if (memErr) return fail('MEM_ERR', 500, { message: 'Could not read members.', detail: memErr.message });
   const { data: unions } = await sb.from('unions').select('id, union_name');
   const umap = Object.fromEntries((unions || []).map(u => [u.id, u.union_name]));
   const { data: receipts } = await sb.from('vote_receipts')
@@ -54,4 +57,7 @@ export async function GET(req) {
   })).sort((a, b) => new Date(b.voted_at) - new Date(a.voted_at));
 
   return ok({ voters, total: voters.length });
+  } catch (e) {
+    return fail('VOTER_DATA_FAILED', 500, { message: 'Voter Data failed.', detail: e.message });
+  }
 }

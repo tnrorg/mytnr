@@ -22,13 +22,15 @@ export async function GET() {
 
   const { data: positions } = await sb.from('positions').select('*').eq('election_id', e.id).order('sort_order');
   const { data: candidates } = await sb.from('candidates').select('*').eq('election_id', e.id).order('sort_order');
-  const { data: votes } = await sb.from('votes').select('candidate_id, position_id').eq('election_id', e.id);
+  const { data: votes } = await sb.from('votes').select('candidate_id, position_id, member_id').eq('election_id', e.id);
   const { data: unions } = await sb.from('unions').select('id, union_name');
   const umap = Object.fromEntries((unions || []).map(u => [u.id, u.union_name]));
 
   const tally = {};
   for (const v of votes || []) tally[v.candidate_id] = (tally[v.candidate_id] || 0) + 1;
-  const totalVotes = (votes || []).length;
+  // Votes Cast = unique voters who completed a ballot, NOT total candidate selections.
+  // One ballot has one row per position, so counting rows would multiply by the number of positions.
+  const votesCast = new Set((votes || []).map(v => v.member_id)).size;
 
   // group by position, compute winner
   const byPosition = (positions || []).map(p => {
@@ -55,8 +57,8 @@ export async function GET() {
 
   return ok({
     election: { id: e.id, title: e.title, status: e.status, result_published: e.result_published },
-    results_visible: true, total_votes: totalVotes, total_voters,
-    participation: total_voters ? Math.round((totalVotes / total_voters) * 1000) / 10 : 0,
+    results_visible: true, total_votes: votesCast, total_voters,
+    participation: total_voters ? Math.round((votesCast / total_voters) * 1000) / 10 : 0,
     positions: byPosition, union_share: unionShare,
   });
 }

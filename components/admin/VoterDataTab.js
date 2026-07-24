@@ -10,8 +10,9 @@ export default function VoterDataTab({ toast }) {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [err, setErr] = useState('');
   const load = () => aGet('/api/admin/voter-data?t=' + Date.now())
-    .then(r => { if (r.ok) setVoters(r.voters || []); setLoading(false); });
+    .then(r => { if (r.ok) { setVoters(r.voters || []); setErr(r.note || ''); } else setErr(r.detail || r.message || 'Request failed'); setLoading(false); });
   useEffect(() => { load(); const id = setInterval(load, 20000); return () => clearInterval(id); }, []);
 
   const q = search.trim().toLowerCase();
@@ -42,6 +43,8 @@ export default function VoterDataTab({ toast }) {
           ⬇ Export Excel
         </button>
       </div>
+
+      {err && <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm">{err}</div>}
 
       <input className="input max-w-sm" placeholder="Search name / code / email / village / receipt"
         value={search} onChange={e => setSearch(e.target.value)} />
