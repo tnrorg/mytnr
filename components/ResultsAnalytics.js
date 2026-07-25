@@ -204,7 +204,7 @@ function ChartTip({ active, payload, hasCounts }) {
         <div className="text-[11px] text-gray-400">Candidate #{d.number}{d.symbol ? ` · ${d.symbol}` : ''}</div></div>
     </div>
     <div className="mt-2 text-sm font-bold text-[#15231D] tabular-nums">
-      {d.votes != null ? `${d.votes} Valid Vote${d.votes === 1 ? '' : 's'}` : ''}{d.votes != null && d.percent != null ? ' · ' : ''}{d.percent != null ? `${d.percent}%` : ''}
+      {d.percent != null ? `${d.percent}% of valid vote` : ''}
     </div>
   </div>;
 }
