@@ -46,7 +46,7 @@ export default function Home() {
       <Contact />
       <Footer2 org={data?.org} />
 
-      {profile && <ProfileModal c={profile} onClose={() => setProfile(null)} />}
+      {profile && <ProfileModal c={profile} ended={e?.ended} onClose={() => setProfile(null)} />}
       {rules && <RulesModal onClose={() => setRules(false)} />}
     </main>
   );
@@ -288,8 +288,9 @@ function CandidateCard({ c, vis, ended, onProfile }) {
       </div>
 
       <div className="mt-auto pt-4 flex flex-col sm:flex-row gap-2">
-        <button onClick={() => onProfile(c)} className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-white/15 hover:bg-white/5 transition">View Profile</button>
-        <a href="/vote" className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold text-center text-[#063D2B]" style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>Vote Now</a>
+        {/* After the election ends, hide Vote Now and centre the View Profile button. */}
+        <button onClick={() => onProfile(c)} className={`${ended ? 'w-full' : 'flex-1'} py-2 rounded-xl text-xs sm:text-sm font-semibold border border-white/15 hover:bg-white/5 transition`}>View Profile</button>
+        {!ended && <a href="/vote" className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold text-center text-[#063D2B]" style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>Vote Now</a>}
       </div>
     </div>
   );
@@ -401,7 +402,7 @@ function Modal({ children, onClose }) {
     <div className="bg-white rounded-3xl p-6 w-full max-w-md animate-pop shadow-2xl max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>{children}</div>
   </div>;
 }
-function ProfileModal({ c, onClose }) {
+function ProfileModal({ c, onClose, ended }) {
   const R = ({ k, v }) => v ? <div className="flex gap-2 py-2 border-b border-gray-100 text-sm"><span className="text-gray-400 w-28">{k}</span><span className="text-[#15231D] flex-1 font-medium">{v}</span></div> : null;
   return <Modal onClose={onClose}>
     <div className="text-center">
@@ -415,8 +416,8 @@ function ProfileModal({ c, onClose }) {
       {c.percent != null && <R k="Vote Share" v={`${c.percent}%${c.votes != null ? ` (${c.votes} votes)` : ''}`} />}
     </div>
     <div className="mt-5 flex gap-2">
-      <button onClick={onClose} className="flex-1 py-2.5 rounded-xl font-semibold border border-gray-200 text-gray-600">Close</button>
-      <a href="/vote" className="flex-1 py-2.5 rounded-xl font-bold text-center text-[#063D2B]" style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>Vote Now</a>
+      <button onClick={onClose} className={`${ended ? 'w-full' : 'flex-1'} py-2.5 rounded-xl font-semibold border border-gray-200 text-gray-600`}>Close</button>
+      {!ended && <a href="/vote" className="flex-1 py-2.5 rounded-xl font-bold text-center text-[#063D2B]" style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>Vote Now</a>}
     </div>
   </Modal>;
 }
