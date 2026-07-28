@@ -25,6 +25,7 @@ export default function SiteNav() {
   }, [mobile]);
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm relative">
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
         {/* Mobile: REGISTER on the LEFT */}
@@ -105,8 +106,10 @@ export default function SiteNav() {
       )}
 
       {/* Mobile menu */}
+    </header>
+
       {mobile && (
-        <div className="xl:hidden fixed inset-x-0 top-[61px] bottom-0 z-50 bg-white overflow-y-auto overscroll-contain">
+        <div className="xl:hidden fixed inset-x-0 top-[61px] bottom-0 z-[45] bg-white overflow-y-auto overscroll-contain">
           {NAV.map(n => (
             <div key={n.label} className="border-b border-gray-50">
               {n.items ? (
@@ -135,6 +138,6 @@ export default function SiteNav() {
           <a href="/membership/login" className="block px-4 py-3 text-sm font-semibold text-[#063D2B]">LOGIN</a>
         </div>
       )}
-    </header>
+    </>
   );
 }
