@@ -1,6 +1,7 @@
 'use client';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
+import AiFab from '@/components/site/AiFab';
 
 // TNR main website homepage — intentionally blank for now.
 // The complete election system lives at /election-portal (unchanged).
@@ -31,6 +32,7 @@ export default function Home() {
       </section>
 
       <SiteFooter />
+      <AiFab />
     </main>
   );
 }

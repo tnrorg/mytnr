@@ -19,10 +19,15 @@ export default function SiteNav() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm relative">
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
-        {/* Logo */}
-        <a href="/" className="flex items-center gap-2.5 shrink-0">
+        {/* Mobile: hamburger on the LEFT */}
+        <button className="xl:hidden p-2 -ml-2 text-gray-600 shrink-0" onClick={() => setMobile(!mobile)} aria-label="menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+        </button>
+
+        {/* Logo — centred on mobile, left on desktop */}
+        <a href="/" className="flex items-center gap-2.5 shrink-0 absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0">
           <span className="w-10 h-10 rounded-full grid place-items-center bg-white ring-2 ring-[#D4A72C] overflow-hidden shadow">
             <img src="/tnr-logo.png" alt="TNR" className="w-full h-full object-contain p-0.5" />
           </span>
@@ -66,9 +71,6 @@ export default function SiteNav() {
           <a href="/membership/login" className="hidden sm:inline-block px-3 py-2 rounded-xl text-[13px] font-semibold text-[#063D2B] border border-[#063D2B]/15 hover:bg-[#063D2B]/5">LOGIN</a>
           <a href="/membership/join" className="px-3.5 py-2 rounded-xl text-[13px] font-bold text-[#063D2B] shadow whitespace-nowrap"
             style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>REGISTER</a>
-          <button className="xl:hidden p-2 text-gray-600" onClick={() => setMobile(!mobile)} aria-label="menu">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-          </button>
         </div>
       </div>
 
