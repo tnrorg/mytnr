@@ -18,6 +18,12 @@ export default function SiteNav() {
     return () => document.removeEventListener('click', close);
   }, []);
 
+  // Full-screen mobile menu: stop the page behind it from scrolling.
+  useEffect(() => {
+    document.body.style.overflow = mobile ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobile]);
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm relative">
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
@@ -100,7 +106,7 @@ export default function SiteNav() {
 
       {/* Mobile menu */}
       {mobile && (
-        <div className="xl:hidden border-t border-gray-100 bg-white max-h-[75vh] overflow-auto">
+        <div className="xl:hidden fixed inset-x-0 top-[61px] bottom-0 z-50 bg-white overflow-y-auto overscroll-contain">
           {NAV.map(n => (
             <div key={n.label} className="border-b border-gray-50">
               {n.items ? (
