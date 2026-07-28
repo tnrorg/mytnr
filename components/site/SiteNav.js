@@ -23,7 +23,7 @@ export default function SiteNav() {
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
         {/* Mobile: REGISTER on the LEFT */}
         <a href="/membership/join" aria-label="Register" title="Register"
-          className="xl:hidden grid place-items-center w-10 h-10 rounded-xl text-[#063D2B] shadow shrink-0"
+          className="xl:hidden grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow shrink-0"
           style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
@@ -75,7 +75,7 @@ export default function SiteNav() {
           </button>
           <a href="/membership/login" className="hidden xl:inline-block px-3 py-2 rounded-xl text-[13px] font-semibold text-[#063D2B] border border-[#063D2B]/15 hover:bg-[#063D2B]/5">LOGIN</a>
           <a href="/membership/join" aria-label="Register" title="Register"
-            className="hidden xl:grid place-items-center w-10 h-10 rounded-xl text-[#063D2B] shadow"
+            className="hidden xl:grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow"
             style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
