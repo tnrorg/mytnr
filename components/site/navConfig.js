@@ -51,8 +51,16 @@ export const NAV = [
     ['Workshops', '/events/workshops'], ['Past Events', '/events/past'],
     ['Event Registration', '/events/register'],
   ]},
+  { label: 'Rondo Statistics', href: '/statistics', items: [
+    ['Population', '/statistics/population'], ['Literacy Rate', '/statistics/literacy'],
+    ['Education Statistics', '/statistics/education'], ['Schools', '/statistics/schools'],
+    ['Colleges', '/statistics/colleges'], ['Universities', '/statistics/universities'],
+    ['Doctors', '/statistics/doctors'], ['Engineers', '/statistics/engineers'],
+    ['Teachers', '/statistics/teachers'], ['Overseas Professionals', '/statistics/overseas'],
+    ['Employment Statistics', '/statistics/employment'], ['Interactive Reports', '/statistics/reports'],
+  ]},
   { label: 'More', items: [
-    ['Statistics', '/statistics'], ['Digital Library', '/media/library'],
+    ['Digital Library', '/media/library'],
     ['Research Papers', '/media/research'], ['Photo Gallery', '/media/photos'],
     ['Video Gallery', '/media/videos'], ['Newsletter', '/media/newsletter'],
     ['Verify Records', '/verify'], ['Ask TNR AI', '/tnr-ai'],
