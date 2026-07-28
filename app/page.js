@@ -84,7 +84,7 @@ function Countdown({ target, tone = 'light' }) {
 function Navbar({ e, org }) {
   const [open, setOpen] = useState(false);
   const live = e?.voting_open;
-  const links = [['Home', '#top'], ['Candidates', '#candidates'], ['Committee', '#committee'], ['Election Process', '#process'], ['Results', '/results'], ['About', '#about'], ['Contact', '#contact']];
+  const links = [['Home', '#top'], ['Election Portal', '/election-portal'], ['Candidates', '#candidates'], ['Committee', '#committee'], ['Election Process', '#process'], ['Results', '/results'], ['About', '#about'], ['Contact', '#contact']];
   return (
     <header id="top" className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-4">
