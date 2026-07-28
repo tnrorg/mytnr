@@ -22,15 +22,21 @@ export default function SiteNav() {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm relative">
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
         {/* Mobile: REGISTER on the LEFT */}
-        <a href="/membership/join" className="xl:hidden px-3.5 py-2 rounded-xl text-[13px] font-bold text-[#063D2B] shadow whitespace-nowrap shrink-0"
-          style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>REGISTER</a>
+        <a href="/membership/join" aria-label="Register" title="Register"
+          className="xl:hidden grid place-items-center w-10 h-10 rounded-xl text-[#063D2B] shadow shrink-0"
+          style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
+            <path d="M2.8 20c0-3.4 2.8-5.6 6.2-5.6s6.2 2.2 6.2 5.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M18.5 8.5v5M21 11h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </a>
 
         {/* Logo — centred on mobile, left on desktop */}
         <a href="/" className="flex items-center gap-2.5 shrink-0 absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0">
           <span className="w-10 h-10 rounded-full grid place-items-center bg-white ring-2 ring-[#D4A72C] overflow-hidden shadow">
             <img src="/tnr-logo.png" alt="TNR" className="w-full h-full object-contain p-0.5" />
           </span>
-          <span style={mont} className="font-extrabold text-[#063D2B] leading-tight text-sm sm:text-base">TNR</span>
         </a>
 
         {/* Desktop nav */}
@@ -68,8 +74,15 @@ export default function SiteNav() {
               <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
           <a href="/membership/login" className="hidden xl:inline-block px-3 py-2 rounded-xl text-[13px] font-semibold text-[#063D2B] border border-[#063D2B]/15 hover:bg-[#063D2B]/5">LOGIN</a>
-          <a href="/membership/join" className="hidden xl:inline-block px-3.5 py-2 rounded-xl text-[13px] font-bold text-[#063D2B] shadow whitespace-nowrap"
-            style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>REGISTER</a>
+          <a href="/membership/join" aria-label="Register" title="Register"
+            className="hidden xl:grid place-items-center w-10 h-10 rounded-xl text-[#063D2B] shadow"
+            style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
+              <path d="M2.8 20c0-3.4 2.8-5.6 6.2-5.6s6.2 2.2 6.2 5.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M18.5 8.5v5M21 11h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </a>
           <button className="xl:hidden p-2 -mr-1 text-gray-600" onClick={() => setMobile(!mobile)} aria-label="menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
