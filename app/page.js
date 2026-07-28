@@ -23,7 +23,12 @@ export default function Home() {
           <h1 style={mont} className="mt-6 text-3xl sm:text-4xl font-black text-[#063D2B]">
             Tehreek-e-Nojawanan Roundu
           </h1>
-          <p className="mt-3 text-gray-500">Website coming soon.</p>
+          <p style={mont} className="mt-4 text-lg sm:text-xl font-extrabold text-[#0B6B4F]">
+            TNR Global Digital Community Platform
+          </p>
+          <p className="mt-2 text-gray-500 max-w-xl mx-auto leading-relaxed">
+            Currently under development — building a connected digital future for the global Rondo community.
+          </p>
           <a href="/election-portal" className="inline-block mt-8 px-6 py-3 rounded-xl font-bold text-[#063D2B] shadow"
             style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
             Go to Election Portal →
