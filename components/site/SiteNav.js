@@ -26,6 +26,22 @@ export default function SiteNav() {
 
   return (
     <>
+    {/* Utility bar */}
+    <div className="hidden sm:block text-white text-[12px]" style={{ background: '#052A1E' }}>
+      <div className="max-w-[1400px] mx-auto px-4 py-1.5 flex items-center gap-4">
+        <span className="text-white/70">Uniting the Rondo Community Worldwide</span>
+        <div className="ml-auto flex items-center gap-4">
+          <a href="/help" className="text-white/70 hover:text-white transition">Help Center</a>
+          <a href="/contact" className="text-white/70 hover:text-white transition">Contact Us</a>
+          <div className="flex items-center gap-2">
+            {[['f','https://facebook.com'],['t','https://twitter.com'],['y','https://youtube.com'],['in','https://linkedin.com'],['ig','https://instagram.com']].map(([l,h]) => (
+              <a key={l} href={h} target="_blank" rel="noopener noreferrer"
+                className="w-5 h-5 rounded grid place-items-center bg-white/10 hover:bg-[#D4A72C] hover:text-[#063D2B] transition text-[10px] font-bold">{l}</a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm relative">
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
         {/* Mobile: REGISTER on the LEFT */}
