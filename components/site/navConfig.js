@@ -53,7 +53,9 @@ export const NAV = [
   ]},
   { label: 'Rondo Statistics', href: '/statistics', items: [
     ['Population', '/statistics/population'], ['Literacy Rate', '/statistics/literacy'],
-    ['Education Statistics', '/statistics/education'], ['Schools', '/statistics/schools'],
+    ['Education Statistics', '/statistics/education'],
+    ['Health Statistics', '/statistics/health'], ['Tourism Statistics', '/statistics/tourism'],
+    ['Schools', '/statistics/schools'],
     ['Colleges', '/statistics/colleges'], ['Universities', '/statistics/universities'],
     ['Doctors', '/statistics/doctors'], ['Engineers', '/statistics/engineers'],
     ['Teachers', '/statistics/teachers'], ['Overseas Professionals', '/statistics/overseas'],
