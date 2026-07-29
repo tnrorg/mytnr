@@ -4,6 +4,8 @@ import SiteFooter from '@/components/site/SiteFooter';
 import AiFab from '@/components/site/AiFab';
 import CouncilCard from '@/components/site/CouncilCard';
 import { COUNCIL, COUNCIL_TAGLINE, COUNCIL_MISSION, COUNCIL_PILLARS } from '@/content/advisoryCouncil';
+import ExecutiveCard from '@/components/site/ExecutiveCard';
+import { EXECUTIVE, CEC_INTRO } from '@/content/executiveCommittee';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3', ink: '#15231D', bg: '#FDFDFD' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -44,6 +46,7 @@ export default function Home() {
       <StatsBar />
       <Modules />
       <AdvisoryCouncil />
+      <ExecutiveCommittee />
       <Panels />
       <ValuesBar />
       <SiteFooter />
@@ -188,6 +191,25 @@ function AdvisoryCouncil() {
             ))}
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────── Central Executive Committee ─────────────────── */
+function ExecutiveCommittee() {
+  return (
+    <section className="max-w-[1400px] mx-auto px-4 py-14 w-full">
+      <div className="flex items-center justify-center gap-3">
+        <span className="h-px w-10 sm:w-20" style={{ background: `${C.gold}66` }} />
+        <h2 style={{ ...mont, color: C.deep }} className="text-lg sm:text-xl font-black uppercase tracking-wide text-center">Central Executive Committee</h2>
+        <span className="h-px w-10 sm:w-20" style={{ background: `${C.gold}66` }} />
+      </div>
+      <p className="mt-3 text-center text-sm text-gray-500 max-w-3xl mx-auto leading-relaxed">{CEC_INTRO}</p>
+
+      {/* one per row on mobile, three per row from desktop up */}
+      <div className="mt-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {EXECUTIVE.map(m => <ExecutiveCard key={m.slug} member={m} />)}
       </div>
     </section>
   );

@@ -1,6 +1,8 @@
 'use client';
 import DocPage, { Section, P, TickList, Callout, C } from '@/components/site/DocPage';
 import { CEC_ROLE, CEC_POSITIONS, CEC_NOTE, CORE_LEADERSHIP_CRITERIA } from '@/content/aboutTnr';
+import ExecutiveCard from '@/components/site/ExecutiveCard';
+import { EXECUTIVE } from '@/content/executiveCommittee';
 
 export default function ExecutiveCommitteePage() {
   return (
@@ -9,6 +11,12 @@ export default function ExecutiveCommitteePage() {
       source="TNR Governance Handbook — Constitution Article VII, and Chapter 4, Clauses 4.2–4.3.">
 
       <Section title="Role"><P>{CEC_ROLE}</P></Section>
+
+      <Section title="Committee Members">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {EXECUTIVE.map(m => <ExecutiveCard key={m.slug} member={m} />)}
+        </div>
+      </Section>
 
       <Section title="Composition">
         <P>The CEC comprises the following positions:</P>
