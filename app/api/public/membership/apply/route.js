@@ -5,6 +5,7 @@ import {
   normalizeEmail, normalizeMobile, isValidEmail, generateApplicationRef,
 } from '@/lib/membership/core';
 import { sendApplicationReceived } from '@/lib/membership/emails';
+import { uploadDataUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +48,20 @@ export async function POST(req) {
   if (existingMember && existingMember.length)
     return fail('DUPLICATE', 409, { message: 'A membership already exists for these details. Please use Member Login.' });
 
+  // ── Profile photo (optional) ──
+  // Validated server-side: images only, max ~4 MB decoded.
+  let photo_url = null;
+  if (b.photo_data) {
+    const head = String(b.photo_data).slice(0, 40);
+    if (!/^data:image\/(png|jpe?g|webp);base64,/i.test(head))
+      return fail('BAD_PHOTO', 400, { message: 'Profile photo must be a JPG, PNG or WEBP image.' });
+    const approxBytes = (String(b.photo_data).length - head.indexOf(',')) * 0.75;
+    if (approxBytes > 4 * 1024 * 1024)
+      return fail('PHOTO_TOO_BIG', 400, { message: 'Profile photo must be smaller than 4 MB.' });
+    try { photo_url = await uploadDataUrl(b.photo_data, 'members'); }
+    catch (e) { photo_url = null; }   // never block an application over a photo
+  }
+
   // ── Insert (status ALWAYS pending_review — never auto-active) ──
   const reference_no = await generateApplicationRef();
   const row = {
@@ -58,7 +73,7 @@ export async function POST(req) {
     union_council: b.union_council || null,
     mobile, mobile_normalized: mobile,
     email, email_normalized: email,
-    photo_url: b.photo_url || null,
+    photo_url,
     education_level: b.education_level || null,
     field_of_study: b.field_of_study || null,
     current_position: b.current_position || null,

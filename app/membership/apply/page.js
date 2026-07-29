@@ -10,6 +10,7 @@ import {
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
 const BLANK = {
+  photo_data: '',
   first_name: '', last_name: '', gender: '', age: '', village: '', union_council: '',
   mobile: '', email: '', education_level: '', field_of_study: '', current_position: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
@@ -22,6 +23,35 @@ export default function ApplyPage() {
   const [err, setErr] = useState('');
   const [done, setDone] = useState(null);
   const set = (k, v) => { setErr(''); setF(p => ({ ...p, [k]: v })); };
+  // Read the chosen image as a base64 data URL, downscaled to keep it small.
+  function pickPhoto(file) {
+    setErr('');
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp)$/i.test(file.type))
+      return setErr('Profile photo must be a JPG, PNG or WEBP image.');
+    if (file.size > 8 * 1024 * 1024)
+      return setErr('Please choose an image smaller than 8 MB.');
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        // Downscale to max 600px on the long edge — keeps uploads fast.
+        const max = 600;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        set('photo_data', c.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = () => setErr('That image could not be read. Please try another file.');
+      img.src = reader.result;
+    };
+    reader.onerror = () => setErr('Could not read that file.');
+    reader.readAsDataURL(file);
+  }
+
   const toggleArea = (a) => setF(p => ({
     ...p, contribution_areas: p.contribution_areas.includes(a)
       ? p.contribution_areas.filter(x => x !== a) : [...p.contribution_areas, a],
@@ -77,6 +107,29 @@ export default function ApplyPage() {
 
         <form onSubmit={submit} className="mt-8 space-y-6">
           <Card title="A · Personal Information">
+            <div className="flex items-center gap-4 pb-4 mb-4 border-b border-gray-100">
+              <div className="w-24 h-28 rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 grid place-items-center shrink-0">
+                {f.photo_data
+                  ? <img src={f.photo_data} alt="Selected photo" className="w-full h-full object-cover" />
+                  : <span className="text-3xl text-gray-300">👤</span>}
+              </div>
+              <div className="min-w-0">
+                <label className="block text-xs font-semibold text-gray-500 mb-1.5">Profile Photo</label>
+                <input type="file" accept="image/png,image/jpeg,image/webp"
+                  onChange={e => pickPhoto(e.target.files?.[0])}
+                  className="block w-full text-xs text-gray-600
+                    file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                    file:text-xs file:font-bold file:text-white file:cursor-pointer
+                    file:bg-[#0B6B4F] hover:file:bg-[#063D2B]" />
+                <p className="mt-1.5 text-[11px] text-gray-400">
+                  A clear passport-style photo. JPG, PNG or WEBP.
+                </p>
+                {f.photo_data && (
+                  <button type="button" onClick={() => set('photo_data', '')}
+                    className="mt-1 text-[11px] font-semibold text-red-500 hover:underline">Remove photo</button>
+                )}
+              </div>
+            </div>
             <Grid>
               <Field label="First Name" req><Input value={f.first_name} onChange={v => set('first_name', v)} /></Field>
               <Field label="Last Name" req><Input value={f.last_name} onChange={v => set('last_name', v)} /></Field>
