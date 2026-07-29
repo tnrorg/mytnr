@@ -112,7 +112,9 @@ function PhotoCard({ core, onSaved }) {
     const r = await mPatch('/api/member/profile', { photo_data: preview });
     setBusy(false);
     if (!r.ok) return setErr(r.message || 'Could not save the photo.');
-    setPreview(''); onSaved('Profile photo updated.');
+    setPreview('');
+    window.dispatchEvent(new Event('tnr-member-updated'));   // refresh sidebar avatar
+    onSaved('Profile photo updated.');
   }
 
   const shown = preview || core.photo_url;

@@ -1,5 +1,6 @@
 'use client';
 import QrCode from './QrCode';
+import Avatar from './Avatar';
 
 const G='#0B5836', DEEP='#063D2B', GOLD='#C9A227', GOLD_LT='#E8C766', INK='#1F2937', MUTED='#6B7280';
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -43,7 +44,7 @@ export default function MembershipCard({ m, verifyUrl }) {
             DIGITAL MEMBERSHIP CARD
           </div>
 
-          <img src={m?.photo_url || '/tnr-logo.png'} alt=""
+          <Avatar src={m?.photo_url} name={m?.full_name} fontSize={22}
             style={{ width: 62, height: 74, objectFit: 'cover', borderRadius: 5, border: `1px solid ${GOLD}`,
               background: '#F3F4F6', display: 'block', margin: '0 auto' }} />
 

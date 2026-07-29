@@ -34,12 +34,20 @@ export default function MemberShell({ active, children }) {
   const [state, setState] = useState('loading');
   const [open, setOpen] = useState(false);
 
+  const refresh = () => mGet('/api/member/me').then(r => {
+    if (r?.ok) { setMember(r.member); setState('ok'); }
+    else setState('denied');
+  });
+
   useEffect(() => {
     if (!getToken()) { window.location.href = '/member/login'; return; }
-    mGet('/api/member/me').then(r => {
-      if (r?.ok) { setMember(r.member); setState('ok'); }
-      else setState('denied');
-    });
+    refresh();
+    // Any page can fire this after changing profile data (e.g. a new photo)
+    // so the sidebar updates immediately without a page reload.
+    const onUpdate = () => refresh();
+    window.addEventListener('tnr-member-updated', onUpdate);
+    return () => window.removeEventListener('tnr-member-updated', onUpdate);
+    // eslint-disable-next-line
   }, []);
 
   if (state === 'loading') return <div className="light-page min-h-screen grid place-items-center text-gray-400" style={mont}>Loading…</div>;

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Avatar from '@/components/member/Avatar';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 
@@ -64,7 +65,7 @@ export default function DirectoryPage() {
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(d?.members || []).map(m => (
             <div key={m.membership_id} className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5 text-center">
-              <img src={m.photo_url || '/tnr-logo.png'} alt=""
+              <Avatar src={m.photo_url} name={m.full_name} fontSize={24}
                 className="w-20 h-20 mx-auto rounded-full object-cover ring-2 ring-[#D4A72C]/60 bg-gray-50" />
               <h3 style={{ ...mont, color: C.deep }} className="mt-3 font-extrabold text-sm">{m.full_name}</h3>
               {m.current_position && <div className="text-xs text-gray-500 mt-0.5">{m.current_position}</div>}

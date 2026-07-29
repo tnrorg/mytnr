@@ -1,5 +1,6 @@
 'use client';
 import MemberShell from '@/components/member/MemberShell';
+import Avatar from '@/components/member/Avatar';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -20,7 +21,7 @@ export default function MemberDashboard() {
         <>
           <div className="rounded-3xl p-6 sm:p-8 text-white shadow-xl" style={{ background: `linear-gradient(165deg,${C.deep},#04241A)` }}>
             <div className="flex items-center gap-4 flex-wrap">
-              <img src={m?.photo_url || '/tnr-logo.png'} alt=""
+              <Avatar src={m?.photo_url} name={m?.full_name} fontSize={22}
                 className="w-16 h-16 rounded-2xl object-cover ring-2 ring-[#D4A72C]/60 bg-white/10" />
               <div className="min-w-0">
                 <h1 style={mont} className="text-2xl font-black">Welcome Back, {m?.first_name}</h1>
