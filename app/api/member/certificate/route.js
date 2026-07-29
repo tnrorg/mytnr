@@ -9,10 +9,13 @@ export const dynamic = 'force-dynamic';
 export async function GET(req) {
   const { member, res } = await requireMember(req); if (res) return res;
   const sb = supabaseAdmin();
+  try {
 
-  let { data: cert } = await sb.from('membership_certificates')
+  let { data: cert, error: readErr } = await sb.from('membership_certificates')
     .select('*').eq('member_id', member.id).eq('type', 'membership')
     .order('issued_at', { ascending: false }).limit(1).maybeSingle();
+  if (readErr) return fail('CERT_TABLE', 500, {
+    message: 'Certificate storage is not ready.', detail: readErr.message });
 
   if (!cert) {
     const certificate_no = await generateCertificateNo();
@@ -20,7 +23,8 @@ export async function GET(req) {
       member_id: member.id, certificate_no, type: 'membership',
       title: 'Certificate of Membership', issued_by: 'TNR Membership Committee',
     }).select('*').single();
-    if (error) return fail('ISSUE_FAILED', 500, { message: 'Could not issue the certificate.' });
+    if (error) return fail('ISSUE_FAILED', 500, {
+      message: 'Could not issue the certificate.', detail: error.message });
     cert = data;
   }
 
@@ -39,4 +43,7 @@ export async function GET(req) {
       expires_at: member.expires_at, category,
     },
   });
+  } catch (e) {
+    return fail('CERT_FAILED', 500, { message: 'Could not load your certificate.', detail: e.message });
+  }
 }

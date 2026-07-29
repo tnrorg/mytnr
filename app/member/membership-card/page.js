@@ -10,7 +10,24 @@ const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }
 
 export default function CardPage() {
   const [d, setD] = useState(null);
-  useEffect(() => { mGet('/api/member/certificate').then(r => r.ok && setD(r)); }, []);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    mGet('/api/member/certificate')
+      .then(r => { if (r?.ok) setD(r); else setErr(r?.detail || r?.message || 'Could not load.'); })
+      .catch(e => setErr(e.message || 'Request failed.'));
+  }, []);
+  if (err) return (
+    <MemberShell active="/member/membership-card">
+      <div className="rounded-2xl bg-red-50 border border-red-200 p-5 text-sm">
+        <div className="font-bold text-red-800">Could not load this page</div>
+        <div className="mt-1 text-red-700 text-xs break-words">{err}</div>
+        <div className="mt-2 text-red-700/80 text-xs">
+          If this mentions a missing table or relation, run the membership migration files in
+          Supabase (phase1 → phase6), in order.
+        </div>
+      </div>
+    </MemberShell>
+  );
   if (!d) return <MemberShell active="/member/membership-card"><p className="text-gray-400">Loading…</p></MemberShell>;
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
