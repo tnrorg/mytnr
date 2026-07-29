@@ -1,0 +1,100 @@
+import { supabaseAdmin } from '@/lib/supabaseServer';
+import { ok, fail, readJson } from '@/lib/api';
+import { clientIp } from '@/lib/audit';
+import {
+  normalizeEmail, normalizeMobile, isValidEmail, generateApplicationRef,
+} from '@/lib/membership/core';
+import { sendApplicationReceived } from '@/lib/membership/emails';
+
+export const dynamic = 'force-dynamic';
+
+const ACTIVE = ['pending_review', 'under_review', 'correction_requested', 'approved'];
+
+export async function POST(req) {
+  const sb = supabaseAdmin();
+  const b = await readJson(req);
+  const ip = clientIp(req);
+
+  // ── Required fields ──
+  const first_name = String(b.first_name || '').trim();
+  const last_name  = String(b.last_name || '').trim();
+  const email      = normalizeEmail(b.email);
+  const mobile     = normalizeMobile(b.mobile);
+
+  if (!first_name || !last_name) return fail('INVALID', 400, { message: 'First and last name are required.' });
+  if (!isValidEmail(email))      return fail('INVALID', 400, { message: 'Please enter a valid email address.' });
+  if (mobile.length < 8)         return fail('INVALID', 400, { message: 'Please enter a valid mobile number.' });
+  if (!b.declaration_accepted)   return fail('DECLARATION', 400, { message: 'You must accept the declaration to submit.' });
+  if (!String(b.why_join || '').trim())    return fail('INVALID', 400, { message: 'Please tell us why you want to join.' });
+  if (!Array.isArray(b.contribution_areas) || !b.contribution_areas.length)
+    return fail('INVALID', 400, { message: 'Please select at least one contribution area.' });
+  if (!String(b.leadership_view || '').trim()) return fail('INVALID', 400, { message: 'Please answer the leadership question.' });
+  if (!String(b.youth_issues || '').trim())    return fail('INVALID', 400, { message: 'Please describe the issues facing Roundu youth.' });
+
+  // ── Duplicate prevention (privacy-safe: never reveal whose record it is) ──
+  const { data: dupes } = await sb.from('membership_applications')
+    .select('status, email_normalized, mobile_normalized')
+    .or(`email_normalized.eq.${email},mobile_normalized.eq.${mobile}`);
+  const blocking = (dupes || []).find(d => ACTIVE.includes(d.status));
+  if (blocking) {
+    const msg = blocking.status === 'approved'
+      ? 'A membership already exists for these details. Please use Member Login, or contact support if you need help.'
+      : 'An application with these details is already under review. Please use "Check Application Status".';
+    return fail('DUPLICATE', 409, { message: msg });
+  }
+  const { data: existingMember } = await sb.from('membership_members')
+    .select('id').eq('email_normalized', email).is('deleted_at', null).limit(1);
+  if (existingMember && existingMember.length)
+    return fail('DUPLICATE', 409, { message: 'A membership already exists for these details. Please use Member Login.' });
+
+  // ── Insert (status ALWAYS pending_review — never auto-active) ──
+  const reference_no = await generateApplicationRef();
+  const row = {
+    reference_no,
+    first_name, last_name,
+    gender: b.gender || null,
+    age: b.age ? Number(b.age) : null,
+    village: b.village || null,
+    union_council: b.union_council || null,
+    mobile, mobile_normalized: mobile,
+    email, email_normalized: email,
+    photo_url: b.photo_url || null,
+    education_level: b.education_level || null,
+    field_of_study: b.field_of_study || null,
+    current_position: b.current_position || null,
+    why_join: String(b.why_join).trim(),
+    contribution_areas: b.contribution_areas,
+    leadership_view: b.leadership_view,
+    leadership_note: b.leadership_note || null,
+    youth_issues: String(b.youth_issues).trim(),
+    declaration_accepted: true,
+    declaration_version: b.declaration_version || 'v1.0',
+    declaration_at: new Date().toISOString(),
+    submitted_ip: ip,
+    submitted_user_agent: (req.headers.get('user-agent') || '').slice(0, 300),
+    whatsapp_opt_in: !!b.whatsapp_opt_in,
+    status: 'pending_review',
+  };
+
+  const { data, error } = await sb.from('membership_applications').insert(row)
+    .select('reference_no, created_at').single();
+  if (error) {
+    // Unique index race → treat as duplicate, not a server error
+    if (error.code === '23505')
+      return fail('DUPLICATE', 409, { message: 'An application with these details already exists.' });
+    return fail('SUBMIT_FAILED', 500, { message: 'Could not submit your application. Please try again.' });
+  }
+
+  await sb.from('membership_status_history').insert({
+    to_status: 'pending_review', reason: 'Application submitted', changed_by: 'applicant',
+  }).then(() => {}, () => {});
+
+  // Confirmation email — never block submission if the mail server hiccups.
+  try { await sendApplicationReceived({ ...row, reference_no: data.reference_no }); } catch {}
+
+  return ok({
+    reference_no: data.reference_no,
+    submitted_at: data.created_at,
+    message: 'Application submitted successfully.',
+  });
+}

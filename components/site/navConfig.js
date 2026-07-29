@@ -14,11 +14,11 @@ export const NAV = [
     ['Voter Verification', '/vote'], ['Election Results', '/results'],
     ['Live Dashboard', '/dashboard'], ['Election Guidelines', '/election-portal#process'],
   ]},
-  { label: 'Membership', items: [
-    ['Become a Member', '/membership/join'], ['Member Login', '/membership/login'],
-    ['Member Dashboard', '/membership/dashboard'], ['Member Directory', '/membership/directory'],
-    ['Digital Membership Card', '/membership/card'], ['Update Profile', '/membership/profile'],
-    ['Membership Verification', '/verify/membership'],
+  { label: 'Membership', href: '/membership', items: [
+    ['Membership Overview', '/membership'], ['Become a Member', '/membership/apply'],
+    ['Check Application Status', '/membership/status'], ['Verify Membership', '/membership/verify'],
+    ['Our Members', '/members'], ['Volunteer With TNR', '/volunteer'],
+    ['Member Login', '/member/login'],
   ]},
   { label: 'Community', items: [
     ['Global Member Directory', '/community/directory'], ['Professional Directory', '/community/professionals'],

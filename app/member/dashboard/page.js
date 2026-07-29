@@ -1,0 +1,82 @@
+'use client';
+import MemberShell from '@/components/member/MemberShell';
+
+const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3' };
+const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
+
+const QUICK = [
+  ['Complete Profile', '/member/profile', '👤'],
+  ['Create CV', '/member/cv-builder', '📄'],
+  ['Cover Letter', '/member/cover-letters', '✉️'],
+  ['Membership Card', '/member/membership-card', '🪪'],
+  ['Opportunities', '/member/opportunities', '💼'],
+  ['Upload Document', '/member/certificates', '📎'],
+];
+
+export default function MemberDashboard() {
+  return (
+    <MemberShell active="/member/dashboard">
+      {(m) => (
+        <>
+          <div className="rounded-3xl p-6 sm:p-8 text-white shadow-xl" style={{ background: `linear-gradient(165deg,${C.deep},#04241A)` }}>
+            <div className="flex items-center gap-4 flex-wrap">
+              <img src={m?.photo_url || '/tnr-logo.png'} alt=""
+                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-[#D4A72C]/60 bg-white/10" />
+              <div className="min-w-0">
+                <h1 style={mont} className="text-2xl font-black">Welcome Back, {m?.first_name}</h1>
+                <div className="text-sm text-white/60 mt-0.5">
+                  <span className="font-mono" style={{ color: C.soft }}>{m?.membership_id}</span>
+                  {m?.union_council && <> · {m.union_council}</>}
+                  {m?.village && <> · {m.village}</>}
+                </div>
+              </div>
+              <span className="ml-auto px-3 py-1.5 rounded-full text-xs font-bold"
+                style={{ background: 'rgba(212,167,44,0.18)', color: C.soft }}>
+                {String(m?.status || '').toUpperCase()} MEMBER
+              </span>
+            </div>
+          </div>
+
+          {/* Stats — real values only; features arrive in later phases */}
+          <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[['Profile Completion', profilePct(m) + '%'], ['CVs Created', '0'],
+              ['Cover Letters', '0'], ['Certificates', '0']].map(([l, v]) => (
+              <div key={l} className="rounded-2xl bg-white border border-gray-100 shadow-sm p-4 text-center">
+                <div style={{ ...mont, color: C.deep }} className="text-2xl font-black">{v}</div>
+                <div className="text-[11px] uppercase tracking-wider text-gray-400 mt-1">{l}</div>
+              </div>
+            ))}
+          </div>
+
+          <h2 style={{ ...mont, color: C.deep }} className="mt-8 text-sm font-black uppercase tracking-wide">Quick Actions</h2>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {QUICK.map(([t, href, icon]) => (
+              <a key={t} href={href}
+                className="rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition p-4 text-center">
+                <div className="text-2xl">{icon}</div>
+                <div className="mt-2 text-xs font-bold" style={{ color: C.deep }}>{t}</div>
+              </a>
+            ))}
+          </div>
+
+          <div className="mt-8 rounded-2xl bg-white border border-gray-100 shadow-sm p-6 text-center">
+            <div className="text-3xl">📢</div>
+            <h3 style={{ ...mont, color: C.deep }} className="mt-2 font-extrabold">No announcements yet</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              TNR announcements, jobs, scholarships and events will appear here.
+            </p>
+          </div>
+        </>
+      )}
+    </MemberShell>
+  );
+}
+
+// Honest completion measure from the fields we actually have today.
+function profilePct(m) {
+  if (!m) return 0;
+  const fields = ['first_name', 'last_name', 'email', 'mobile', 'gender', 'village',
+    'union_council', 'education_level', 'field_of_study', 'current_position', 'photo_url'];
+  const filled = fields.filter(f => m[f]).length;
+  return Math.round((filled / fields.length) * 100);
+}

@@ -7,6 +7,9 @@ import { Toast } from '@/components/admin/ui';
 import Login from '@/components/admin/Login';
 import DashboardTab from '@/components/admin/DashboardTab';
 import MembersTab from '@/components/admin/MembersTab';
+import MembershipTab from '@/components/admin/MembershipTab';
+import ProfileRequestsTab from '@/components/admin/ProfileRequestsTab';
+import MembersDirectoryTab from '@/components/admin/MembersDirectoryTab';
 import CandidatesTab from '@/components/admin/CandidatesTab';
 import ElectionsTab from '@/components/admin/ElectionsTab';
 import RecordsTab from '@/components/admin/RecordsTab';
@@ -29,6 +32,8 @@ const ELECTION_TABS = [
 ];
 // Super-admin election tools that also belong inside the group.
 const ELECTION_SUPER = ['committee', 'voterdata'];
+// Membership module (separate from the election system).
+const MEMBERSHIP_TABS = [['mapplications', 'Applications', '📝'], ['mmembers', 'Members', '🪪'], ['mrequests', 'Profile Requests', '✏️']];
 
 export default function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -37,6 +42,7 @@ export default function Admin() {
   const [roleLabel, setRoleLabel] = useState('Control Panel');
   const [tab, setTab] = useState('dashboard');
   const [portalOpen, setPortalOpen] = useState(true);   // Election Portal group
+  const [memOpen, setMemOpen] = useState(true);         // Membership group
   // The server is the only source of truth for what this account may see.
   async function loadMe() {
     const r = await aGet('/api/admin/me');
@@ -67,7 +73,7 @@ export default function Admin() {
   const electionExtra = extraTabs.filter(t => ELECTION_SUPER.includes(t[0]));
   const platformExtra = extraTabs.filter(t => !ELECTION_SUPER.includes(t[0]));
   const electionTabs = [...ELECTION_TABS, ...electionExtra];
-  const TABS = [...TOP_TABS, ...electionTabs, ...platformExtra];
+  const TABS = [...TOP_TABS, ...electionTabs, ...MEMBERSHIP_TABS, ...platformExtra];
   const activeTab = TABS.find(t => t[0] === tab) || TABS[0];
   const inElection = electionTabs.some(t => t[0] === tab);
 
@@ -99,6 +105,17 @@ export default function Admin() {
         </button>
         {portalOpen && electionTabs.map(t => NavBtn(t, true))}
 
+        {/* ── Membership group ── */}
+        <button onClick={() => setMemOpen(o => !o)}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm whitespace-nowrap transition text-tnr-cream/90 hover:bg-white/5 font-semibold">
+          <span>🪪</span>Membership
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+            className={`ml-auto hidden md:block transition ${memOpen ? 'rotate-180' : ''}`}>
+            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        {memOpen && MEMBERSHIP_TABS.map(t => NavBtn(t, true))}
+
         {/* Platform-level tools (e.g. Admin Accounts) */}
         {!!platformExtra.length && <div className="hidden md:block h-px bg-tnr-line my-1" />}
         {platformExtra.map(t => NavBtn(t))}
@@ -128,6 +145,9 @@ export default function Admin() {
       {tab === 'committee' && hasTab('committee') && <CommitteeVoteTab toast={toast} />}
       {tab === 'admins' && hasTab('admins') && <AdminsTab toast={toast} me={admin} />}
       {tab === 'voterdata' && hasTab('voterdata') && <VoterDataTab toast={toast} />}
+      {tab === 'mapplications' && <MembershipTab toast={toast} />}
+      {tab === 'mrequests' && <ProfileRequestsTab toast={toast} />}
+      {tab === 'mmembers' && <MembersDirectoryTab toast={toast} />}
     </main>
     <Toast msg={toastMsg} tone={toastTone} />
   </div>;
