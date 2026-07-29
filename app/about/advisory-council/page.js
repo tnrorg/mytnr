@@ -1,5 +1,7 @@
 'use client';
 import DocPage, { Section, P, TickList, Callout, C } from '@/components/site/DocPage';
+import CouncilCard from '@/components/site/CouncilCard';
+import { COUNCIL, COUNCIL_TAGLINE, COUNCIL_MISSION } from '@/content/advisoryCouncil';
 import { ADC_INTRO, ADC_CRITERIA, ADC_DUTIES, ADC_FACTS, EGC } from '@/content/aboutTnr';
 
 export default function AdvisoryCouncilPage() {
@@ -9,6 +11,13 @@ export default function AdvisoryCouncilPage() {
       source="TNR Governance Handbook — Constitution Article V and Article VI, and Chapter 4, Clause 4.1.">
 
       <Section title="Role"><P>{ADC_INTRO}</P></Section>
+
+      <Section title="Interim Advisory Council" kicker={COUNCIL_TAGLINE}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {COUNCIL.map(m => <CouncilCard key={m.slug} member={m} />)}
+        </div>
+        <div className="mt-6"><Callout label="Our Collective Mission">{COUNCIL_MISSION}</Callout></div>
+      </Section>
 
       <Section title="At a Glance">
         <div className="rounded-2xl border border-gray-200 overflow-hidden">
