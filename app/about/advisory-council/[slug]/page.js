@@ -1,10 +1,12 @@
 'use client';
 import DocPage, { Section, P, C } from '@/components/site/DocPage';
 import { CouncilPhoto } from '@/components/site/CouncilCard';
-import { COUNCIL, bySlug } from '@/content/advisoryCouncil';
+import { bySlug } from '@/content/advisoryCouncil';
+import { useLeadership } from '@/components/site/useLeadership';
 
 export default function CouncilMemberPage({ params }) {
-  const m = bySlug(params?.slug);
+  const { advisory } = useLeadership();
+  const m = advisory.find(x => x.slug === params?.slug) || bySlug(params?.slug);
 
   if (!m) {
     return (
@@ -15,7 +17,7 @@ export default function CouncilMemberPage({ params }) {
     );
   }
 
-  const others = COUNCIL.filter(x => x.slug !== m.slug);
+  const others = advisory.filter(x => x.slug !== m.slug);
 
   return (
     <DocPage eyebrow="Interim Advisory Council" title={m.name}
@@ -28,7 +30,7 @@ export default function CouncilMemberPage({ params }) {
           <div className="text-[11px] font-bold uppercase tracking-[.2em] mb-1" style={{ color: C.gold }}>Affiliation</div>
           <p className="text-[16px] font-semibold leading-relaxed" style={{ color: C.deep }}>{m.affiliation}</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            {m.expertise.map(e => (
+            {(m.expertise || []).map(e => (
               <span key={e} className="text-[12px] font-semibold px-3 py-1.5 rounded-lg"
                 style={{ background: '#0B6B4F14', color: C.green }}>{e}</span>
             ))}
@@ -38,7 +40,7 @@ export default function CouncilMemberPage({ params }) {
 
       <Section title="Interests & Expertise">
         <div className="grid sm:grid-cols-2 gap-3">
-          {m.expertise.map(e => (
+          {(m.expertise || []).map(e => (
             <div key={e} className="rounded-xl border border-gray-200 px-4 py-3 text-[14px] font-semibold" style={{ color: C.deep }}>{e}</div>
           ))}
         </div>

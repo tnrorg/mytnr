@@ -19,8 +19,10 @@ export function CouncilPhoto({ member, size = 'card' }) {
       </div>
     );
   }
+  // Admin-uploaded photo wins; otherwise fall back to the /public file convention.
+  const src = member.photo_url || `/advisory/${member.slug}.jpg`;
   return (
-    <img src={`/advisory/${member.slug}.jpg`} alt={member.name} onError={() => setFailed(true)}
+    <img src={src} alt={member.name} onError={() => setFailed(true)}
       className={`${box} ${radius} object-cover object-top shrink-0 bg-gray-100`} />
   );
 }
@@ -41,14 +43,14 @@ export default function CouncilCard({ member }) {
           Interests / Expertise
         </div>
         <ul className="space-y-1">
-          {member.expertise.slice(0, 3).map(e => (
+          {(member.expertise || []).slice(0, 3).map(e => (
             <li key={e} className="flex gap-2 text-[12px] text-gray-600 leading-snug">
               <span className="mt-[6px] shrink-0 w-1 h-1 rounded-full" style={{ background: C.gold }} />
               <span>{e}</span>
             </li>
           ))}
-          {member.expertise.length > 3 && (
-            <li className="text-[11px] text-gray-400 pl-3">+{member.expertise.length - 3} more</li>
+          {(member.expertise || []).length > 3 && (
+            <li className="text-[11px] text-gray-400 pl-3">+{(member.expertise || []).length - 3} more</li>
           )}
         </ul>
       </div>

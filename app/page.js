@@ -3,9 +3,10 @@ import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 import AiFab from '@/components/site/AiFab';
 import CouncilCard from '@/components/site/CouncilCard';
-import { COUNCIL, COUNCIL_TAGLINE, COUNCIL_MISSION, COUNCIL_PILLARS } from '@/content/advisoryCouncil';
+import { COUNCIL_TAGLINE, COUNCIL_MISSION, COUNCIL_PILLARS } from '@/content/advisoryCouncil';
 import ExecutiveCard from '@/components/site/ExecutiveCard';
-import { EXECUTIVE, CEC_INTRO } from '@/content/executiveCommittee';
+import { CEC_INTRO } from '@/content/executiveCommittee';
+import { useLeadership } from '@/components/site/useLeadership';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3', ink: '#15231D', bg: '#FDFDFD' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -166,6 +167,7 @@ function Modules() {
 
 /* ─────────────────── Interim Advisory Council ─────────────────── */
 function AdvisoryCouncil() {
+  const { advisory } = useLeadership();
   return (
     <section className="w-full py-14" style={{ background: '#F6F9F7' }}>
       <div className="max-w-[1400px] mx-auto px-4">
@@ -177,7 +179,7 @@ function AdvisoryCouncil() {
         <p className="mt-3 text-center text-sm text-gray-500 max-w-2xl mx-auto">{COUNCIL_TAGLINE}</p>
 
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-          {COUNCIL.map(m => <CouncilCard key={m.slug} member={m} />)}
+          {advisory.map(m => <CouncilCard key={m.slug} member={m} />)}
         </div>
 
         <div className="mt-8 rounded-2xl p-6 sm:p-8 text-center" style={{ background: C.deep }}>
@@ -198,6 +200,7 @@ function AdvisoryCouncil() {
 
 /* ─────────────────── Central Executive Committee ─────────────────── */
 function ExecutiveCommittee() {
+  const { executive } = useLeadership();
   return (
     <section className="max-w-[1400px] mx-auto px-4 py-14 w-full">
       <div className="flex items-center justify-center gap-3">
@@ -209,7 +212,7 @@ function ExecutiveCommittee() {
 
       {/* one per row on mobile, three per row from desktop up */}
       <div className="mt-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {EXECUTIVE.map(m => <ExecutiveCard key={m.slug} member={m} />)}
+        {executive.map(m => <ExecutiveCard key={m.slug} member={m} />)}
       </div>
     </section>
   );

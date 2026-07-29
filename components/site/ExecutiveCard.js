@@ -1,6 +1,10 @@
 'use client';
 import { useState } from 'react';
 
+// Monogram for admin-created rows, which have no hard-coded monogram field.
+const initialsOf = (m) => String(m.designation || m.name || '?')
+  .split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', goldLt: '#E8C25A' };
 
 export function ExecutivePhoto({ member, size = 'card' }) {
@@ -14,9 +18,9 @@ export function ExecutivePhoto({ member, size = 'card' }) {
         ? <div className="w-full h-full rounded-full grid place-items-center font-black text-white"
             style={{ background: `linear-gradient(140deg, ${C.green}, ${C.deep})`,
                      fontSize: size === 'large' ? 44 : 28, letterSpacing: '.04em' }}>
-            {member.monogram}
+            {member.monogram || initialsOf(member)}
           </div>
-        : <img src={`/executive/${member.slug}.jpg`} alt={member.name || member.designation}
+        : <img src={member.photo_url || `/executive/${member.slug}.jpg`} alt={member.name || member.designation}
             onError={() => setFailed(true)}
             className="w-full h-full rounded-full object-cover object-top bg-gray-100" />}
     </div>

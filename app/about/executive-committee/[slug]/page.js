@@ -1,11 +1,13 @@
 'use client';
 import DocPage, { Section, P, TickList, C } from '@/components/site/DocPage';
 import { ExecutivePhoto } from '@/components/site/ExecutiveCard';
-import { EXECUTIVE, execBySlug } from '@/content/executiveCommittee';
+import { execBySlug } from '@/content/executiveCommittee';
+import { useLeadership } from '@/components/site/useLeadership';
 import { CORE_LEADERSHIP_CRITERIA } from '@/content/aboutTnr';
 
 export default function ExecutiveMemberPage({ params }) {
-  const m = execBySlug(params?.slug);
+  const { executive } = useLeadership();
+  const m = executive.find(x => x.slug === params?.slug) || execBySlug(params?.slug);
 
   if (!m) {
     return (
@@ -18,7 +20,7 @@ export default function ExecutiveMemberPage({ params }) {
   }
 
   const named = !!m.name;
-  const others = EXECUTIVE.filter(x => x.slug !== m.slug);
+  const others = executive.filter(x => x.slug !== m.slug);
 
   return (
     <DocPage eyebrow="Central Executive Committee" title={m.designation} lead={m.summary}
@@ -38,7 +40,7 @@ export default function ExecutiveMemberPage({ params }) {
         </div>
       </div>
 
-      <Section title="Responsibilities"><TickList items={m.duties} /></Section>
+      {!!(m.duties || []).length && <Section title="Responsibilities"><TickList items={m.duties} /></Section>}
 
       <Section title="Eligibility Criteria">
         <P>To be eligible for this position, a candidate must:</P>
