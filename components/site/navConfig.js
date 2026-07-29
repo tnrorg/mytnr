@@ -9,11 +9,6 @@ export const NAV = [
     ['Advisory Council', '/about/advisory-council'], ['Office Bearers', '/about/office-bearers'],
     ['Departments', '/about/departments'], ['History of TNR', '/about/history'],
   ]},
-  { label: 'Election Portal', href: '/election-portal', highlight: true, items: [
-    ['Current Election', '/election-portal'], ['Candidate Profiles', '/election-portal#candidates'],
-    ['Voter Verification', '/vote'], ['Election Results', '/results'],
-    ['Live Dashboard', '/dashboard'], ['Election Guidelines', '/election-portal#process'],
-  ]},
   { label: 'Membership', href: '/membership', items: [
     ['Membership Overview', '/membership'], ['Become a Member', '/membership/apply'],
     ['Check Application Status', '/membership/status'], ['Verify Membership', '/membership/verify'],
@@ -60,6 +55,11 @@ export const NAV = [
     ['Doctors', '/statistics/doctors'], ['Engineers', '/statistics/engineers'],
     ['Teachers', '/statistics/teachers'], ['Overseas Professionals', '/statistics/overseas'],
     ['Employment Statistics', '/statistics/employment'], ['Interactive Reports', '/statistics/reports'],
+  ]},
+  { label: 'Election Portal', href: '/election-portal', highlight: true, items: [
+    ['Current Election', '/election-portal'], ['Candidate Profiles', '/election-portal#candidates'],
+    ['Voter Verification', '/vote'], ['Election Results', '/results'],
+    ['Live Dashboard', '/dashboard'], ['Election Guidelines', '/election-portal#process'],
   ]},
   { label: 'More', items: [
     ['Digital Library', '/media/library'],
