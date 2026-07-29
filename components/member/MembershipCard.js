@@ -83,7 +83,7 @@ export default function MembershipCard({ m, verifyUrl }) {
               and the details above already consume the column, so `margin-top:auto`
               had no free space to work with and extra padding simply overflowed
               off the bottom of the card and was clipped. */}
-          <div style={{ position: 'absolute', right: 4, bottom: 24, zIndex: 3 }}>
+          <div style={{ position: 'absolute', right: 4, bottom: 14, zIndex: 3 }}>
             <div style={{ textAlign: 'right' }}>
               {/* Real signature scan. `multiply` makes the white paper background
                   disappear against the white card — no image editing needed. */}
