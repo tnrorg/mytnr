@@ -1,9 +1,8 @@
 'use client';
-import DocPage, { Section, P, TickList, C } from '@/components/site/DocPage';
+import DocPage, { Section, TickList, C } from '@/components/site/DocPage';
 import { ExecutivePhoto } from '@/components/site/ExecutiveCard';
 import { execBySlug } from '@/content/executiveCommittee';
 import { useLeadership } from '@/components/site/useLeadership';
-import { CORE_LEADERSHIP_CRITERIA } from '@/content/aboutTnr';
 
 export default function ExecutiveMemberPage({ params }) {
   const { executive } = useLeadership();
@@ -41,11 +40,6 @@ export default function ExecutiveMemberPage({ params }) {
       </div>
 
       {!!(m.duties || []).length && <Section title="Responsibilities"><TickList items={m.duties} /></Section>}
-
-      <Section title="Eligibility Criteria">
-        <P>To be eligible for this position, a candidate must:</P>
-        <TickList items={CORE_LEADERSHIP_CRITERIA} />
-      </Section>
 
       <Section title="Other Committee Positions">
         <div className="flex flex-wrap gap-2">

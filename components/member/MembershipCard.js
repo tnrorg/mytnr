@@ -79,20 +79,21 @@ export default function MembershipCard({ m, verifyUrl }) {
           </table>
 
           {/* Signature — sits clear of the wave, with room to breathe */}
-          <div style={{ marginTop: 'auto', paddingBottom: 62 }}>
-            <div style={{ textAlign: 'center' }}>
+          <div style={{ marginTop: 'auto', paddingBottom: 68 }}>
+            <div style={{ textAlign: 'right', paddingRight: 6 }}>
               {/* Real signature scan. `multiply` makes the white paper background
                   disappear against the white card — no image editing needed. */}
               <img src="/signature.png" alt="Signature"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 style={{
-                  height: 40, width: 'auto', maxWidth: 140, objectFit: 'contain',
-                  display: 'block', margin: '0 auto 1px',
-                  mixBlendMode: 'multiply', filter: 'contrast(1.25)',
+                  height: 44, width: 'auto', maxWidth: 150, objectFit: 'contain',
+                  display: 'block', margin: '0 0 2px auto',
+                  mixBlendMode: 'multiply',
+                  filter: 'grayscale(1) contrast(2.2) brightness(.72)',
                 }} />
-              <div style={{ width: 104, height: 1, background: GOLD, margin: '0 auto 3px', opacity: .8 }} />
+              <div style={{ width: 118, height: 1, background: GOLD, margin: '0 0 3px auto', opacity: .85 }} />
               <div style={{ fontSize: 5, fontWeight: 900, color: DEEP, letterSpacing: '.1em' }}>CENTRAL PRESIDENT</div>
-              <div style={{ fontSize: 4.2, color: MUTED, letterSpacing: '.08em', marginTop: 1 }}>AUTHORIZED SIGNATURE</div>
+              <div style={{ fontSize: 4.4, color: '#4B5563', fontWeight: 600, letterSpacing: '.08em', marginTop: 1 }}>AUTHORIZED SIGNATURE</div>
             </div>
           </div>
         </div>
