@@ -7,7 +7,7 @@ export const NAV = [
     ['About Us', '/about'], ['Vision & Mission', '/about/vision-mission'],
     ['Constitution', '/about/constitution'], ['Executive Committee', '/about/executive-committee'],
     ['Advisory Council', '/about/advisory-council'], ['Office Bearers', '/about/office-bearers'],
-    ['Departments', '/about/departments'], ['History of TNR', '/about/history'],
+    ['Governance Structure', '/about/governance'], ['Code of Conduct', '/about/code-of-conduct'],
   ]},
   { label: 'Membership', href: '/membership', items: [
     ['Membership Overview', '/membership'], ['Become a Member', '/membership/apply'],
