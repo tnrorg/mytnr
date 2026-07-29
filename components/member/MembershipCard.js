@@ -78,9 +78,13 @@ export default function MembershipCard({ m, verifyUrl }) {
             </tbody>
           </table>
 
-          {/* Signature — sits clear of the wave, with room to breathe */}
-          <div style={{ marginTop: 'auto', paddingBottom: 88 }}>
-            <div style={{ textAlign: 'right', paddingRight: 6 }}>
+          {/* Signature — anchored a fixed distance above the wave.
+              It must be absolutely positioned: the card face is a fixed 348px
+              and the details above already consume the column, so `margin-top:auto`
+              had no free space to work with and extra padding simply overflowed
+              off the bottom of the card and was clipped. */}
+          <div style={{ position: 'absolute', right: 4, bottom: 40, zIndex: 3 }}>
+            <div style={{ textAlign: 'right' }}>
               {/* Real signature scan. `multiply` makes the white paper background
                   disappear against the white card — no image editing needed. */}
               <img src="/signature.png" alt="Signature"
