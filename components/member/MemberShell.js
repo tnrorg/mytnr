@@ -5,6 +5,13 @@ import { mGet, mPost, clearToken, getToken } from './memberApi';
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
 
+// Fallback avatar: member initials, never the organisation logo.
+function initials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
+
 export const NAV = [
   ['Dashboard', '/member/dashboard', '🏠'],
   ['My Profile', '/member/profile', '👤'],
@@ -45,8 +52,11 @@ export default function MemberShell({ active, children }) {
       {/* Sidebar */}
       <aside className="lg:w-64 lg:min-h-screen bg-white border-b lg:border-b-0 lg:border-r border-gray-100">
         <div className="p-4 flex items-center gap-3 border-b border-gray-100">
-          <a href="/" className="w-10 h-10 rounded-full grid place-items-center bg-white ring-2 ring-[#D4A72C] overflow-hidden shrink-0">
-            <img src="/tnr-logo.png" alt="TNR" className="w-full h-full object-contain p-0.5" />
+          <a href="/member/profile" title="My Profile"
+            className="w-11 h-11 rounded-full grid place-items-center overflow-hidden shrink-0 ring-2 ring-[#D4A72C] bg-[#0B6B4F]">
+            {member?.photo_url
+              ? <img src={member.photo_url} alt="" className="w-full h-full object-cover" />
+              : <span className="text-white font-black text-sm">{initials(member?.full_name)}</span>}
           </a>
           <div className="min-w-0">
             <div style={{ ...mont, color: C.deep }} className="font-extrabold text-sm truncate">{member?.full_name}</div>

@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireMember } from '@/lib/membership/auth';
 import { ok, fail, readJson } from '@/lib/api';
 import { SECTIONS, PROFILE_FIELDS, SENSITIVE_FIELDS, FORBIDDEN_FIELDS, pick } from '@/lib/membership/profile';
+import { uploadDataUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,23 @@ export async function PATCH(req) {
       return fail('FORBIDDEN_FIELD', 403, { message: 'You cannot change your membership status or ID.' });
   }
 
-  // 2. Free profile fields — written immediately.
+  // 2. Profile photo — members may change their own picture directly.
+  if (b.photo_data) {
+    const head = String(b.photo_data).slice(0, 40);
+    if (!/^data:image\/(png|jpe?g|webp);base64,/i.test(head))
+      return fail('BAD_PHOTO', 400, { message: 'Photo must be a JPG, PNG or WEBP image.' });
+    if ((String(b.photo_data).length) * 0.75 > 4 * 1024 * 1024)
+      return fail('PHOTO_TOO_BIG', 400, { message: 'Photo must be smaller than 4 MB.' });
+    try {
+      const url = await uploadDataUrl(b.photo_data, 'members');
+      if (url) await sb.from('membership_members')
+        .update({ photo_url: url, updated_at: new Date().toISOString() }).eq('id', member.id);
+    } catch (e) {
+      return fail('UPLOAD_FAILED', 502, { message: 'Could not upload the photo. Please try again.' });
+    }
+  }
+
+  // 2b. Free profile fields — written immediately.
   const patch = pick(b, PROFILE_FIELDS);
   if (Object.keys(patch).length) {
     patch.member_id = member.id;

@@ -66,6 +66,7 @@ export default function ProfilePage() {
         </div>
       )}
 
+      <PhotoCard core={d.core} onSaved={m => { setMsg(m); load(); }} />
       <CoreCard core={d.core} onSaved={m => { setMsg(m); load(); }} />
       <AboutCard profile={d.profile} onSaved={m => { setMsg(m); load(); }} />
 
@@ -73,6 +74,78 @@ export default function ProfilePage() {
         <SectionCard key={key} sec={key} label={label} fields={fields} items={d[key] || []} reload={load} />
       ))}
     </MemberShell>
+  );
+}
+
+
+/* ── Profile photo ── */
+function PhotoCard({ core, onSaved }) {
+  const [preview, setPreview] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  function pick(file) {
+    setErr('');
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) return setErr('Use a JPG, PNG or WEBP image.');
+    if (file.size > 8 * 1024 * 1024) return setErr('Choose an image smaller than 8 MB.');
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 600;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        setPreview(c.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function save() {
+    if (!preview) return;
+    setBusy(true); setErr('');
+    const r = await mPatch('/api/member/profile', { photo_data: preview });
+    setBusy(false);
+    if (!r.ok) return setErr(r.message || 'Could not save the photo.');
+    setPreview(''); onSaved('Profile photo updated.');
+  }
+
+  const shown = preview || core.photo_url;
+
+  return (
+    <Card title="Profile Photo" note="Your photo appears on your membership card, certificate and member directory listing.">
+      <div className="flex items-center gap-5 flex-wrap">
+        <div className="w-28 h-32 rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 grid place-items-center shrink-0">
+          {shown
+            ? <img src={shown} alt="" className="w-full h-full object-cover" />
+            : <span className="text-4xl text-gray-300">👤</span>}
+        </div>
+        <div className="min-w-0">
+          <input type="file" accept="image/png,image/jpeg,image/webp"
+            onChange={e => pick(e.target.files?.[0])}
+            className="block w-full text-xs text-gray-600
+              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+              file:text-xs file:font-bold file:text-white file:cursor-pointer
+              file:bg-[#0B6B4F] hover:file:bg-[#063D2B]" />
+          <p className="mt-1.5 text-[11px] text-gray-400">A clear passport-style photo. JPG, PNG or WEBP.</p>
+          {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
+          {preview && (
+            <div className="mt-3 flex gap-2">
+              <button onClick={save} disabled={busy}
+                className="px-4 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-40"
+                style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>
+                {busy ? 'Saving…' : 'Save Photo'}</button>
+              <button onClick={() => setPreview('')} className="px-4 py-2 rounded-xl text-sm border border-gray-200">Cancel</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }
 
