@@ -5,9 +5,14 @@ export const setToken  = (t) => localStorage.setItem('tnr_member_token', t);
 export const clearToken = () => localStorage.removeItem('tnr_member_token');
 
 async function req(method, url, body) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' };
   const t = getToken(); if (t) headers.Authorization = `Bearer ${t}`;
-  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  // no-store: the browser must never serve a cached copy of member data,
+  // otherwise changes (e.g. a new profile photo) appear on some pages only.
+  const res = await fetch(url, {
+    method, headers, cache: 'no-store',
+    body: body ? JSON.stringify(body) : undefined,
+  });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401 || res.status === 403) {
     clearToken();
