@@ -18,6 +18,7 @@ import LogsTab from '@/components/admin/LogsTab';
 import CommitteeTab from '@/components/admin/CommitteeTab';
 import RemindersTab from '@/components/admin/RemindersTab';
 import LeadershipTab from '@/components/admin/LeadershipTab';
+import CardTemplateTab from '@/components/admin/CardTemplateTab';
 // Loaded on demand, only after the SERVER confirms Super Admin.
 const CommitteeVoteTab = dynamicImport(() => import('@/components/admin/CommitteeVoteTab'), { ssr: false });
 const AdminsTab = dynamicImport(() => import('@/components/admin/AdminsTab'), { ssr: false });
@@ -34,7 +35,7 @@ const ELECTION_TABS = [
 // Super-admin election tools that also belong inside the group.
 const ELECTION_SUPER = ['committee', 'voterdata'];
 // Membership module (separate from the election system).
-const MEMBERSHIP_TABS = [['mapplications', 'Applications', '📝'], ['mmembers', 'Members', '🪪'], ['mrequests', 'Profile Requests', '✏️']];
+const MEMBERSHIP_TABS = [['mapplications', 'Applications', '📝'], ['mmembers', 'Members', '🪪'], ['mrequests', 'Profile Requests', '✏️'], ['mcard', 'Card Template', '🎫']];
 
 export default function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -150,6 +151,7 @@ export default function Admin() {
       {tab === 'mapplications' && <MembershipTab toast={toast} />}
       {tab === 'mrequests' && <ProfileRequestsTab toast={toast} />}
       {tab === 'mmembers' && <MembersDirectoryTab toast={toast} />}
+      {tab === 'mcard' && <CardTemplateTab toast={toast} />}
     </main>
     <Toast msg={toastMsg} tone={toastTone} />
   </div>;

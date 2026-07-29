@@ -1,6 +1,8 @@
 'use client';
+import { useEffect, useState } from 'react';
 import QrCode from './QrCode';
 import Avatar from './Avatar';
+import { CARD_DEFAULTS } from '@/lib/cardDefaults';
 
 const G='#0B5836', DEEP='#063D2B', GOLD='#C9A227', GOLD_LT='#E8C766', INK='#1F2937', MUTED='#6B7280';
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -21,6 +23,16 @@ export default function MembershipCard({ m, verifyUrl }) {
   const [label, chip, chipFg] = STATE[m?.status] || STATE.inactive;
   const valid = ['active', 'approved'].includes(m?.status);
 
+  // Template wording is admin-editable; defaults render until it loads so the
+  // card is never blank while the request is in flight.
+  const [t, setT] = useState(CARD_DEFAULTS);
+  useEffect(() => {
+    fetch('/api/public/card-settings?t=' + Date.now(), { cache: 'no-store' })
+      .then(r => r.json())
+      .then(j => { if (j?.ok && j.settings) setT({ ...CARD_DEFAULTS, ...j.settings }); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div id="card-sheet" className="flex flex-wrap gap-6" style={{ ...mont, color: INK }}>
 
@@ -35,14 +47,14 @@ export default function MembershipCard({ m, verifyUrl }) {
           <img src="/tnr-logo.png" alt="TNR" style={{ width: 15, height: 15, objectFit: 'contain', margin: '0 auto', display: 'block' }} />
 
           <div style={{ textAlign: 'center', marginTop: 4 }}>
-            <div style={org}>TEHREEK-E-NOJAWANAN</div>
-            <div style={bigName}>ROUNDU</div>
+            <div style={org}>{t.org_line1}</div>
+            <div style={bigName}>{t.org_line2}</div>
             <Values />
           </div>
 
           <div style={rule} />
           <div style={{ fontSize: 4.8, letterSpacing: '.16em', color: GOLD, fontWeight: 900, textAlign: 'center', marginBottom: 5 }}>
-            DIGITAL MEMBERSHIP CARD
+            {t.card_label}
           </div>
 
           {/* Photo with a double gold frame for a premium finish */}
@@ -87,7 +99,7 @@ export default function MembershipCard({ m, verifyUrl }) {
             <div style={{ textAlign: 'right' }}>
               {/* Real signature scan. `multiply` makes the white paper background
                   disappear against the white card — no image editing needed. */}
-              <img src="/signature.png" alt="Signature"
+              <img src={t.signature_url || "/signature.png"} alt="Signature"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 style={{
                   height: 44, width: 'auto', maxWidth: 150, objectFit: 'contain',
@@ -96,8 +108,8 @@ export default function MembershipCard({ m, verifyUrl }) {
                   filter: 'grayscale(1) contrast(2.2) brightness(.72)',
                 }} />
               <div style={{ width: 118, height: 1, background: GOLD, margin: '0 0 3px auto', opacity: .85 }} />
-              <div style={{ fontSize: 5, fontWeight: 900, color: DEEP, letterSpacing: '.1em' }}>CENTRAL PRESIDENT</div>
-              <div style={{ fontSize: 4.4, color: '#4B5563', fontWeight: 600, letterSpacing: '.08em', marginTop: 1 }}>AUTHORIZED SIGNATURE</div>
+              <div style={{ fontSize: 5, fontWeight: 900, color: DEEP, letterSpacing: '.1em' }}>{t.signatory_title}</div>
+              <div style={{ fontSize: 4.4, color: '#4B5563', fontWeight: 600, letterSpacing: '.08em', marginTop: 1 }}>{t.signature_note}</div>
             </div>
           </div>
         </div>
@@ -119,7 +131,7 @@ export default function MembershipCard({ m, verifyUrl }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#fff' }}>
           <span style={{ width: 22, height: 1, background: GOLD_LT, opacity: .6 }} />
           <div style={{ fontSize: 7.5, fontWeight: 900, letterSpacing: '.16em',
-            lineHeight: 1.1, whiteSpace: 'nowrap', textAlign: 'center' }}>PROUD TO SERVE ROUNDU</div>
+            lineHeight: 1.1, whiteSpace: 'nowrap', textAlign: 'center' }}>{t.footer_tagline}</div>
           <span style={{ width: 22, height: 1, background: GOLD_LT, opacity: .6 }} />
         </div>
         {!valid && <Stamp text={label} />}
@@ -132,8 +144,8 @@ export default function MembershipCard({ m, verifyUrl }) {
 
         <div style={safe}>
           <div style={{ textAlign: 'center' }}>
-            <div style={org}>TEHREEK-E-NOJAWANAN</div>
-            <div style={{ ...bigName, fontSize: 13 }}>ROUNDU (TNR)</div>
+            <div style={org}>{t.org_line1}</div>
+            <div style={{ ...bigName, fontSize: 13 }}>{t.org_line2} (TNR)</div>
             <Values />
           </div>
           <div style={rule} />
@@ -144,31 +156,28 @@ export default function MembershipCard({ m, verifyUrl }) {
           </div>
           <div style={{ margin: '5px auto 0', width: 96, textAlign: 'center', color: '#fff',
             background: `linear-gradient(135deg,${G},${DEEP})`, fontSize: 5.6, fontWeight: 800,
-            letterSpacing: '.08em', padding: '4px 0', borderRadius: 20 }}>SCAN TO VERIFY</div>
+            letterSpacing: '.08em', padding: '4px 0', borderRadius: 20 }}>{t.scan_label}</div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
             marginTop: 4, fontSize: 5.6, fontWeight: 900, color: G, letterSpacing: '.06em' }}>
-            🛡 VERIFIED TNR MEMBER
+            🛡 {t.verify_label}
           </div>
 
-          <H>ABOUT TNR</H>
-          <p style={p}>Tehreek-e-Nojawanan Roundu is a youth-led organization committed to education,
-            unity, responsible leadership, community development, and a better future for Roundu.</p>
+          <H>{t.about_heading}</H>
+          <p style={p}>{t.about_text}</p>
 
-          <H>MEMBER BENEFITS</H>
+          <H>{t.benefits_heading}</H>
           <ul style={{ listStyle: 'none', margin: '1px 0 0', padding: 0 }}>
-            {['Participation in TNR programs and events', 'Volunteer opportunities',
-              'Leadership development', 'Community welfare initiatives',
-              'Access to jobs and scholarships', 'Voting rights where eligible'].map(t => (
-              <li key={t} style={{ fontSize: 4.9, color: INK, padding: '1px 0 1px 9px',
+            {(t.benefits || []).map(b => (
+              <li key={b} style={{ fontSize: 4.9, color: INK, padding: '1px 0 1px 9px',
                 position: 'relative', lineHeight: 1.35 }}>
-                <span style={{ position: 'absolute', left: 0, color: G, fontWeight: 900, fontSize: 4.6 }}>✓</span>{t}
+                <span style={{ position: 'absolute', left: 0, color: G, fontWeight: 900, fontSize: 4.6 }}>✓</span>{b}
               </li>
             ))}
           </ul>
 
           <div style={{ marginTop: 'auto', borderTop: `1px solid ${GOLD}`, paddingTop: 4,
             display: 'flex', justifyContent: 'space-between', gap: 3 }}>
-            {[['WEBSITE', 'www.tnroundu.org'], ['EMAIL', 'info@tnroundu.org'], ['PHONE', '+92 300 1234567']].map(([k, v]) => (
+            {[['WEBSITE', t.website], ['EMAIL', t.email], ['PHONE', t.phone]].map(([k, v]) => (
               <div key={k} style={{ fontSize: 4.3, color: MUTED, textAlign: 'center', lineHeight: 1.4, flex: 1 }}>
                 <b style={{ display: 'block', color: G, fontSize: 4.6, fontWeight: 900 }}>{k}</b>{v}
               </div>
