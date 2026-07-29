@@ -61,7 +61,7 @@ export default function Opportunities() {
     </MemberShell>
   );
 }
-export function Empty({ icon, title, text }) {
+function Empty({ icon, title, text }) {
   return <div className="mt-6 rounded-2xl bg-white border border-gray-100 shadow-sm p-10 text-center">
     <div className="text-4xl">{icon}</div>
     <h3 style={{ ...mont, color: C.deep }} className="mt-2 font-extrabold">{title}</h3>

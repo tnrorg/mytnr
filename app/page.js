@@ -247,9 +247,3 @@ function ValuesBar() {
   );
 }
 
-// Shared dark footer used by /results and /dashboard — keep this export.
-export function Footer({ t, rtl }) {
-  return <footer className="border-t border-tnr-line py-6 text-center text-tnr-cream/50 text-xs">
-    © {new Date().getFullYear()} {t?.org || 'Tehreek-e-Nojawanan Roundu'} ({t?.short || 'TNR'}) · Developed by: <a href="https://www.northdigitaltech.com/" target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline" style={{ color: '#4FC3F7' }}>Shabbir Hussain</a>
-  </footer>;
-}

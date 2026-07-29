@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useLang } from '@/components/useLang';
 import { BrandHeader } from '@/components/Brand';
-import { Footer } from '@/app/page';
+import Footer from '@/components/DarkFooter';
 
 export default function Results() {
   const { lang, toggle, t } = useLang();

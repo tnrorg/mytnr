@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useLang } from '@/components/useLang';
 import { BrandHeader } from '@/components/Brand';
-import { Footer } from '@/app/page';
+import Footer from '@/components/DarkFooter';
 import VictorySign from '@/components/VictorySign';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
 
