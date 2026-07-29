@@ -21,11 +21,17 @@ export default function MembershipTab({ toast }) {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(null);      // application being reviewed
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const load = () => {
     const q = new URLSearchParams({ status, search });
-    aGet('/api/admin/membership/applications?' + q).then(r => r.ok && setApps(r.applications || []));
-    aGet('/api/admin/membership/stats').then(r => r.ok && setStats(r));
+    aGet('/api/admin/membership/applications?' + q).then(r => {
+      setLoading(false);
+      if (r?.ok) { setApps(r.applications || []); setErr(''); }
+      else setErr(r?.detail || r?.message || 'Could not load applications.');
+    }).catch(e => { setLoading(false); setErr(e.message || 'Request failed.'); });
+    aGet('/api/admin/membership/stats').then(r => { if (r?.ok) setStats(r); });
   };
   useEffect(() => { const t = setTimeout(load, 250); return () => clearTimeout(t); /* eslint-disable-next-line */ }, [status, search]);
 
@@ -62,6 +68,17 @@ export default function MembershipTab({ toast }) {
           Review and approve applications. Approval generates a Membership ID and activates the member.
         </p>
       </div>
+
+      {err && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm space-y-1">
+          <div className="font-semibold">Membership module not ready</div>
+          <div className="text-red-200/80 text-xs">{err}</div>
+          <div className="text-red-200/70 text-xs pt-1">
+            If this mentions a missing table or relation, run the six migration files in Supabase
+            (supabase/migration_membership_phase1.sql → phase6.sql), in order.
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
         <S label="Total" value={stats?.total_applications} />
@@ -113,7 +130,8 @@ export default function MembershipTab({ toast }) {
               </tr>
             ))}
             {!apps.length && <tr><td colSpan={7} className="px-3 py-10 text-center text-tnr-cream/40">
-              No applications{status ? ' with this status' : ''} yet.</td></tr>}
+              {loading ? 'Loading…' : err ? 'Could not load applications.' :
+                `No applications${status ? ' with this status' : ''} yet.`}</td></tr>}
           </tbody>
         </table>
       </div>
