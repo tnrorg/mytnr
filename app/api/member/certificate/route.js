@@ -4,6 +4,8 @@ import { ok, fail } from '@/lib/api';
 import { generateCertificateNo } from '@/lib/membership/verify';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 // Returns the member's membership certificate, issuing one on first request.
 export async function GET(req) {
@@ -41,19 +43,27 @@ export async function GET(req) {
     }
   }
 
+  // Re-read the member row explicitly so the card always shows current data
+  // (photo, village, status) rather than a copy taken during authentication.
+  const { data: fresh } = await sb.from('membership_members')
+    .select(`membership_id, full_name, first_name, photo_url, village, union_council,
+             status, issued_at, approved_at, expires_at, category_id`)
+    .eq('id', member.id).maybeSingle();
+  const mm = fresh || member;
+
   let category = null;
-  if (member.category_id) {
-    const { data: c } = await sb.from('membership_categories').select('name').eq('id', member.category_id).maybeSingle();
+  if (mm.category_id) {
+    const { data: c } = await sb.from('membership_categories').select('name').eq('id', mm.category_id).maybeSingle();
     category = c?.name || null;
   }
 
   return ok({
     certificate: cert,
     member: {
-      membership_id: member.membership_id, full_name: member.full_name,
-      photo_url: member.photo_url, village: member.village, union_council: member.union_council,
-      status: member.status, issued_at: member.issued_at || member.approved_at,
-      expires_at: member.expires_at, category,
+      membership_id: mm.membership_id, full_name: mm.full_name, first_name: mm.first_name,
+      photo_url: mm.photo_url, village: mm.village, union_council: mm.union_council,
+      status: mm.status, issued_at: mm.issued_at || mm.approved_at,
+      expires_at: mm.expires_at, category,
     },
   });
   } catch (e) {
