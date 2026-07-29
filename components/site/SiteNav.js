@@ -45,7 +45,7 @@ export default function SiteNav() {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm relative">
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
         {/* Mobile: REGISTER on the LEFT */}
-        <a href="/membership/join" aria-label="Register" title="Register"
+        <a href="/membership/apply" aria-label="Register" title="Register"
           className="xl:hidden grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow shrink-0"
           style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -96,8 +96,8 @@ export default function SiteNav() {
               <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
               <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
-          <a href="/membership/login" className="hidden xl:inline-block px-3 py-2 rounded-xl text-[13px] font-semibold text-[#063D2B] border border-[#063D2B]/15 hover:bg-[#063D2B]/5">LOGIN</a>
-          <a href="/membership/join" aria-label="Register" title="Register"
+          <a href="/member/login" className="hidden xl:inline-block px-3 py-2 rounded-xl text-[13px] font-semibold text-[#063D2B] border border-[#063D2B]/15 hover:bg-[#063D2B]/5">LOGIN</a>
+          <a href="/membership/apply" aria-label="Register" title="Register"
             className="hidden xl:grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow"
             style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -151,7 +151,7 @@ export default function SiteNav() {
               )}
             </div>
           ))}
-          <a href="/membership/login" className="block px-4 py-3 text-sm font-semibold text-[#063D2B]">LOGIN</a>
+          <a href="/member/login" className="block px-4 py-3 text-sm font-semibold text-[#063D2B]">LOGIN</a>
         </div>
       )}
     </>

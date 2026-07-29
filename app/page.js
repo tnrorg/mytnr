@@ -13,7 +13,7 @@ const STATS = [
 
 const MODULES = [
   ['Election Portal', 'Transparent elections and voting system', '/election-portal'],
-  ['Membership', 'Join, connect and grow with the community', '/membership/join'],
+  ['Membership', 'Join, connect and grow with the community', '/membership/apply'],
   ['Verification', 'Verify certificates and membership records', '/verify'],
   ['Education', 'Scholarships, admission guidance and resources', '/education/scholarships'],
   ['Career & Business', 'Jobs, internships and business opportunities', '/career/jobs'],

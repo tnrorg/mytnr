@@ -86,11 +86,11 @@ export default function MembershipCard({ m, verifyUrl }) {
               <img src="/signature.png" alt="Signature"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 style={{
-                  height: 26, width: 'auto', maxWidth: 96, objectFit: 'contain',
+                  height: 40, width: 'auto', maxWidth: 140, objectFit: 'contain',
                   display: 'block', margin: '0 auto 1px',
                   mixBlendMode: 'multiply', filter: 'contrast(1.25)',
                 }} />
-              <div style={{ width: 84, height: 1, background: GOLD, margin: '0 auto 3px', opacity: .8 }} />
+              <div style={{ width: 104, height: 1, background: GOLD, margin: '0 auto 3px', opacity: .8 }} />
               <div style={{ fontSize: 5, fontWeight: 900, color: DEEP, letterSpacing: '.1em' }}>CENTRAL PRESIDENT</div>
               <div style={{ fontSize: 4.2, color: MUTED, letterSpacing: '.08em', marginTop: 1 }}>AUTHORIZED SIGNATURE</div>
             </div>
@@ -113,10 +113,8 @@ export default function MembershipCard({ m, verifyUrl }) {
         <div style={{ position: 'absolute', left: 0, right: 0, bottom: 8, zIndex: 2,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#fff' }}>
           <span style={{ width: 22, height: 1, background: GOLD_LT, opacity: .6 }} />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 4.2, letterSpacing: '.22em', opacity: .8, fontWeight: 700 }}>PROUD TO SERVE</div>
-            <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: '.12em', lineHeight: 1.1 }}>ROUNDU</div>
-          </div>
+          <div style={{ fontSize: 7.5, fontWeight: 900, letterSpacing: '.16em',
+            lineHeight: 1.1, whiteSpace: 'nowrap', textAlign: 'center' }}>PROUD TO SERVE ROUNDU</div>
           <span style={{ width: 22, height: 1, background: GOLD_LT, opacity: .6 }} />
         </div>
         {!valid && <Stamp text={label} />}

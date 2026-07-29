@@ -25,7 +25,7 @@ export async function GET(req) {
   // no randomness, no possibility of collision between members.
   if (!cert) {
     const certificate_no = String(member.membership_id || '')
-      .replace(/^TNR-/, 'TNR-CERT-') || `TNR-CERT-${member.id.slice(0, 8).toUpperCase()}`;
+      .replace(/^TNR-(MN-)?/, 'TNR-CERT-') || `TNR-CERT-${member.id.slice(0, 8).toUpperCase()}`;
 
     const { data, error } = await sb.from('membership_certificates').insert({
       member_id: member.id, certificate_no, type: 'membership',
