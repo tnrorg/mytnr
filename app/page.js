@@ -36,7 +36,7 @@ const VALUES = [
 export default function Home() {
   return (
     <main style={{ background: C.bg, color: C.ink, fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }}
-      className="min-h-screen flex flex-col">
+      className="light-page min-h-screen flex flex-col">
       <SiteNav />
       <Hero />
       <StatsBar />

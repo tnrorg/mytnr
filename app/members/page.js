@@ -22,7 +22,7 @@ export default function DirectoryPage() {
   const sel = 'rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#0B6B4F] bg-white';
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
+    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
       <SiteNav />
 
       <section className="text-white py-14" style={{ background: `linear-gradient(165deg,${C.deep},#04241A)` }}>

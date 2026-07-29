@@ -46,7 +46,7 @@ export default function ApplyPage() {
   }
 
   if (done) return (
-    <main className="min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
+    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
       <SiteNav />
       <section className="flex-1 grid place-items-center px-4 py-20">
         <div className="max-w-lg w-full text-center rounded-3xl bg-white border border-gray-100 shadow-xl p-8">

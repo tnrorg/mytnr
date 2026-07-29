@@ -29,7 +29,7 @@ export default function MembershipPage() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
+    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
       <SiteNav />
 
       <section className="relative overflow-hidden" style={{ background: `linear-gradient(165deg,${C.deep},#04241A)` }}>

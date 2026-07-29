@@ -35,7 +35,7 @@ export default function MemberShell({ active, children }) {
     });
   }, []);
 
-  if (state === 'loading') return <div className="min-h-screen grid place-items-center text-gray-400" style={mont}>Loading…</div>;
+  if (state === 'loading') return <div className="light-page min-h-screen grid place-items-center text-gray-400" style={mont}>Loading…</div>;
   if (state === 'denied') return null;   // memberApi already redirected
 
   const signOut = () => { clearToken(); window.location.href = '/member/login'; };

@@ -69,3 +69,22 @@ button, input, textarea, select, option { font-family: inherit; }
   border-color: rgba(212, 167, 44, 0.35);
   color: #F7F5EE; /* text inside green cards stays cream, even where no color class is set */
 }
+
+
+/* ── Light-themed pages ────────────────────────────────────────────────
+   The app root declares `color-scheme: dark`, which makes browsers paint
+   every form control with a dark background. Light pages (public site,
+   membership, member portal) opt back into light form controls here. */
+.light-page { color-scheme: light; }
+.light-page input,
+.light-page textarea,
+.light-page select {
+  color-scheme: light;
+  background-color: #FFFFFF;
+  color: #111827;
+}
+.light-page input::placeholder,
+.light-page textarea::placeholder { color: #9CA3AF; }
+.light-page input:disabled,
+.light-page select:disabled { background-color: #F3F4F6; color: #6B7280; }
+.light-page option { background-color: #FFFFFF; color: #111827; }
