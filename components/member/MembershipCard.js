@@ -27,6 +27,7 @@ export default function MembershipCard({ m, verifyUrl }) {
       {/* ══════════ FRONT ══════════ */}
       <div className="card-face" style={face}>
         <Pattern />
+        <GoldFrame />
         <img src="/tnr-logo.png" alt="" style={watermark} />
         <div style={badge}>TNR</div>
 
@@ -44,9 +45,13 @@ export default function MembershipCard({ m, verifyUrl }) {
             DIGITAL MEMBERSHIP CARD
           </div>
 
-          <Avatar src={m?.photo_url} name={m?.full_name} fontSize={22}
-            style={{ width: 62, height: 74, objectFit: 'cover', borderRadius: 5, border: `1px solid ${GOLD}`,
-              background: '#F3F4F6', display: 'block', margin: '0 auto' }} />
+          {/* Photo with a double gold frame for a premium finish */}
+          <div style={{ width: 68, height: 80, margin: '0 auto', padding: 2,
+            borderRadius: 7, background: `linear-gradient(150deg,${GOLD_LT},${GOLD})` }}>
+            <Avatar src={m?.photo_url} name={m?.full_name} fontSize={22}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5,
+                background: '#F3F4F6', display: 'block' }} />
+          </div>
 
           <div style={{ fontSize: 11.5, fontWeight: 900, color: DEEP, textAlign: 'center', marginTop: 6, lineHeight: 1.05 }}>
             {m?.full_name}
@@ -73,25 +78,46 @@ export default function MembershipCard({ m, verifyUrl }) {
             </tbody>
           </table>
 
-          <div style={{ marginTop: 'auto', textAlign: 'center', paddingTop: 5 }}>
-            <div style={{ width: 68, height: 1, background: '#9CA3AF', margin: '0 auto 3px' }} />
-            <div style={{ fontSize: 4.6, color: MUTED, fontWeight: 700, letterSpacing: '.06em', lineHeight: 1.5 }}>
-              AUTHORIZED SIGNATURE<br />
-              <b style={{ color: DEEP }}>Central President</b><br />
-              Tehreek-e-Nojawanan Roundu
+          {/* Signature — sits clear of the wave, with room to breathe */}
+          <div style={{ marginTop: 'auto', paddingBottom: 46 }}>
+            <div style={{ textAlign: 'center' }}>
+              {/* Real signature scan. `multiply` makes the white paper background
+                  disappear against the white card — no image editing needed. */}
+              <img src="/signature.png" alt="Signature"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                style={{
+                  height: 26, width: 'auto', maxWidth: 96, objectFit: 'contain',
+                  display: 'block', margin: '0 auto 1px',
+                  mixBlendMode: 'multiply', filter: 'contrast(1.25)',
+                }} />
+              <div style={{ width: 84, height: 1, background: GOLD, margin: '0 auto 3px', opacity: .8 }} />
+              <div style={{ fontSize: 5, fontWeight: 900, color: DEEP, letterSpacing: '.1em' }}>CENTRAL PRESIDENT</div>
+              <div style={{ fontSize: 4.2, color: MUTED, letterSpacing: '.08em', marginTop: 1 }}>AUTHORIZED SIGNATURE</div>
             </div>
           </div>
         </div>
 
-        <svg viewBox="0 0 60 14" preserveAspectRatio="none"
-          style={{ position: 'absolute', left: 0, right: 0, bottom: 0, width: '100%', height: 38 }}>
-          <path d="M0 6 Q 15 0 30 4 T 60 2 L60 14 L0 14 Z" fill={DEEP} />
-          <path d="M0 8.4 Q 15 2.6 30 6.4 T 60 4.4" fill="none" stroke={GOLD} strokeWidth=".45" />
+        <svg viewBox="0 0 60 16" preserveAspectRatio="none"
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 0, width: '100%', height: 42, zIndex: 1 }}>
+          <defs>
+            <linearGradient id="tnrWave" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor={G} /><stop offset="1" stopColor="#04241A" />
+            </linearGradient>
+          </defs>
+          {/* soft gold underlay for depth */}
+          <path d="M0 7.6 Q 16 2.6 32 5.6 T 60 3.4 L60 16 L0 16 Z" fill={GOLD} opacity=".28" />
+          <path d="M0 9 Q 16 4 32 7 T 60 4.8 L60 16 L0 16 Z" fill="url(#tnrWave)" />
+          <path d="M0 9 Q 16 4 32 7 T 60 4.8" fill="none" stroke={GOLD_LT} strokeWidth=".35" opacity=".9" />
         </svg>
-        <div style={{ position: 'absolute', right: 10, bottom: 7, textAlign: 'right', color: '#fff', zIndex: 2 }}>
-          <div style={{ fontSize: 4.2, letterSpacing: '.1em', opacity: .85, fontWeight: 700 }}>PROUD TO SERVE</div>
-          <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.04em' }}>ROUNDU</div>
-          <div style={{ fontSize: 4.5, color: GOLD_LT, letterSpacing: '.2em' }}>★ ★ ★</div>
+
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 8, zIndex: 2,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#fff' }}>
+          <span style={{ width: 22, height: 1, background: GOLD_LT, opacity: .6 }} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 4.2, letterSpacing: '.22em', opacity: .8, fontWeight: 700 }}>PROUD TO SERVE</div>
+            <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: '.12em', lineHeight: 1.1 }}>ROUNDU</div>
+          </div>
+          <span style={{ width: 22, height: 1, background: GOLD_LT, opacity: .6 }} />
         </div>
         {!valid && <Stamp text={label} />}
       </div>
@@ -172,6 +198,13 @@ const badge = {
   display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 900, fontSize: 11,
   letterSpacing: '.06em', borderLeft: `1.5px solid ${GOLD}`, borderBottom: `1.5px solid ${GOLD}`, zIndex: 3,
 };
+// Thin inner gold rule — a common premium-card cue.
+const GoldFrame = () => (
+  <div style={{
+    position: 'absolute', inset: 6, borderRadius: 10, pointerEvents: 'none', zIndex: 1,
+    border: `.5px solid ${GOLD}`, opacity: .35,
+  }} />
+);
 const Pattern = () => (
   <div style={{
     position: 'absolute', inset: 0, opacity: .5, pointerEvents: 'none',

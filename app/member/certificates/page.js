@@ -92,9 +92,13 @@ export default function CertificatePage() {
                   <div className="font-bold" style={{ color: G }}>{fmt(c.issued_at)}</div>
                 </div>
                 <div className="text-center">
-                  <div className="w-[50mm] border-b border-gray-400" />
-                  <div className="text-[8pt] text-gray-500 mt-1">Authorized Signature</div>
-                  <div className="text-[8pt] font-semibold" style={{ color: G }}>TNR Membership Committee</div>
+                  <img src="/signature.png" alt="Signature"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    style={{ height: '14mm', width: 'auto', maxWidth: '46mm', objectFit: 'contain',
+                      display: 'block', margin: '0 auto 1mm', mixBlendMode: 'multiply', filter: 'contrast(1.25)' }} />
+                  <div className="w-[50mm] border-b" style={{ borderColor: GOLD }} />
+                  <div className="text-[8pt] mt-1 font-semibold" style={{ color: G }}>Central President</div>
+                  <div className="text-[7.5pt] text-gray-500">Tehreek-e-Nojawanan Roundu</div>
                 </div>
               </div>
             </div>
