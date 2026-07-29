@@ -3,7 +3,7 @@
 // election data, APIs or logic.
 export const NAV = [
   { label: 'Home', href: '/' },
-  { label: 'About TNR', items: [
+  { label: 'About TNR', href: '/about', items: [
     ['About Us', '/about'], ['Vision & Mission', '/about/vision-mission'],
     ['Constitution', '/about/constitution'], ['Executive Committee', '/about/executive-committee'],
     ['Advisory Council', '/about/advisory-council'], ['Office Bearers', '/about/office-bearers'],
