@@ -4,7 +4,7 @@ import { CONDUCT_APPLICABILITY, CONDUCT_STANDARDS, CONFLICT_OF_INTEREST, DISCIPL
 
 export default function CodeOfConductPage() {
   return (
-    <DocPage eyebrow="Part IV" title="Code of Conduct"
+    <DocPage eyebrow="Ethics & Conduct" title="Code of Conduct"
       lead="The standards of conduct expected of every member of TNR."
       source="TNR Governance Handbook, Part IV — Ethics & Conduct, Chapter 5.">
 

@@ -1,6 +1,6 @@
 'use client';
 import DocPage, { Section, P, TickList, Callout, C } from '@/components/site/DocPage';
-import { WHO_WE_ARE, WHAT_WE_DO, GUIDING_PRINCIPLES, MOTTO, CORE_VALUES, COLOURS, FOREWORD } from '@/content/aboutTnr';
+import { WHO_WE_ARE, WHAT_WE_DO, GUIDING_PRINCIPLES, MOTTO, CORE_VALUES, FOREWORD } from '@/content/aboutTnr';
 
 export default function AboutPage() {
   return (
@@ -27,20 +27,6 @@ export default function AboutPage() {
             <div key={en} className="rounded-2xl p-5 text-center text-white" style={{ background: C.deep }}>
               <div className="text-2xl mb-1" style={{ fontFamily: "'Noto Nastaliq Urdu', serif", lineHeight: 1.8 }}>{ur}</div>
               <div className="text-[11px] font-bold uppercase tracking-[.2em]" style={{ color: C.gold }}>{en}</div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Official Colours">
-        <div className="space-y-3">
-          {COLOURS.map(([name, hex, meaning]) => (
-            <div key={name} className="flex items-start gap-4 rounded-xl border border-gray-200 p-4">
-              <span className="shrink-0 w-10 h-10 rounded-lg border border-gray-200" style={{ background: hex }} />
-              <div>
-                <div className="font-bold text-[15px]" style={{ color: C.deep }}>{name}</div>
-                <div className="text-[14px] text-gray-600 leading-relaxed">{meaning}</div>
-              </div>
             </div>
           ))}
         </div>

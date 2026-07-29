@@ -4,8 +4,7 @@ import { VISION, MISSION, STRATEGIC_PRIORITIES, MANIFESTO } from '@/content/abou
 
 export default function VisionMissionPage() {
   return (
-    <DocPage eyebrow="Organisational Identity" title="Vision, Mission & Manifesto"
-      lead="Chapter 1 of the TNR Governance Handbook."
+    <DocPage eyebrow="Our Identity" title="Vision, Mission & Manifesto"
       source="TNR Governance Handbook, Part I — Organisational Identity, Chapter 1.">
       <Section title="Vision">
         <div className="rounded-2xl p-6 sm:p-8 text-white" style={{ background: C.deep }}>

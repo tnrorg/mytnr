@@ -4,7 +4,7 @@ import { CONSTITUTION } from '@/content/aboutTnr';
 
 export default function ConstitutionPage() {
   return (
-    <DocPage eyebrow="Part II" title="Constitution of TNR"
+    <DocPage eyebrow="Governance" title="Constitution of TNR"
       lead="The supreme governance document of Tehreek-e-Nojawanan Roundu. Where any inconsistency arises between governance documents, this Constitution shall prevail."
       source="TNR Governance Handbook, Part II — Constitution, Chapter 2, Articles I–XV.">
 

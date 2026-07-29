@@ -4,7 +4,7 @@ import { GOVERNANCE_INTRO, GOVERNANCE_TIERS, REPORTING_LINES, GOVERNING_DOCUMENT
 
 export default function GovernancePage() {
   return (
-    <DocPage eyebrow="Part III" title="Governance Structure"
+    <DocPage eyebrow="Governance" title="Governance Structure"
       lead="How TNR is organised, from the Advisory Council down to Village Committees."
       source="TNR Governance Handbook, Part III — Governance Structure, Chapter 3.">
 
