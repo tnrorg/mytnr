@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import MemberShell from '@/components/member/MemberShell';
 import QrCode from '@/components/member/QrCode';
-import Avatar from '@/components/member/Avatar';
 import { printSheet } from '@/components/member/printSheet';
 import { mGet } from '@/components/member/memberApi';
 
@@ -67,12 +66,7 @@ export default function CertificatePage() {
               <div className="w-[60mm] h-[2px] mt-2" style={{ background: GOLD }} />
 
               <p className="text-[11pt] text-gray-500 mt-6">This is to certify that</p>
-              <div className="flex items-center gap-5 mt-2">
-                <Avatar src={m.photo_url} name={m.full_name} fontSize={26}
-                  style={{ width: '26mm', height: '31mm', objectFit: 'cover', borderRadius: '3mm',
-                    border: `1.5px solid ${GOLD}`, background: '#F3F4F6' }} />
-                <h2 className="text-[24pt] font-black" style={{ color: GR }}>{m.full_name}</h2>
-              </div>
+              <h2 className="text-[24pt] font-black mt-1" style={{ color: GR }}>{m.full_name}</h2>
               <p className="text-[11pt] text-gray-600 mt-3 max-w-[180mm] leading-relaxed">
                 bearing Membership ID <b className="font-mono" style={{ color: G }}>{m.membership_id}</b>
                 {m.village ? <> of <b>{m.village}</b></> : null}

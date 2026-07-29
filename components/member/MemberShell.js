@@ -34,7 +34,7 @@ export default function MemberShell({ active, children }) {
   const [state, setState] = useState('loading');
   const [open, setOpen] = useState(false);
 
-  const refresh = () => mGet('/api/member/me').then(r => {
+  const refresh = () => mGet('/api/member/me?t=' + Date.now()).then(r => {
     if (r?.ok) { setMember(r.member); setState('ok'); }
     else setState('denied');
   });
