@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
-import { setToken } from '@/components/member/memberApi';
+import { setToken, clearToken } from '@/components/member/memberApi';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -21,7 +21,20 @@ export default function MemberLogin() {
     }).then(x => x.json()).catch(() => ({ ok: false, message: 'Network error.' }));
     setBusy(false);
     if (!r.ok) return setErr(r.message || 'Invalid email or password.');
-    setToken(r.token); window.location.href = '/member/dashboard';
+    if (!r.token) return setErr('Sign-in failed: no session was issued. Please contact support.');
+
+    // Store the token, then VERIFY it works before navigating. Without this a
+    // rejected token silently bounces the member back here with no explanation.
+    setToken(r.token);
+    const check = await fetch('/api/member/me', {
+      headers: { Authorization: 'Bearer ' + r.token }, cache: 'no-store',
+    }).then(x => x.json()).catch(() => ({ ok: false, message: 'Network error.' }));
+
+    if (!check.ok) {
+      clearToken();
+      return setErr('Signed in, but your session was rejected: ' + (check.message || 'unknown reason'));
+    }
+    window.location.href = '/member/dashboard';
   }
 
   async function reset(e) {
