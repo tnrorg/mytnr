@@ -79,7 +79,7 @@ export default function MembershipCard({ m, verifyUrl }) {
           </table>
 
           {/* Signature — sits clear of the wave, with room to breathe */}
-          <div style={{ marginTop: 'auto', paddingBottom: 46 }}>
+          <div style={{ marginTop: 'auto', paddingBottom: 62 }}>
             <div style={{ textAlign: 'center' }}>
               {/* Real signature scan. `multiply` makes the white paper background
                   disappear against the white card — no image editing needed. */}
