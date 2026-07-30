@@ -88,7 +88,7 @@ export default function Admin() {
     </button>
   );
 
-  return <div className="min-h-screen flex flex-col md:flex-row">
+  return <div className="admin-light min-h-screen flex flex-col md:flex-row">
     <aside className="md:w-60 md:min-h-screen border-b md:border-b-0 md:border-r border-tnr-line bg-tnr-black/40 backdrop-blur">
       <div className="p-4 flex items-center gap-3 border-b border-tnr-line"><Logo size={40} />
         <div><div className="font-bold text-sm text-tnr-cream">TNR Admin</div>

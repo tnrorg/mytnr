@@ -88,3 +88,45 @@ button, input, textarea, select, option { font-family: inherit; }
 .light-page input:disabled,
 .light-page select:disabled { background-color: #F3F4F6; color: #6B7280; }
 .light-page option { background-color: #FFFFFF; color: #111827; }
+
+/* ── Admin console: snow-white page, mountain-green cards ──────────────
+   Same idea as `.vote-green` — the shell is light so the console reads as a
+   clean document, while every card keeps the TNR forest-green so the panels
+   stay recognisable. */
+.admin-light { background: #FDFDFD; color: #15231D; }
+
+.admin-light .card,
+.admin-light .stat {
+  background: linear-gradient(165deg, #0B6B4F 0%, #063D2B 100%);
+  border-color: rgba(212, 167, 44, 0.32);
+  color: #F7F5EE;
+  box-shadow: 0 1px 3px rgba(6, 61, 43, .08);
+}
+
+/* Sidebar stays a solid green panel rather than a translucent grey wash. */
+.admin-light aside {
+  background: linear-gradient(180deg, #063D2B 0%, #04241A 100%);
+  border-color: rgba(212, 167, 44, 0.22);
+}
+
+/* Cream text is correct inside green surfaces but invisible on the white
+   page, so repaint only the cream that sits outside a card or the sidebar.
+   `!important` is required to beat the Tailwind utilities already applied. */
+.admin-light [class*="text-tnr-cream"]:not(.card *):not(aside *):not(.stat *) {
+  color: #4B5563 !important;
+}
+/* Gold headings lose contrast on white — use the deep forest green instead. */
+.admin-light > main .heading-gold:not(.card *) {
+  background: none;
+  -webkit-text-fill-color: initial;
+  color: #063D2B;
+}
+/* Bare inputs outside a card need dark-on-white treatment. */
+.admin-light .input:not(.card *):not(aside *) {
+  background: #fff;
+  border-color: #E5E7EB;
+  color: #15231D;
+}
+.admin-light .input:not(.card *):not(aside *)::placeholder { color: #9CA3AF; }
+/* Ghost buttons outside cards would otherwise be cream-on-white. */
+.admin-light .btn-ghost:not(.card *):not(aside *) { color: #063D2B; border-color: #D8DEDA; }
