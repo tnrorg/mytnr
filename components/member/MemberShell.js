@@ -12,6 +12,9 @@ function initials(name) {
   return ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
 }
 
+// Base navigation — everyone signs into the same portal, because that is where
+// authentication, the membership card and the CV tools live. A role does not
+// create a separate portal; it ADDS the items below.
 export const NAV = [
   ['Dashboard', '/member/dashboard', '🏠'],
   ['My Profile', '/member/profile', '👤'],
@@ -27,6 +30,31 @@ export const NAV = [
   ['Help & Support', '/member/support', '💬'],
   ['Account Settings', '/member/settings', '⚙️'],
 ];
+
+// Extra items by role. Advisory Council and Executive Committee members get a
+// public professional profile to maintain and an inbox of guidance requests;
+// a general member has neither, so showing those links to everyone would be
+// misleading.
+export const ROLE_NAV = {
+  advisory: [
+    ['My Council Profile', '/member/council-profile', '🎓'],
+    ['Guidance Requests', '/member/guidance', '💡'],
+  ],
+  cec: [
+    ['My Leadership Profile', '/member/council-profile', '🎓'],
+  ],
+  uc_team: [
+    ['My UC Team', '/member/uc-team', '📍'],
+  ],
+};
+
+export const navFor = (role) => {
+  const extra = ROLE_NAV[role] || [];
+  if (!extra.length) return NAV;
+  // Slot the role items straight after My Profile, where they belong.
+  const i = NAV.findIndex(([, href]) => href === '/member/profile') + 1;
+  return [...NAV.slice(0, i), ...extra, ...NAV.slice(i)];
+};
 
 // Protected shell for every /member/* page.
 export default function MemberShell({ active, children }) {
@@ -76,7 +104,7 @@ export default function MemberShell({ active, children }) {
         </div>
 
         <nav className={`${open ? 'block' : 'hidden'} lg:block p-2 space-y-0.5`}>
-          {NAV.map(([label, href, icon]) => (
+          {navFor(member?.role).map(([label, href, icon]) => (
             <a key={href} href={href}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition ${active === href
                 ? 'text-white font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}

@@ -1,4 +1,5 @@
 'use client';
+import { roleLabel } from '@/lib/membership/roles';
 import MemberShell from '@/components/member/MemberShell';
 import Avatar from '@/components/member/Avatar';
 
@@ -31,10 +32,21 @@ export default function MemberDashboard() {
                   {m?.village && <> · {m.village}</>}
                 </div>
               </div>
-              <span className="ml-auto px-3 py-1.5 rounded-full text-xs font-bold"
-                style={{ background: 'rgba(212,167,44,0.18)', color: C.soft }}>
-                {String(m?.status || '').toUpperCase()} MEMBER
-              </span>
+              {/* Membership type as well as status, so an Advisory Council or
+                  Executive member can see their role at a glance rather than
+                  wondering why the portal looks like everyone else's. */}
+              <div className="ml-auto flex flex-wrap gap-2 justify-end">
+                {m?.role && m.role !== 'general' && (
+                  <span className="px-3 py-1.5 rounded-full text-xs font-bold"
+                    style={{ background: 'rgba(255,255,255,0.14)', color: '#fff' }}>
+                    {roleLabel(m.role).toUpperCase()}
+                  </span>
+                )}
+                <span className="px-3 py-1.5 rounded-full text-xs font-bold"
+                  style={{ background: 'rgba(212,167,44,0.18)', color: C.soft }}>
+                  {String(m?.status || '').toUpperCase()} MEMBER
+                </span>
+              </div>
             </div>
           </div>
 
