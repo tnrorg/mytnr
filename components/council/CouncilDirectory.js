@@ -6,13 +6,14 @@ import { Skeleton, EmptyState, VerifiedBadge } from '@/components/ui';
 import { COLORS, FONT, MOTION } from '@/lib/design/tokens';
 import { initials } from '@/content/advisoryCouncil';
 
-const glass = 'rounded-tnr-lg border border-gray-100 bg-white/85 backdrop-blur-sm shadow-tnr-flat';
+const glass = 'rounded-tnr-lg bg-white/90 backdrop-blur-sm shadow-tnr-flat ' +
+  'border border-[rgba(200,154,43,.35)]';
 
 function Card({ m, i }) {
   const meta = [m.organisation || m.affiliation, m.country].filter(Boolean);
   return (
     <motion.article className={`${glass} flex flex-col overflow-hidden transition-all duration-standard
-      hover:-translate-y-[3px] hover:shadow-tnr-raise hover:border-[rgba(23,107,73,.22)]`}
+      hover:-translate-y-[3px] hover:shadow-tnr-raise hover:border-[rgba(200,154,43,.75)]`}
       initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       transition={{ duration: MOTION.reveal, delay: Math.min(i * 0.04, 0.3), ease: MOTION.ease }}>
 
@@ -60,7 +61,7 @@ function Card({ m, i }) {
         )}
 
         {!!(m.expertise || []).length && (
-          <div className="mt-1.5 flex flex-wrap gap-1">
+          <div className="mt-1.5 mb-3 flex flex-wrap gap-1">
             {m.expertise.slice(0, 2).map(e => (
               <span key={e} className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
                 style={{ background: 'rgba(23,107,73,.08)', color: COLORS.green700 }}>{e}</span>
@@ -73,12 +74,17 @@ function Card({ m, i }) {
           </div>
         )}
 
+        {/* Solid green button, matching the Executive Committee cards so both
+            leadership sections share one call to action. */}
         <a href={`/council/${m.slug}`}
-          className="group mt-auto pt-2.5 inline-flex items-center justify-center gap-1.5 text-[11.5px] font-bold"
-          style={{ color: COLORS.green700 }}>
-          View Full Profile
-          <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true"
-            className="transition-transform duration-micro group-hover:translate-x-0.5" />
+          className="group mt-auto block rounded-tnr py-2.5 text-center text-[12px] font-bold text-white
+            transition-opacity duration-micro hover:opacity-90"
+          style={{ background: `linear-gradient(180deg,${COLORS.green700},${COLORS.green900})` }}>
+          <span className="inline-flex items-center gap-1.5">
+            View Full Profile
+            <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true"
+              className="transition-transform duration-micro group-hover:translate-x-0.5" />
+          </span>
         </a>
       </div>
     </motion.article>

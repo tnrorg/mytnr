@@ -29,9 +29,10 @@ export default function Home() {
       <SiteNav />
       <Hero />
       <CommunityStats />
-      <CoreAreas />
+      {/* Leadership leads: who guides TNR, then what TNR does. */}
       <CouncilSection />
       <ExecutiveCommittee />
+      <CoreAreas />
       <MembersPreview />
       <JoinCta />
       <SiteFooter />

@@ -32,8 +32,12 @@ export function ExecutivePhoto({ member, size = 'card' }) {
 
 export default function ExecutiveCard({ member }) {
   const named = !!member.name;
+  // Gold hairline ring to match the council cards, and a lighter lift than
+  // the old shadow-2xl / -translate-y-1.5, which the design system disallows.
   return (
-    <article className="group relative rounded-3xl bg-white border border-gray-200 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition overflow-hidden flex flex-col">
+    <article className="group relative rounded-tnr-lg bg-white overflow-hidden flex flex-col
+      border border-[rgba(200,154,43,.35)] shadow-tnr-flat transition-all duration-standard
+      hover:-translate-y-[3px] hover:shadow-tnr-raise hover:border-[rgba(200,154,43,.75)]">
       {/* deep-green crown behind the portrait, the way the printed cards read */}
       <div className="h-20" style={{ background: `linear-gradient(135deg, ${C.deep}, ${C.green})` }} />
       <div className="-mt-16 px-6 pb-6 flex flex-col flex-1">
