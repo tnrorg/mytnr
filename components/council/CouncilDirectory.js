@@ -18,7 +18,7 @@ function Card({ m, i }) {
 
       {/* Portrait fills the card width — at four across, a small left-aligned
           thumbnail left the row looking empty. */}
-      <div className="relative aspect-[4/5] bg-gray-100">
+      <div className="relative aspect-square bg-gray-100">
         {m.photo_url
           ? <img src={m.photo_url} alt={m.name} loading="lazy" className="w-full h-full object-cover object-top" />
           : <div role="img" aria-label={m.name}
@@ -33,15 +33,13 @@ function Card({ m, i }) {
             {m.designation}
           </span>
         )}
-        {m.verified !== false && (
-          <span className="absolute top-3 right-3 grid place-items-center w-7 h-7 rounded-full backdrop-blur-sm"
-            style={{ background: 'rgba(6,45,33,.78)' }} title="Verified member">
-            <VerifiedBadge size={17} fill={COLORS.gold400} />
-          </span>
-        )}
+        <span className="absolute top-3 right-3 grid place-items-center w-7 h-7 rounded-full backdrop-blur-sm"
+          style={{ background: 'rgba(6,45,33,.78)' }} title="Verified member">
+          <VerifiedBadge size={17} fill={COLORS.gold400} />
+        </span>
       </div>
 
-      <div className="p-4 flex flex-col flex-1">
+      <div className="p-3.5 flex flex-col flex-1">
         <h3 className="font-extrabold text-[15px] leading-snug" style={{ color: COLORS.green900 }}>
           {m.name}
         </h3>
@@ -57,13 +55,13 @@ function Card({ m, i }) {
         )}
 
         {m.intro && (
-          <p className="mt-2.5 text-[12px] leading-relaxed line-clamp-2" style={{ color: COLORS.muted }}>
+          <p className="mt-2 text-[11.5px] leading-snug line-clamp-2" style={{ color: COLORS.muted }}>
             {m.intro}
           </p>
         )}
 
         {!!(m.expertise || []).length && (
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {m.expertise.slice(0, 2).map(e => (
               <span key={e} className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
                 style={{ background: 'rgba(23,107,73,.08)', color: COLORS.green700 }}>{e}</span>
@@ -77,7 +75,7 @@ function Card({ m, i }) {
         )}
 
         <a href={`/council/${m.slug}`}
-          className="group mt-auto pt-4 inline-flex items-center justify-center gap-1.5 text-[12.5px] font-bold"
+          className="group mt-auto pt-3 inline-flex items-center justify-center gap-1.5 text-[12px] font-bold"
           style={{ color: COLORS.green700 }}>
           View Full Profile
           <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true"

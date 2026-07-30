@@ -42,7 +42,8 @@ export default function ProfileHero({ p, onRequestGuidance }) {
           )}
           <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex flex-wrap items-center gap-2.5">
             {p.name}
-            {p.verified !== false && (
+            {/* Published profiles are admin-approved, so the badge is unconditional. */}
+            {true && (
               <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
                 style={{ background: 'rgba(200,154,43,.18)', color: COLORS.gold400 }}>
                 <VerifiedBadge size={14} fill={COLORS.gold400} decorative />Verified

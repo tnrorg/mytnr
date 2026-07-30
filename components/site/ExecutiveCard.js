@@ -49,7 +49,8 @@ export default function ExecutiveCard({ member }) {
           {named ? member.name : 'To Be Announced'}
           {/* Gold verified badge, same as the council and members directory —
               a filled seat is a confirmed office bearer. */}
-          {named && member.verified !== false && <VerifiedBadge size={16} />}
+          {/* A filled seat is a confirmed office bearer. */}
+          {named && <VerifiedBadge size={16} />}
         </h3>
 
         {member.qualification && (
