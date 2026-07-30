@@ -41,7 +41,7 @@ export default function ProfileHero({ p, onRequestGuidance }) {
           )}
           <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex flex-wrap items-center gap-2.5">
             {p.name}
-            {p.verified && (
+            {p.verified !== false && (
               <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
                 style={{ background: 'rgba(200,154,43,.18)', color: COLORS.gold400 }}>
                 <BadgeCheck size={13} strokeWidth={2.5} aria-hidden="true" />Verified

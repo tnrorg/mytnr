@@ -29,7 +29,9 @@ function Card({ m, i }) {
           <h3 className="font-extrabold text-[15px] leading-snug flex items-center gap-1.5"
             style={{ color: COLORS.green900 }}>
             <span className="truncate">{m.name}</span>
-            {m.verified && <BadgeCheck size={14} strokeWidth={2.5} aria-label="Verified"
+            {/* Every published leadership profile carries the gold badge: it
+                exists only because an admin confirmed an approved member. */}
+            {m.verified !== false && <BadgeCheck size={14} strokeWidth={2.5} aria-label="Verified member"
               className="shrink-0" style={{ color: COLORS.gold500 }} />}
           </h3>
           {m.designation && <div className="mt-0.5 text-[11px] font-bold uppercase tracking-wide"

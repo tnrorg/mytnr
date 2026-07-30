@@ -24,8 +24,17 @@ function MemberCard({ m }) {
       <Avatar src={m.photo_url} name={m.full_name} fontSize={24}
         className="w-20 h-20 mx-auto rounded-full object-cover ring-2 ring-[#D4A72C]/60 bg-gray-50" />
       <h3 style={{ ...mont, color: C.deep }} className="mt-3 font-extrabold text-sm leading-tight">{m.full_name}</h3>
-      <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
-        style={{ background: '#0B6B4F14', color: C.green }}>✔ Verified Member</div>
+      {/* One gold verified badge across the whole platform: council, executive
+          and general members. Every published member has been approved by the
+          membership committee, so they all carry it. */}
+      <div className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
+        style={{ background: 'rgba(200,154,43,.14)', color: '#7A5C10' }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2l2.4 1.8 3-.3 1 2.8 2.6 1.5-1 2.9 1 2.9-2.6 1.5-1 2.8-3-.3L12 22l-2.4-1.8-3 .3-1-2.8L3 16.2l1-2.9-1-2.9 2.6-1.5 1-2.8 3 .3L12 2z"/>
+          <path d="M10.6 14.6l-2.2-2.2 1.1-1.1 1.1 1.1 3.4-3.4 1.1 1.1-4.5 4.5z" fill="#fff"/>
+        </svg>
+        Verified Member
+      </div>
       {m.current_position && <div className="text-xs text-gray-500 mt-2">{m.current_position}</div>}
       <div className="text-[11px] text-gray-400 mt-1">{[m.village, m.union_council].filter(Boolean).join(' · ')}</div>
       {m.category && <div className="mt-2 text-[10px] font-bold tracking-wide uppercase" style={{ color: C.gold }}>{m.category}</div>}

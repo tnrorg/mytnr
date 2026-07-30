@@ -43,9 +43,18 @@ export default function ExecutiveCard({ member }) {
             style={{ background: '#F3E4B3', color: C.deep }}>{member.designation}</div>
         </div>
 
-        <h3 className="mt-3 text-center font-black text-[17px] leading-snug"
+        <h3 className="mt-3 text-center font-black text-[17px] leading-snug flex items-center justify-center gap-1.5"
           style={{ color: named ? C.deep : '#9CA3AF' }}>
           {named ? member.name : 'To Be Announced'}
+          {/* Gold verified badge, same as the council and members directory —
+              a filled seat is a confirmed office bearer. */}
+          {named && member.verified !== false && (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={COLORS.gold500}
+              className="shrink-0" role="img" aria-label="Verified member">
+              <path d="M12 2l2.4 1.8 3-.3 1 2.8 2.6 1.5-1 2.9 1 2.9-2.6 1.5-1 2.8-3-.3L12 22l-2.4-1.8-3 .3-1-2.8L3 16.2l1-2.9-1-2.9 2.6-1.5 1-2.8 3 .3L12 2z"/>
+              <path d="M10.6 14.6l-2.2-2.2 1.1-1.1 1.1 1.1 3.4-3.4 1.1 1.1-4.5 4.5z" fill="#fff"/>
+            </svg>
+          )}
         </h3>
 
         {member.qualification && (

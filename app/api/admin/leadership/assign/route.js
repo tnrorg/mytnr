@@ -63,7 +63,7 @@ export async function POST(req) {
       .select('id, body, slug').eq('id', member.leadership_profile_id).maybeSingle();
     if (existing) {
       await sb.from('leadership_profiles')
-        .update({ body, designation: b.designation || null, active: true,
+        .update({ body, designation: b.designation || null, active: true, verified: true,
                   updated_at: new Date().toISOString() })
         .eq('id', existing.id);
       await sb.from('membership_members')
@@ -92,6 +92,9 @@ export async function POST(req) {
     mobile: member.mobile || null,
     // Contact stays private until the member or an admin publishes it.
     show_email: false, show_mobile: false,
+    // Assigning from an approved member record IS the verification: an admin
+    // has confirmed a real, approved member into a leadership body.
+    verified: true,
     active: true,
     sort_order: Number(b.sort_order) || 0,
   }).select().maybeSingle();
