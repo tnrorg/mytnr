@@ -17,6 +17,7 @@ const asText = (v) => Array.isArray(v) ? v.join('\n') : (v || '');
 
 export default function LeadershipTab({ toast }) {
   const [body, setBody] = useState('advisory');
+  const [all, setAll] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
@@ -24,10 +25,15 @@ export default function LeadershipTab({ toast }) {
 
   const load = useCallback(async () => {
     setLoading(true); setErr('');
-    const r = await aGet('/api/admin/leadership?body=' + body);
+    // Fetch ALL bodies, then filter locally. The counts on the switcher then
+    // reveal at a glance if a profile was saved under the wrong tab — the
+    // failure mode that makes a saved profile look missing on the website.
+    const r = await aGet('/api/admin/leadership');
     setLoading(false);
-    if (!r?.ok) { setErr(r?.message || 'Could not load profiles.'); setRows([]); return; }
-    setRows(r.profiles || []);
+    if (!r?.ok) { setErr(r?.message || 'Could not load profiles.'); setRows([]); setAll([]); return; }
+    const profiles = r.profiles || [];
+    setAll(profiles);
+    setRows(profiles.filter(p => p.body === body));
   }, [body]);
   useEffect(() => { load(); }, [load]);
 
@@ -80,13 +86,17 @@ export default function LeadershipTab({ toast }) {
   return <div className="space-y-4">
     <div className="flex flex-wrap items-center gap-2">
       <div className="flex gap-1 p-1 rounded-xl bg-white/5">
-        {BODIES.map(([k, label]) => (
-          <button key={k} onClick={() => { setBody(k); setForm(null); }}
-            className={`px-3 py-1.5 rounded-lg text-sm transition
-              ${body === k ? 'bg-tnr-gold text-tnr-black font-semibold' : 'text-tnr-cream/70 hover:bg-white/5'}`}>
-            {label}
-          </button>
-        ))}
+        {BODIES.map(([k, label]) => {
+          const n = all.filter(p => p.body === k).length;
+          const live = all.filter(p => p.body === k && p.active).length;
+          return (
+            <button key={k} onClick={() => { setBody(k); setForm(null); }}
+              className={`px-3 py-1.5 rounded-lg text-sm transition
+                ${body === k ? 'bg-tnr-gold text-tnr-black font-semibold' : 'text-tnr-cream/70 hover:bg-white/5'}`}>
+              {label} <span className="opacity-70">({live}/{n})</span>
+            </button>
+          );
+        })}
       </div>
       <div className="flex-1" />
       <button className="btn-green" onClick={() => setForm({ ...empty, sort_order: rows.length })}>
@@ -120,6 +130,9 @@ export default function LeadershipTab({ toast }) {
               {p.qualification && <div className="text-xs text-tnr-cream/60 truncate">{p.qualification}{p.field ? ` (${p.field})` : ''}</div>}
               <div className="mt-1 flex items-center gap-2">
                 <Badge tone={p.active ? 'ok' : 'muted'}>{p.active ? 'Visible' : 'Hidden'}</Badge>
+                {!p.active && (
+                  <span className="text-[11px] text-amber-300">Not shown on the website</span>
+                )}
                 <span className="text-[11px] text-tnr-cream/40">#{p.sort_order}</span>
               </div>
             </div>
