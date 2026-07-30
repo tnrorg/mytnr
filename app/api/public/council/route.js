@@ -13,13 +13,22 @@ export async function GET(req) {
   const q = p('q').toLowerCase();
   const country = p('country'), profession = p('profession'), expertise = p('expertise');
 
+  // The portal columns (profession, country, verified …) only exist once
+  // migration_council_portal.sql has been run. Selecting them on an un-migrated
+  // database errors, which would silently empty the whole council section — so
+  // fall back to the base columns instead of showing nothing.
+  const FULL = 'slug,name,designation,qualification,field,affiliation,profession,' +
+    'organisation,country,tagline,intro,expertise,research_areas,photo_url,verified,sort_order';
+  const BASE = 'slug,name,designation,qualification,field,affiliation,expertise,photo_url,sort_order';
+
   try {
-    const { data, error } = await supabaseAdmin().from('leadership_profiles')
-      .select('slug,name,designation,qualification,field,affiliation,profession,' +
-              'organisation,country,tagline,intro,expertise,research_areas,photo_url,verified,sort_order')
-      .eq('body', 'advisory').eq('active', true)
-      .order('sort_order').order('name');
-    if (error) return ok({ members: [], filters: {} });
+    const sb = supabaseAdmin();
+    const run = (cols) => sb.from('leadership_profiles').select(cols)
+      .eq('body', 'advisory').eq('active', true).order('sort_order').order('name');
+
+    let { data, error } = await run(FULL);
+    if (error) ({ data, error } = await run(BASE));
+    if (error) return ok({ members: [], filters: {}, degraded: true });
 
     let members = data || [];
     const all = members;

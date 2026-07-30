@@ -52,14 +52,16 @@ export async function GET(_req, { params }) {
   if (p.show_email && p.email) profile.email = p.email;
   if (p.show_mobile && p.mobile) profile.mobile = p.mobile;
 
+  // Child tables also arrive with the portal migration. A missing table must
+  // degrade to an empty section, not a broken profile page.
   const sections = {};
   await Promise.all(CHILD_TABLES.map(async ([key, table, order]) => {
     const [primary, secondary] = order.split(',');
     let q = sb.from(table).select('*').eq('profile_id', p.id).eq('approved', true)
       .order(primary, { ascending: true });
     if (secondary) q = q.order(secondary, { ascending: false });
-    const { data } = await q;
-    sections[key] = (data || []).map(({ profile_id, approved, ...rest }) => rest);
+    const { data, error } = await q;
+    sections[key] = error ? [] : (data || []).map(({ profile_id, approved, ...rest }) => rest);
   }));
 
   return ok({ profile, sections });
