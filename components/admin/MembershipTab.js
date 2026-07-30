@@ -17,7 +17,10 @@ const TONE = {
 export default function MembershipTab({ toast }) {
   const [apps, setApps] = useState([]);
   const [stats, setStats] = useState(null);
-  const [status, setStatus] = useState('pending_review');
+  // Defaults to All rather than Pending: if an application ever carries an
+  // unexpected status it would silently vanish from a filtered view, which
+  // looks exactly like "the application never arrived".
+  const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(null);      // application being reviewed
   const [busy, setBusy] = useState(false);
