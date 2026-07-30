@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 import {
@@ -14,6 +14,7 @@ const BLANK = {
   photo_data: '',
   first_name: '', last_name: '', gender: '', age: '', village: '', union_council: '',
   mobile: '', email: '', education_level: '', field_of_study: '', current_position: '',
+  position_other: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
   youth_issues: '', declaration_accepted: false, whatsapp_opt_in: false,
 };
@@ -23,10 +24,23 @@ export default function ApplyPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState(null);
+  const [councils, setCouncils] = useState(null);   // null = still loading
   const [touched, setTouched] = useState({});   // fields the applicant has visited
   const [tried, setTried] = useState(false);    // they have pressed Submit at least once
   const set = (k, v) => { setErr(''); setF(p => ({ ...p, [k]: v })); };
   const blur = (k) => setTouched(t => ({ ...t, [k]: true }));
+
+  // Admin-managed Union Councils and their villages.
+  useEffect(() => {
+    fetch('/api/public/areas', { cache: 'no-store' })
+      .then(r => r.json()).then(j => setCouncils(j?.ok ? (j.councils || []) : []))
+      .catch(() => setCouncils([]));
+  }, []);
+
+  // Picking a different council clears a village that no longer belongs to it.
+  const setCouncil = (name) => setF(p => ({ ...p, union_council: name, village: '' }));
+  const villagesFor = (name) => councils?.find(c => c.name === name)?.villages || [];
+  const useAreaLists = !!councils?.length;
 
   const errors = validateApplication(f);
   // An error is only shown once the applicant has left that field, or after
@@ -152,8 +166,23 @@ export default function ApplyPage() {
               <Field label="Last Name" req error={showErr('last_name')}><Input value={f.last_name} onChange={v => set('last_name', v)} onBlur={() => blur('last_name')} bad={!!showErr('last_name')} /></Field>
               <Field label="Gender" req error={showErr('gender')}><Select value={f.gender} onChange={v => set('gender', v)} options={GENDERS} onBlur={() => blur('gender')} bad={!!showErr('gender')} /></Field>
               <Field label="Age" req error={showErr('age')}><Input type="number" value={f.age} onChange={v => set('age', v)} onBlur={() => blur('age')} bad={!!showErr('age')} /></Field>
-              <Field label="Union Council in Roundu" req error={showErr('union_council')}><Input value={f.union_council} onChange={v => set('union_council', v)} placeholder="e.g. Roundu" onBlur={() => blur('union_council')} bad={!!showErr('union_council')} /></Field>
-              <Field label="Village / Area" req error={showErr('village')}><Input value={f.village} onChange={v => set('village', v)} onBlur={() => blur('village')} bad={!!showErr('village')} /></Field>
+              <Field label="Union Council in Roundu" req error={showErr('union_council')}>
+                {useAreaLists
+                  ? <Select value={f.union_council} onChange={setCouncil} options={councils.map(c => c.name)}
+                      onBlur={() => blur('union_council')} bad={!!showErr('union_council')} />
+                  : <Input value={f.union_council} onChange={v => set('union_council', v)} placeholder="e.g. Roundu"
+                      onBlur={() => blur('union_council')} bad={!!showErr('union_council')} />}
+              </Field>
+              <Field label="Village / Area" req error={showErr('village')}>
+                {useAreaLists
+                  ? <Select value={f.village} onChange={v => set('village', v)}
+                      options={villagesFor(f.union_council)}
+                      placeholder={f.union_council ? '— select —' : '— choose a union council first —'}
+                      disabled={!f.union_council}
+                      onBlur={() => blur('village')} bad={!!showErr('village')} />
+                  : <Input value={f.village} onChange={v => set('village', v)}
+                      onBlur={() => blur('village')} bad={!!showErr('village')} />}
+              </Field>
               <Field label="Mobile / WhatsApp Number" req error={showErr('mobile')}><Input value={f.mobile} onChange={v => set('mobile', v)} placeholder="+92 3xx xxxxxxx" onBlur={() => blur('mobile')} bad={!!showErr('mobile')} /></Field>
               <Field label="Email Address" req error={showErr('email')}><Input type="email" value={f.email} onChange={v => set('email', v)} placeholder="name@example.com" onBlur={() => blur('email')} bad={!!showErr('email')} /></Field>
             </Grid>
@@ -163,7 +192,17 @@ export default function ApplyPage() {
             <Grid>
               <Field label="Highest Level of Education" req error={showErr('education_level')}><Select value={f.education_level} onChange={v => set('education_level', v)} options={EDUCATION_LEVELS} onBlur={() => blur('education_level')} bad={!!showErr('education_level')} /></Field>
               <Field label="Field of Study / Profession" req error={showErr('field_of_study')}><Input value={f.field_of_study} onChange={v => set('field_of_study', v)} onBlur={() => blur('field_of_study')} bad={!!showErr('field_of_study')} /></Field>
-              <Field label="Current Position" req error={showErr('current_position')}><Select value={f.current_position} onChange={v => set('current_position', v)} options={POSITIONS} onBlur={() => blur('current_position')} bad={!!showErr('current_position')} /></Field>
+              <Field label="Current Position" req error={showErr('current_position')}>
+                <Select value={f.current_position} onChange={v => set('current_position', v)} options={POSITIONS}
+                  onBlur={() => blur('current_position')} bad={!!showErr('current_position')} />
+              </Field>
+              {f.current_position === 'Other' && (
+                <Field label="Please specify your position" req error={showErr('position_other')}>
+                  <Input value={f.position_other} onChange={v => set('position_other', v)}
+                    placeholder="Type your current position"
+                    onBlur={() => blur('position_other')} bad={!!showErr('position_other')} />
+                </Field>
+              )}
             </Grid>
           </Card>
 
@@ -271,8 +310,9 @@ const Input = ({ value, onChange, onBlur, bad, type = 'text', placeholder }) =>
 const Textarea = ({ value, onChange, onBlur, bad, rows = 3 }) =>
   <textarea rows={rows} value={value} onBlur={onBlur}
     onChange={e => onChange(e.target.value)} className={ring(bad) + ' leading-relaxed'} />;
-const Select = ({ value, onChange, onBlur, bad, options }) =>
-  <select value={value} onBlur={onBlur} onChange={e => onChange(e.target.value)} className={ring(bad)}>
-    <option value="">— select —</option>
+const Select = ({ value, onChange, onBlur, bad, options, placeholder = '— select —', disabled }) =>
+  <select value={value} onBlur={onBlur} disabled={disabled} onChange={e => onChange(e.target.value)}
+    className={ring(bad) + (disabled ? ' opacity-50 cursor-not-allowed' : '')}>
+    <option value="">{placeholder}</option>
     {options.map(o => <option key={o} value={o}>{o}</option>)}
   </select>;

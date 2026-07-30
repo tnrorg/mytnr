@@ -79,7 +79,11 @@ export async function POST(req) {
     photo_url,
     education_level: b.education_level || null,
     field_of_study: b.field_of_study || null,
-    current_position: b.current_position || null,
+    // "Other" is stored as the text the applicant typed, so reports and the
+    // directory filter show a real position rather than a bucket label.
+    current_position: b.current_position === 'Other'
+      ? String(b.position_other || '').trim() || 'Other'
+      : (b.current_position || null),
     why_join: String(b.why_join).trim(),
     contribution_areas: b.contribution_areas,
     leadership_view: b.leadership_view,
