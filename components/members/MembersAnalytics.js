@@ -44,10 +44,24 @@ export default function MembersAnalytics() {
   const [active, setActive] = useState(null);
 
   useEffect(() => {
+    // Surface the real reason on failure — a silent skeleton is impossible to
+    // debug from a screenshot.
     fetch('/api/public/member-stats?t=' + Date.now(), { cache: 'no-store' })
-      .then(r => r.json())
-      .then(j => j?.ok ? setS(j.stats) : setErr(j?.message || 'Statistics are unavailable right now.'))
-      .catch(() => setErr('Statistics are unavailable right now.'));
+      .then(async r => {
+        const body = await r.text();
+        let j = null;
+        try { j = JSON.parse(body); } catch {
+          throw new Error(`Stats endpoint returned ${r.status} (not JSON).`);
+        }
+        if (!j?.ok) throw new Error(j?.message || j?.error || `Stats endpoint returned ${r.status}.`);
+        if (!j.stats || typeof j.stats.total !== 'number') throw new Error('Stats payload was empty.');
+        return j.stats;
+      })
+      .then(st => setS({
+        total: 0, totalAreas: 0, ranked: [], top5: [], segments: [],
+        otherAreas: [], unassigned: 0, balanced: true, ...st,
+      }))
+      .catch(e => setErr(e.message || 'Statistics are unavailable right now.'));
   }, []);
 
   const colors = useMemo(
@@ -55,7 +69,8 @@ export default function MembersAnalytics() {
     [s]);
 
   if (err) return <div className={card + ' text-center py-10'}>
-    <p className="text-sm text-gray-500">{err}</p>
+    <h3 style={{ ...mont, color: C.deep }} className="font-extrabold">Membership statistics unavailable</h3>
+    <p className="mt-1 text-xs text-gray-400">{err}</p>
   </div>;
   if (!s) return <Skeleton />;
 
