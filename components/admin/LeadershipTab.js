@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
+import AssignLeader from './AssignLeader';
 import { aGet, aPost, aPatch, aDel } from './adminApi';
 import { Card, Badge, Field } from './ui';
 
@@ -18,6 +19,7 @@ const asText = (v) => Array.isArray(v) ? v.join('\n') : (v || '');
 export default function LeadershipTab({ toast }) {
   const [body, setBody] = useState('advisory');
   const [all, setAll] = useState([]);
+  const [assigning, setAssigning] = useState(false);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
@@ -68,6 +70,17 @@ export default function LeadershipTab({ toast }) {
     setForm(null); load();
   }
 
+  /** Moves a profile to the other body. Added because a profile saved under
+   *  the wrong tab previously had to be deleted and retyped. */
+  async function move(p) {
+    const to = p.body === 'advisory' ? 'executive' : 'advisory';
+    const label = to === 'advisory' ? 'Advisory Council' : 'Executive Committee';
+    if (!confirm(`Move ${p.name || p.designation} to the ${label}?`)) return;
+    const r = await aPatch('/api/admin/leadership/' + p.id, { body: to });
+    if (!r?.ok) return toast(r?.message || 'Could not move', 'err');
+    toast('Moved to ' + label); load();
+  }
+
   async function del(p) {
     if (!confirm(`Remove ${p.name || p.designation} from the ${body === 'advisory' ? 'Advisory Council' : 'Executive Committee'}?`)) return;
     const r = await aDel('/api/admin/leadership/' + p.id);
@@ -99,10 +112,18 @@ export default function LeadershipTab({ toast }) {
         })}
       </div>
       <div className="flex-1" />
-      <button className="btn-green" onClick={() => setForm({ ...empty, sort_order: rows.length })}>
+      <button className="btn-green" onClick={() => { setAssigning(a => !a); setForm(null); }}>
+        {assigning ? 'Close' : '+ Assign Member'}
+      </button>
+      <button className="btn-ghost" onClick={() => { setForm({ ...empty, sort_order: rows.length }); setAssigning(false); }}>
         + Add Profile
       </button>
     </div>
+
+    {assigning && (
+      <AssignLeader body={body} toast={toast} onDone={() => { setAssigning(false); load(); }}
+        bodyLabel={body === 'advisory' ? 'Advisory Council' : 'Executive Committee'} />
+    )}
 
     <p className="text-sm text-tnr-cream/60">
       These profiles appear on the homepage and under About TNR. Lower order number appears first.
@@ -141,6 +162,9 @@ export default function LeadershipTab({ toast }) {
           <div className="mt-3 flex gap-2">
             <button className="btn-ghost !py-1.5 text-xs flex-1" onClick={() => edit(p)}>Edit</button>
             <button className="btn-ghost !py-1.5 text-xs" onClick={() => toggle(p)}>{p.active ? 'Hide' : 'Show'}</button>
+            <button className="btn-ghost !py-1.5 text-xs" onClick={() => move(p)}>
+              Move to {body === 'advisory' ? 'CEC' : 'Advisory'}
+            </button>
             <button className="btn-ghost !py-1.5 text-xs text-red-300" onClick={() => del(p)}>Delete</button>
           </div>
         </Card>

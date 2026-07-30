@@ -13,8 +13,10 @@ export async function PATCH(req, { params }) {
   const { admin, res } = requireAdmin(req); if (res) return res;
   const b = await readJson(req);
   const patch = { updated_at: new Date().toISOString() };
+  // `body` is editable so a profile saved under the wrong tab can be moved
+  // rather than deleted and retyped.
   for (const f of ['name', 'designation', 'qualification', 'field', 'affiliation', 'summary',
-                   'slug', 'active', 'country', 'profession', 'organisation', 'tagline',
+                   'slug', 'active', 'body', 'country', 'profession', 'organisation', 'tagline',
                    'intro', 'bio', 'email', 'mobile', 'cv_url'])
     if (f in b) patch[f] = b[f];
   // Booleans are coerced so an absent value can never accidentally publish a
