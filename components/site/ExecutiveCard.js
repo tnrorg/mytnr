@@ -1,11 +1,13 @@
 'use client';
+import { COLORS, FONT } from '@/lib/design/tokens';
 import { useState } from 'react';
 
 // Monogram for admin-created rows, which have no hard-coded monogram field.
 const initialsOf = (m) => String(m.designation || m.name || '?')
   .split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
-const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', goldLt: '#E8C25A' };
+// Sourced from the shared design tokens rather than redeclared locally.
+const C = { deep: COLORS.green900, green: COLORS.green700, gold: COLORS.gold500 };
 
 export function ExecutivePhoto({ member, size = 'card' }) {
   const [failed, setFailed] = useState(false);
@@ -55,7 +57,7 @@ export default function ExecutiveCard({ member }) {
         <a href={`/about/executive-committee/${member.slug}`}
           className="mt-5 block text-center text-[12.5px] font-bold py-2.5 rounded-xl text-white transition hover:opacity-90"
           style={{ background: C.deep }}>
-          View More →
+          View Profile
         </a>
       </div>
     </article>

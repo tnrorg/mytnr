@@ -2,14 +2,25 @@
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 import { HANDBOOK } from '@/content/aboutTnr';
+import { COLORS, FONT } from '@/lib/design/tokens';
+import ReadingProgress from './ReadingProgress';
+import DocToc from './DocToc';
 
-export const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3', ink: '#15231D' };
+// Sourced from the design tokens rather than redeclared, so a brand change is
+// one edit. Re-exported because the About pages import `C` from here.
+export const C = {
+  deep: COLORS.green900, green: COLORS.green700, gold: COLORS.gold500,
+  soft: '#F3E4B3', ink: COLORS.charcoal,
+};
+export { DocToc };
 
 // Shared shell for every About TNR page, so the governance documents all read
 // as one publication rather than eight separately-styled pages.
-export default function DocPage({ eyebrow, title, lead, children, source }) {
+export default function DocPage({ eyebrow, title, lead, children, source, toc }) {
   return (
-    <div className="light-page min-h-screen bg-white" style={{ color: C.ink }}>
+    <div className="light-page min-h-screen bg-white" style={{ color: C.ink, ...FONT }}>
+      {/* Long governance documents get a reading-progress indicator. */}
+      {toc && <ReadingProgress />}
       <SiteNav />
 
       <header className="relative overflow-hidden" style={{ background: C.deep }}>
@@ -22,7 +33,17 @@ export default function DocPage({ eyebrow, title, lead, children, source }) {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-5 py-12 sm:py-16">{children}</main>
+      {/* With a table of contents the page becomes a two-column reading view;
+          without one it stays a single measured column. */}
+      {toc ? (
+        <main id="main" className="max-w-tnr mx-auto px-5 py-12 sm:py-16
+          grid lg:grid-cols-[220px,minmax(0,1fr)] gap-10 lg:gap-14">
+          <DocToc items={toc} />
+          <div className="min-w-0">{children}</div>
+        </main>
+      ) : (
+        <main id="main" className="max-w-4xl mx-auto px-5 py-12 sm:py-16">{children}</main>
+      )}
 
       <div className="max-w-4xl mx-auto px-5 pb-14">
         <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 text-[13px] text-gray-600 leading-relaxed">
@@ -37,9 +58,14 @@ export default function DocPage({ eyebrow, title, lead, children, source }) {
   );
 }
 
-export function Section({ title, kicker, children }) {
+/** Turns a heading into a stable anchor id, so the sticky TOC and the section
+ *  it points at are always generated from the same string. */
+export const sectionId = (t = '') =>
+  t.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+export function Section({ title, kicker, id, children }) {
   return (
-    <section className="mb-12">
+    <section id={id || (title ? sectionId(title) : undefined)} className="mb-12 scroll-mt-24">
       {kicker && <div className="text-[11px] font-bold uppercase tracking-[.22em] mb-2" style={{ color: C.gold }}>{kicker}</div>}
       {title && <h2 className="text-2xl font-black mb-4" style={{ color: C.deep }}>{title}</h2>}
       {children}

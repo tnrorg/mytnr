@@ -1,10 +1,17 @@
 'use client';
-import DocPage, { Section, P, Callout, C } from '@/components/site/DocPage';
+import DocPage, { Section, P, Callout, C, sectionId } from '@/components/site/DocPage';
 import { VISION, MISSION, STRATEGIC_PRIORITIES, MANIFESTO } from '@/content/aboutTnr';
 
 export default function VisionMissionPage() {
+  const toc = [
+    { id: sectionId('Vision'), title: 'Vision' },
+    { id: sectionId('Mission'), title: 'Mission' },
+    { id: sectionId('Strategic Priorities'), title: 'Strategic Priorities' },
+    { id: sectionId('Manifesto'), title: 'Manifesto' },
+  ];
+
   return (
-    <DocPage eyebrow="Our Identity" title="Vision, Mission & Manifesto"
+    <DocPage toc={toc} eyebrow="Our Identity" title="Vision, Mission & Manifesto"
       source="TNR Governance Handbook, Part I — Organisational Identity, Chapter 1.">
       <Section title="Vision">
         <div className="rounded-2xl p-6 sm:p-8 text-white" style={{ background: C.deep }}>

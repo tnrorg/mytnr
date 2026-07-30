@@ -1,10 +1,16 @@
 'use client';
-import DocPage, { Section, P, TickList, C } from '@/components/site/DocPage';
+import DocPage, { Section, P, TickList, C, sectionId } from '@/components/site/DocPage';
 import { GOVERNANCE_INTRO, GOVERNANCE_TIERS, REPORTING_LINES, GOVERNING_DOCUMENTS } from '@/content/aboutTnr';
 
 export default function GovernancePage() {
+  const toc = [
+    { id: sectionId('Governance Tiers'), title: 'Governance Tiers' },
+    { id: sectionId('Reporting Lines and Coordination Framework'), title: 'Reporting Lines and Coordination Framework' },
+    { id: sectionId('Governing Documents'), title: 'Governing Documents' },
+  ];
+
   return (
-    <DocPage eyebrow="Governance" title="Governance Structure"
+    <DocPage toc={toc} eyebrow="Governance" title="Governance Structure"
       lead="How TNR is organised, from the Advisory Council down to Village Committees."
       source="TNR Governance Handbook, Part III — Governance Structure, Chapter 3.">
 

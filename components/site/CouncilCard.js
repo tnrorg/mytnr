@@ -1,8 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { initials } from '@/content/advisoryCouncil';
+import { COLORS, FONT } from '@/lib/design/tokens';
 
-const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C' };
+// One of the 29 duplicated palettes the audit found — now sourced from tokens.
+const C = { deep: COLORS.green900, green: COLORS.green700, gold: COLORS.gold500 };
 
 // Photo with an initials fallback: a member without a photo file still gets a
 // complete-looking card instead of a broken image icon.
@@ -13,9 +15,10 @@ export function CouncilPhoto({ member, size = 'card' }) {
 
   if (failed) {
     return (
-      <div className={`${box} ${radius} grid place-items-center font-black text-white shrink-0`}
-        style={{ background: `linear-gradient(140deg, ${C.green}, ${C.deep})` }}>
-        {initials(member.name)}
+      <div className={`${box} ${radius} grid place-items-center font-extrabold text-white shrink-0`}
+        style={{ background: `linear-gradient(140deg, ${C.green}, ${C.deep})` }}
+        role="img" aria-label={member.name}>
+        <span aria-hidden="true">{initials(member.name)}</span>
       </div>
     );
   }
@@ -29,14 +32,22 @@ export function CouncilPhoto({ member, size = 'card' }) {
 
 export default function CouncilCard({ member }) {
   return (
-    <article className="rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition p-4 flex flex-col">
+    <article style={FONT}
+      className="rounded-tnr-lg bg-white border border-gray-100 p-4 flex flex-col shadow-tnr-flat
+        transition-all duration-standard hover:-translate-y-[3px] hover:shadow-tnr-raise
+        hover:border-[rgba(23,107,73,.22)]">
       <CouncilPhoto member={member} />
 
       <h3 className="mt-4 font-black text-[15px] leading-snug text-center" style={{ color: C.deep }}>{member.name}</h3>
       <div className="mt-1 text-center text-[12px] font-bold" style={{ color: C.green }}>
         {member.degree}{member.field && <><br /><span className="font-semibold">({member.field})</span></>}
       </div>
-      <p className="mt-2 text-center text-[12px] text-gray-500 leading-snug">{member.affiliation}</p>
+      <p className="mt-2 text-center text-[12px] leading-snug" style={{ color: COLORS.muted }}>{member.affiliation}</p>
+      {(member.village || member.tenure) && (
+        <p className="mt-1 text-center text-[11px]" style={{ color: COLORS.muted }}>
+          {[member.village, member.tenure].filter(Boolean).join(' · ')}
+        </p>
+      )}
 
       <div className="mt-3 pt-3 border-t border-gray-100">
         <div className="text-[10px] font-bold uppercase tracking-[.14em] text-center mb-2" style={{ color: C.gold }}>
@@ -56,9 +67,10 @@ export default function CouncilCard({ member }) {
       </div>
 
       <a href={`/about/advisory-council/${member.slug}`}
-        className="mt-4 block text-center text-[12px] font-bold py-2 rounded-xl transition hover:opacity-90"
-        style={{ background: '#0B6B4F14', color: C.green }}>
-        View More →
+        className="mt-4 block text-center text-[12px] font-bold py-2.5 rounded-tnr
+          transition-colors duration-micro hover:bg-[rgba(23,107,73,.14)]"
+        style={{ background: 'rgba(23,107,73,.08)', color: C.green }}>
+        View Profile
       </a>
     </article>
   );

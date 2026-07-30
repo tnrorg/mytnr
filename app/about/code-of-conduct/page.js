@@ -1,10 +1,17 @@
 'use client';
-import DocPage, { Section, P, TickList, Callout, C } from '@/components/site/DocPage';
+import DocPage, { Section, P, TickList, Callout, C, sectionId } from '@/components/site/DocPage';
 import { CONDUCT_APPLICABILITY, CONDUCT_STANDARDS, CONFLICT_OF_INTEREST, DISCIPLINARY_MEASURES, DISCIPLINARY_NOTES } from '@/content/aboutTnr';
 
 export default function CodeOfConductPage() {
+  const toc = [
+    { id: sectionId('General Applicability'), title: 'General Applicability' },
+    { id: sectionId('Standards of Conduct'), title: 'Standards of Conduct' },
+    { id: sectionId('Conflict of Interest'), title: 'Conflict of Interest' },
+    { id: sectionId('Disciplinary Action'), title: 'Disciplinary Action' },
+  ];
+
   return (
-    <DocPage eyebrow="Ethics & Conduct" title="Code of Conduct"
+    <DocPage toc={toc} eyebrow="Ethics & Conduct" title="Code of Conduct"
       lead="The standards of conduct expected of every member of TNR."
       source="TNR Governance Handbook, Part IV — Ethics & Conduct, Chapter 5.">
 
