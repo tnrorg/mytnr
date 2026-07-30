@@ -239,10 +239,11 @@ export default function ApplyPage() {
               {showErr('applied_role') &&
                 <p className="text-[11px] font-semibold text-red-600">{showErr('applied_role')}</p>}
             </div>
-            <p className="text-[12px] text-gray-400 leading-relaxed">
-              Every applicant fills in the same form. Advisory Council and Executive Committee
-              applications are reviewed against the eligibility criteria in the TNR Constitution —
-              the membership committee confirms the final role at approval.
+            <p className="rounded-xl px-4 py-3 text-[12.5px] leading-relaxed"
+              style={{ background: 'rgba(200,154,43,.10)', color: '#7A5C10' }}>
+              <b>Please note:</b> select Union Council Team, Central Executive Committee or
+              Advisory Council <b>only if you already hold that position</b>. If you do not,
+              please select General Member. Thank you.
             </p>
           </Card>}
 
