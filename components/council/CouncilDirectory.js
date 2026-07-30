@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { Search, BadgeCheck, MapPin, ArrowRight, SlidersHorizontal } from 'lucide-react';
+import { Search, BadgeCheck, ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton, EmptyState } from '@/components/ui';
 import { COLORS, FONT, MOTION } from '@/lib/design/tokens';
@@ -9,73 +9,81 @@ import { initials } from '@/content/advisoryCouncil';
 const glass = 'rounded-tnr-lg border border-gray-100 bg-white/85 backdrop-blur-sm shadow-tnr-flat';
 
 function Card({ m, i }) {
+  const meta = [m.organisation || m.affiliation, m.country].filter(Boolean);
   return (
-    <motion.article className={`${glass} p-5 flex flex-col transition-all duration-standard
+    <motion.article className={`${glass} flex flex-col overflow-hidden transition-all duration-standard
       hover:-translate-y-[3px] hover:shadow-tnr-raise hover:border-[rgba(23,107,73,.22)]`}
       initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       transition={{ duration: MOTION.reveal, delay: Math.min(i * 0.04, 0.3), ease: MOTION.ease }}>
-      <div className="flex gap-4">
-        <div className="w-20 h-24 shrink-0 rounded-tnr overflow-hidden"
-          style={{ border: '1.5px solid rgba(200,154,43,.35)' }}>
-          {m.photo_url
-            ? <img src={m.photo_url} alt={m.name} loading="lazy" className="w-full h-full object-cover object-top" />
-            : <div role="img" aria-label={m.name}
-                className="w-full h-full grid place-items-center text-lg font-extrabold text-white"
-                style={{ background: `linear-gradient(140deg,${COLORS.green700},${COLORS.green950})` }}>
-                <span aria-hidden="true">{initials(m.name || '')}</span>
-              </div>}
-        </div>
-        <div className="min-w-0">
-          <h3 className="font-extrabold text-[15px] leading-snug flex items-center gap-1.5"
-            style={{ color: COLORS.green900 }}>
-            <span className="truncate">{m.name}</span>
-            {/* Every published leadership profile carries the gold badge: it
-                exists only because an admin confirmed an approved member. */}
-            {m.verified !== false && <BadgeCheck size={14} strokeWidth={2.5} aria-label="Verified member"
-              className="shrink-0" style={{ color: COLORS.gold500 }} />}
-          </h3>
-          {m.designation && <div className="mt-0.5 text-[11px] font-bold uppercase tracking-wide"
-            style={{ color: COLORS.gold500 }}>{m.designation}</div>}
-          {(m.profession || m.qualification) && (
-            <div className="mt-1 text-[12.5px] font-semibold" style={{ color: COLORS.green700 }}>
-              {m.profession || m.qualification}
-            </div>
-          )}
-          {(m.organisation || m.affiliation) && (
-            <div className="mt-0.5 text-[12px] truncate" style={{ color: COLORS.muted }}>
-              {m.organisation || m.affiliation}
-            </div>
-          )}
-          {m.country && (
-            <div className="mt-1 inline-flex items-center gap-1 text-[11.5px]" style={{ color: COLORS.muted }}>
-              <MapPin size={11} strokeWidth={2.2} aria-hidden="true" />{m.country}
-            </div>
-          )}
-        </div>
+
+      {/* Portrait fills the card width — at four across, a small left-aligned
+          thumbnail left the row looking empty. */}
+      <div className="relative aspect-[4/5] bg-gray-100">
+        {m.photo_url
+          ? <img src={m.photo_url} alt={m.name} loading="lazy" className="w-full h-full object-cover object-top" />
+          : <div role="img" aria-label={m.name}
+              className="w-full h-full grid place-items-center text-4xl font-extrabold text-white"
+              style={{ background: `linear-gradient(140deg,${COLORS.green700},${COLORS.green950})` }}>
+              <span aria-hidden="true">{initials(m.name || '')}</span>
+            </div>}
+
+        {m.designation && (
+          <span className="absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide backdrop-blur-sm"
+            style={{ background: 'rgba(6,45,33,.78)', color: COLORS.gold400 }}>
+            {m.designation}
+          </span>
+        )}
+        {m.verified !== false && (
+          <span className="absolute top-3 right-3 grid place-items-center w-7 h-7 rounded-full backdrop-blur-sm"
+            style={{ background: 'rgba(6,45,33,.78)' }} title="Verified member">
+            <BadgeCheck size={15} strokeWidth={2.5} aria-label="Verified member" style={{ color: COLORS.gold400 }} />
+          </span>
+        )}
       </div>
 
-      {m.intro && <p className="mt-3.5 text-[12.5px] leading-relaxed line-clamp-3" style={{ color: COLORS.muted }}>{m.intro}</p>}
+      <div className="p-4 flex flex-col flex-1">
+        <h3 className="font-extrabold text-[15px] leading-snug" style={{ color: COLORS.green900 }}>
+          {m.name}
+        </h3>
+        {(m.profession || m.qualification) && (
+          <div className="mt-1 text-[12.5px] font-semibold leading-snug" style={{ color: COLORS.green700 }}>
+            {m.profession || m.qualification}
+          </div>
+        )}
+        {!!meta.length && (
+          <div className="mt-1 text-[11.5px] leading-snug" style={{ color: COLORS.muted }}>
+            {meta.join(' · ')}
+          </div>
+        )}
 
-      {!!(m.expertise || []).length && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {m.expertise.slice(0, 3).map(e => (
-            <span key={e} className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
-              style={{ background: 'rgba(23,107,73,.08)', color: COLORS.green700 }}>{e}</span>
-          ))}
-          {m.expertise.length > 3 && (
-            <span className="px-1.5 py-1 text-[11px]" style={{ color: COLORS.muted }}>+{m.expertise.length - 3}</span>
-          )}
-        </div>
-      )}
+        {m.intro && (
+          <p className="mt-2.5 text-[12px] leading-relaxed line-clamp-2" style={{ color: COLORS.muted }}>
+            {m.intro}
+          </p>
+        )}
 
-      <a href={`/council/${m.slug}`}
-        className="group mt-4 inline-flex items-center justify-center gap-1.5 rounded-tnr py-2.5 text-[12.5px] font-bold
-          transition-colors duration-micro hover:bg-[rgba(23,107,73,.14)]"
-        style={{ background: 'rgba(23,107,73,.08)', color: COLORS.green700 }}>
-        View Full Profile
-        <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true"
-          className="transition-transform duration-micro group-hover:translate-x-0.5" />
-      </a>
+        {!!(m.expertise || []).length && (
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {m.expertise.slice(0, 2).map(e => (
+              <span key={e} className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
+                style={{ background: 'rgba(23,107,73,.08)', color: COLORS.green700 }}>{e}</span>
+            ))}
+            {m.expertise.length > 2 && (
+              <span className="px-1 py-0.5 text-[10.5px]" style={{ color: COLORS.muted }}>
+                +{m.expertise.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+
+        <a href={`/council/${m.slug}`}
+          className="group mt-auto pt-4 inline-flex items-center justify-center gap-1.5 text-[12.5px] font-bold"
+          style={{ color: COLORS.green700 }}>
+          View Full Profile
+          <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true"
+            className="transition-transform duration-micro group-hover:translate-x-0.5" />
+        </a>
+      </div>
     </motion.article>
   );
 }
@@ -100,8 +108,8 @@ export default function CouncilDirectory({ limit, showFilters = true }) {
   const sel = 'rounded-tnr border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#176B49] bg-white';
 
   if (!d) return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {Array.from({ length: limit || 6 }).map((_, i) => <Skeleton key={i} height="h-64" />)}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {Array.from({ length: limit || 8 }).map((_, i) => <Skeleton key={i} height="h-80" />)}
     </div>
   );
 
@@ -157,7 +165,7 @@ export default function CouncilDirectory({ limit, showFilters = true }) {
             ? 'Try a different name, profession or country.'
             : 'Advisory Council profiles will appear here once published.'} />
       ) : (
-        <div className={`${showFilters ? 'mt-6' : ''} grid sm:grid-cols-2 lg:grid-cols-3 gap-4`}>
+        <div className={`${showFilters ? 'mt-6' : ''} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5`}>
           {members.map((m, i) => <Card key={m.slug} m={m} i={i} />)}
         </div>
       )}

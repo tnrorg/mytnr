@@ -23,7 +23,8 @@ export default function CouncilSection() {
         </a>
       </div>
       <div className="mt-10">
-        <CouncilDirectory limit={6} showFilters={false} />
+        {/* Two full rows at desktop width (4 per row). */}
+        <CouncilDirectory limit={8} showFilters={false} />
       </div>
     </section>
   );
