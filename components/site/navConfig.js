@@ -1,79 +1,110 @@
-// TNR platform navigation. Election Portal points at the LIVE existing system.
-// Every other route is a placeholder page to be built — nothing here touches
+// ── TNR site navigation ────────────────────────────────────────────────────
+// Structure follows the 10-item information architecture: Home, About TNR,
+// Leadership, Initiatives, Membership, Members, Opportunities, Media,
+// Election Portal, Contact.
+//
+// IMPORTANT: an audit found 73 of the previous 94 nav links pointed at pages
+// that do not exist. Every entry is now either a real route or explicitly
+// marked `soon`, which the header renders as a non-clickable "Soon" chip.
+// That keeps the full roadmap visible without sending anyone to a 404.
+// When a page is built, delete its `soon: true` and the link goes live.
+//
+// Election Portal points at the LIVE existing system — nothing here touches
 // election data, APIs or logic.
+
+const soon = (label, href) => ({ label, href, soon: true });
+const live = (label, href) => ({ label, href });
+
 export const NAV = [
   { label: 'Home', href: '/' },
+
   { label: 'About TNR', href: '/about', items: [
-    ['About Us', '/about'], ['Vision & Mission', '/about/vision-mission'],
-    ['Constitution', '/about/constitution'], ['Executive Committee', '/about/executive-committee'],
-    ['Advisory Council', '/about/advisory-council'], ['Office Bearers', '/about/office-bearers'],
-    ['Governance Structure', '/about/governance'], ['Code of Conduct', '/about/code-of-conduct'],
+    live('About Us', '/about'),
+    live('Vision & Mission', '/about/vision-mission'),
+    live('Constitution', '/about/constitution'),
+    live('Governance Structure', '/about/governance'),
+    live('Code of Conduct', '/about/code-of-conduct'),
+    soon('History of TNR', '/about/history'),
   ]},
+
+  { label: 'Leadership', href: '/about/executive-committee', items: [
+    live('Central Executive Committee', '/about/executive-committee'),
+    live('Advisory Council', '/about/advisory-council'),
+    live('Office Bearers', '/about/office-bearers'),
+    soon('Election Committee', '/about/election-committee'),
+    soon('Previous Leadership', '/about/previous-leadership'),
+    soon("President's Message", '/about/presidents-message'),
+  ]},
+
+  { label: 'Initiatives', items: [
+    soon('Education & Scholarships', '/initiatives/education'),
+    soon('Youth Development', '/initiatives/youth'),
+    soon('Community Welfare', '/initiatives/welfare'),
+    soon('Health Awareness', '/initiatives/health'),
+    soon('Women Empowerment', '/initiatives/women'),
+    soon('Projects & Impact', '/initiatives/projects'),
+  ]},
+
   { label: 'Membership', href: '/membership', items: [
-    ['Membership Overview', '/membership'], ['Become a Member', '/membership/apply'],
-    ['Check Application Status', '/membership/status'], ['Verify Membership', '/membership/verify'],
-    ['Our Members', '/members'], ['Volunteer With TNR', '/volunteer'],
-    ['Member Login', '/member/login'],
+    live('Membership Overview', '/membership'),
+    live('Become a Member', '/membership/apply'),
+    live('Check Application Status', '/membership/status'),
+    live('Verify Membership', '/membership/verify'),
+    live('Member Login', '/member/login'),
+    soon('Eligibility & Guidelines', '/membership/eligibility'),
+    soon('Volunteer With TNR', '/volunteer'),
   ]},
-  { label: 'Community', items: [
-    ['Global Member Directory', '/community/directory'], ['Professional Directory', '/community/professionals'],
-    ['Country Chapters', '/community/chapters'], ['Regional Representatives', '/community/representatives'],
-    ['Interactive World Map', '/community/map'], ['Community Forum', '/community/forum'],
-    ['Success Stories', '/community/stories'], ['Hall of Fame', '/community/hall-of-fame'],
+
+  { label: 'Members', href: '/members' },
+
+  { label: 'Opportunities', href: '/member/opportunities', items: [
+    live('Browse Opportunities', '/member/opportunities'),
+    soon('Jobs & Internships', '/opportunities/jobs'),
+    soon('Scholarships', '/opportunities/scholarships'),
+    soon('Training & Mentorship', '/opportunities/training'),
   ]},
-  { label: 'Education', items: [
-    ['Scholarships', '/education/scholarships'], ['University Directory', '/education/universities'],
-    ['Admission Guidance', '/education/admissions'], ['Student Mentorship', '/education/mentorship'],
-    ['CV Builder', '/education/cv-builder'], ['SOP Builder', '/education/sop-builder'],
-    ['Cover Letter Builder', '/education/cover-letter'], ['Educational Resources', '/education/resources'],
+
+  { label: 'Media', items: [
+    soon('News & Announcements', '/media/news'),
+    soon('Press Releases', '/media/press'),
+    soon('Photo Gallery', '/media/photos'),
+    soon('Video Gallery', '/media/videos'),
+    soon('Publications & Downloads', '/media/downloads'),
+    soon('Upcoming Events', '/events'),
   ]},
-  { label: 'Career & Business', items: [
-    ['Job Portal', '/career/jobs'], ['Internship Portal', '/career/internships'],
-    ['Career Mentorship', '/career/mentorship'], ['Business Directory', '/career/businesses'],
-    ['Startup Support', '/career/startups'], ['Freelancing Resources', '/career/freelancing'],
-    ['Post a Job', '/career/post-job'], ['Register a Business', '/career/register-business'],
-  ]},
-  { label: 'Welfare', items: [
-    ['Charity Projects', '/welfare/projects'], ['Donate', '/welfare/donate'],
-    ['Emergency Support', '/welfare/emergency'], ['Request Assistance', '/welfare/request'],
-    ['Volunteer Portal', '/welfare/volunteer'], ['Transparency Reports', '/welfare/transparency'],
-    ['Completed Projects', '/welfare/completed'],
-  ]},
-  { label: 'News & Events', items: [
-    ['News', '/news'], ['Announcements', '/news/announcements'],
-    ['Upcoming Events', '/events'], ['Events Calendar', '/events/calendar'],
-    ['Online Meetings', '/events/meetings'], ['Webinars', '/events/webinars'],
-    ['Workshops', '/events/workshops'], ['Past Events', '/events/past'],
-    ['Event Registration', '/events/register'],
-  ]},
-  { label: 'Rondo Statistics', href: '/statistics', items: [
-    ['Population', '/statistics/population'], ['Literacy Rate', '/statistics/literacy'],
-    ['Education Statistics', '/statistics/education'],
-    ['Health Statistics', '/statistics/health'], ['Tourism Statistics', '/statistics/tourism'],
-    ['Schools', '/statistics/schools'],
-    ['Colleges', '/statistics/colleges'], ['Universities', '/statistics/universities'],
-    ['Doctors', '/statistics/doctors'], ['Engineers', '/statistics/engineers'],
-    ['Teachers', '/statistics/teachers'], ['Overseas Professionals', '/statistics/overseas'],
-    ['Employment Statistics', '/statistics/employment'], ['Interactive Reports', '/statistics/reports'],
-  ]},
+
   { label: 'Election Portal', href: '/election-portal', highlight: true, items: [
-    ['Current Election', '/election-portal'], ['Candidate Profiles', '/election-portal#candidates'],
-    ['Voter Verification', '/vote'], ['Election Results', '/results'],
-    ['Live Dashboard', '/dashboard'], ['Election Guidelines', '/election-portal#process'],
+    live('Current Election', '/election-portal'),
+    live('Voter Verification', '/vote'),
+    live('Election Results', '/results'),
+    live('Live Dashboard', '/dashboard'),
+    live('Election Guidelines', '/election-portal#process'),
   ]},
-  { label: 'More', items: [
-    ['Digital Library', '/media/library'],
-    ['Research Papers', '/media/research'], ['Photo Gallery', '/media/photos'],
-    ['Video Gallery', '/media/videos'], ['Newsletter', '/media/newsletter'],
-    ['Verify Records', '/verify'], ['Ask TNR AI', '/tnr-ai'],
-    ['Contact Us', '/contact'], ['Help Center', '/help'],
+
+  { label: 'Contact', items: [
+    soon('Contact Us', '/contact'),
+    soon('Feedback', '/contact/feedback'),
+    soon('Complaints', '/contact/complaints'),
+    soon('Technical Support', '/contact/support'),
+    soon('Help Centre & FAQs', '/help'),
   ]},
 ];
 
+// Footer legal / policy links. Live governance documents point at the real
+// About pages; the rest are marked soon for the same reason as above.
 export const FOOTER_LINKS = [
-  ['Privacy Policy', '/legal/privacy'], ['Terms & Conditions', '/legal/terms'],
-  ['Data Protection Policy', '/legal/data-protection'], ['Code of Conduct', '/legal/code-of-conduct'],
-  ['Community Guidelines', '/legal/community-guidelines'], ['Accessibility', '/legal/accessibility'],
-  ['Security', '/legal/security'], ['Transparency Reports', '/welfare/transparency'],
-  ['Sitemap', '/sitemap'], ['Help Center', '/help'], ['Contact', '/contact'],
+  live('Constitution', '/about/constitution'),
+  live('Code of Conduct', '/about/code-of-conduct'),
+  live('Governance', '/about/governance'),
+  soon('Privacy Policy', '/legal/privacy'),
+  soon('Terms & Conditions', '/legal/terms'),
+  soon('Accessibility', '/legal/accessibility'),
+  soon('Sitemap', '/sitemap'),
 ];
+
+/** Flattened list of routes still to be built — handy for a roadmap page. */
+export const PLANNED_ROUTES = NAV
+  .flatMap(n => n.items || [])
+  .concat(FOOTER_LINKS)
+  .filter(i => i.soon)
+  .map(i => i.href);

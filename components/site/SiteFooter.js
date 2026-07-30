@@ -4,7 +4,10 @@ import { NAV, FOOTER_LINKS } from './navConfig';
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
 
 export default function SiteFooter() {
-  const cols = NAV.filter(n => n.items).slice(0, 4);
+  // Only columns that still have at least one live link — otherwise a
+  // heading would sit above an empty list (Initiatives, Media and Contact are
+  // entirely planned pages at the moment).
+  const cols = NAV.filter(n => (n.items || []).some(i => !i.soon)).slice(0, 4);
   return (
     <footer className="mt-auto">
       <div style={{ background: '#063D2B' }} className="text-white">
@@ -25,8 +28,10 @@ export default function SiteFooter() {
             <div key={c.label}>
               <h4 style={mont} className="text-[13px] font-bold uppercase tracking-wider text-[#F3E4B3]">{c.label}</h4>
               <ul className="mt-3 space-y-1.5">
-                {c.items.slice(0, 6).map(([l, h]) => (
-                  <li key={l}><a href={h} className="text-sm text-white/60 hover:text-white transition">{l}</a></li>
+                {c.items.filter(i => !i.soon).slice(0, 6).map(i => (
+                  <li key={i.label}>
+                    <a href={i.href} className="text-sm text-white/60 hover:text-white transition-colors duration-micro">{i.label}</a>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -35,8 +40,8 @@ export default function SiteFooter() {
 
         <div className="border-t border-white/10">
           <div className="max-w-[1400px] mx-auto px-4 py-4 flex flex-wrap gap-x-4 gap-y-2 justify-center">
-            {FOOTER_LINKS.map(([l, h]) => (
-              <a key={l} href={h} className="text-xs text-white/50 hover:text-white transition">{l}</a>
+            {FOOTER_LINKS.filter(i => !i.soon).map(i => (
+              <a key={i.label} href={i.href} className="text-xs text-white/50 hover:text-white transition-colors duration-micro">{i.label}</a>
             ))}
           </div>
         </div>

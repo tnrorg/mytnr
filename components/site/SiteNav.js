@@ -5,6 +5,20 @@ import { NAV } from './navConfig';
 const G = '#063D2B', GOLD = '#D4A72C';
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
 
+/* A dropdown entry. Planned pages render as a non-clickable row with a "Soon"
+   chip rather than a link to a 404 — the roadmap stays visible and honest. */
+function NavLink({ item, onNavigate, className }) {
+  if (item.soon) return (
+    <span className={`${className} flex items-center justify-between cursor-default text-gray-400`}
+      aria-disabled="true">
+      {item.label}
+      <span className="ml-2 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide
+        bg-gray-100 text-gray-400">Soon</span>
+    </span>
+  );
+  return <a href={item.href} onClick={onNavigate} className={className}>{item.label}</a>;
+}
+
 export default function SiteNav() {
   const [open, setOpen] = useState(null);      // desktop dropdown label
   const [mobile, setMobile] = useState(false);
@@ -78,8 +92,9 @@ export default function SiteNav() {
               {n.items && open === n.label && (
                 <div className="absolute left-0 top-full pt-1 w-60">
                   <div className="rounded-2xl bg-white shadow-2xl border border-gray-100 py-2 animate-fade-up">
-                    {n.items.map(([l, h]) => (
-                      <a key={l} href={h} className="block px-4 py-2 text-sm text-gray-600 hover:text-[#0B6B4F] hover:bg-[#0B6B4F]/5 transition">{l}</a>
+                    {n.items.map(item => (
+                      <NavLink key={item.label} item={item}
+                        className="block px-4 py-2 text-sm text-gray-600 hover:text-[#0B6B4F] hover:bg-[#0B6B4F]/5 transition-colors duration-micro" />
                     ))}
                   </div>
                 </div>
@@ -139,8 +154,9 @@ export default function SiteNav() {
                   {acc === n.label && (
                     <div className="pb-2 bg-gray-50/60">
                       {n.href && <a href={n.href} className="block px-7 py-2 text-sm font-semibold text-[#0B6B4F]">Open {n.label} →</a>}
-                      {n.items.map(([l, h]) => (
-                        <a key={l} href={h} onClick={() => setMobile(false)} className="block px-7 py-2 text-sm text-gray-600">{l}</a>
+                      {n.items.map(item => (
+                        <NavLink key={item.label} item={item} onNavigate={() => setMobile(false)}
+                          className="block px-7 py-2.5 text-sm text-gray-600" />
                       ))}
                     </div>
                   )}
