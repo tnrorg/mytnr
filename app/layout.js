@@ -23,7 +23,12 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Keyboard and screen-reader users can jump past the navigation.
+            Hidden until focused — see .tnr-skip-link in globals.css. */}
+        <a href="#main" className="tnr-skip-link">Skip to main content</a>
+        {children}
+      </body>
     </html>
   );
 }

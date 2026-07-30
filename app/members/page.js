@@ -68,7 +68,7 @@ export default function DirectoryPage() {
   ));
 
   return (
-    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
+    <main id="main" className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
       <SiteNav />
 
       <section className="text-white py-14" style={{ background: `linear-gradient(165deg,${C.deep},#04241A)` }}>

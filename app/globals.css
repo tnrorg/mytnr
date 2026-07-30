@@ -147,3 +147,78 @@ button, input, textarea, select, option { font-family: inherit; }
 /* Destructive actions need to stay legible against the green. */
 .admin-light .card .text-red-400 { color: #FCA5A5; }
 .admin-light .card .text-red-300 { color: #FECACA; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM FOUNDATION (Phase 2)
+   Tokens mirror lib/design/tokens.js and the Tailwind `tnr` palette.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --tnr-green-950: #062D21;
+  --tnr-green-900: #0A3D2C;
+  --tnr-green-800: #0F5138;
+  --tnr-green-700: #176B49;
+  --tnr-gold-500:  #C89A2B;
+  --tnr-gold-400:  #D7AE4A;
+  --tnr-white:     #FFFFFF;
+  --tnr-snow:      #F8FAF8;
+  --tnr-neutral:   #F1F4F2;
+  --tnr-charcoal:  #17211C;
+  --tnr-muted:     #647169;
+
+  /* Motion scale — micro / standard / reveal, per the spec. */
+  --tnr-dur-micro: 150ms;
+  --tnr-dur-standard: 250ms;
+  --tnr-dur-reveal: 450ms;
+  --tnr-ease: cubic-bezier(.22,.61,.36,1);
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────
+   The audit found zero handling for this. Anyone who has asked their OS to
+   reduce motion now gets a near-static experience, including Framer Motion
+   (which respects these overrides because it animates real CSS). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Visible focus ────────────────────────────────────────────────────────
+   Keyboard users must always be able to see where they are. Gold reads on
+   both the dark shell and the snow-white pages. */
+:focus-visible {
+  outline: 2px solid var(--tnr-gold-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Only suppress the ring for pointer users, never for keyboard. */
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── Skip to content ──────────────────────────────────────────────────────
+   Visually hidden until focused, so keyboard and screen-reader users can
+   jump past the navigation. */
+.tnr-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+}
+.tnr-skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--tnr-green-900);
+  color: #fff;
+  border: 2px solid var(--tnr-gold-500);
+  border-radius: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ── Screen-reader-only text (for chart summaries and icon buttons) ────── */
+.tnr-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}

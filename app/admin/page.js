@@ -128,7 +128,7 @@ export default function Admin() {
       </div>
     </aside>
 
-    <main className="flex-1 p-4 sm:p-6 max-w-6xl">
+    <main id="main" className="flex-1 p-4 sm:p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-5">
         <div>
           {inElection && <div className="text-[11px] uppercase tracking-widest text-tnr-cream/40">Election Portal</div>}

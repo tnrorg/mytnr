@@ -40,7 +40,7 @@ export default function VerifyPage() {
   const [fg, bg, icon] = TONE[res?.state] || TONE['Not Found'];
 
   return (
-    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
+    <main id="main" className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
       <SiteNav />
       <section className="flex-1 max-w-lg w-full mx-auto px-4 py-14">
         <h1 style={{ ...mont, color: C.deep }} className="text-3xl font-black text-center">Verify Membership</h1>

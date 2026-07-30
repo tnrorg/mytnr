@@ -133,7 +133,7 @@ export default function VotePage() {
   }, [ballotLocked]);
 
   return (
-    <main className="min-h-screen flex flex-col vote-green" dir={rtl ? 'rtl' : 'ltr'} style={{ background: '#FDFDFD', color: '#15231D' }}>
+    <main id="main" className="min-h-screen flex flex-col vote-green" dir={rtl ? 'rtl' : 'ltr'} style={{ background: '#FDFDFD', color: '#15231D' }}>
       <BrandHeader lang={lang} onToggle={toggle} t={t} />
       <section className="flex-1 flex items-start sm:items-center justify-center px-4 py-8">
         <div className="w-full max-w-xl">

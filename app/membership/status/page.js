@@ -33,7 +33,7 @@ export default function StatusPage() {
   const [txt, fg, bg] = LABEL[res?.status] || ['—', '#374151', '#F3F4F6'];
 
   return (
-    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
+    <main id="main" className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
       <SiteNav />
       <section className="flex-1 max-w-lg w-full mx-auto px-4 py-14">
         <h1 style={{ ...mont, color: C.deep }} className="text-3xl font-black text-center">Check Application Status</h1>

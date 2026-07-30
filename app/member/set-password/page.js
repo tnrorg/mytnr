@@ -41,7 +41,7 @@ export default function SetPassword() {
   }
 
   return (
-    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
+    <main id="main" className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: C.ink, ...mont }}>
       <SiteNav />
       <section className="flex-1 grid place-items-center px-4 py-16">
         <div className="w-full max-w-md text-center">

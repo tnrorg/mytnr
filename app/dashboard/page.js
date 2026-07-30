@@ -21,7 +21,7 @@ export default function Dashboard() {
   const pct = s?.participation || 0;
 
   return (
-    <main className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'}>
+    <main id="main" className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'}>
       <BrandHeader lang={lang} onToggle={toggle} t={t} />
       <section className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         <div className="flex items-center justify-between mb-6">

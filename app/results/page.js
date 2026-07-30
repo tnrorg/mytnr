@@ -11,7 +11,7 @@ export default function Results() {
   useEffect(() => { fetch('/api/public/results?t=' + Date.now(), { cache: 'no-store' }).then(x => x.json()).then(setR).catch(() => {}); }, []);
 
   return (
-    <main className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'}>
+    <main id="main" className="min-h-screen flex flex-col" dir={rtl ? 'rtl' : 'ltr'}>
       <BrandHeader lang={lang} onToggle={toggle} t={t} />
       <section className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         <h1 className={`text-3xl font-black heading-gold mb-1 ${rtl ? 'urdu' : ''}`}>{t.results}</h1>

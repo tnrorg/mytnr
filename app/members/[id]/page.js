@@ -28,7 +28,7 @@ export default function PublicMemberProfile() {
   ) : null;
 
   return (
-    <main className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
+    <main id="main" className="light-page min-h-screen flex flex-col bg-[#FDFDFD]" style={{ color: '#15231D', ...mont }}>
       <SiteNav />
       <section className="max-w-2xl mx-auto px-4 py-12 w-full flex-1">
         <a href="/members" className="text-xs font-semibold" style={{ color: C.green }}>← Back to Members</a>
