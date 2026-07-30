@@ -6,6 +6,7 @@ import {
   GENDERS, EDUCATION_LEVELS, POSITIONS, CONTRIBUTION_AREAS,
   LEADERSHIP_OPTIONS, DECLARATION_TEXT, DECLARATION_VERSION,
 } from '@/lib/membership/options';
+import { validateApplication, incompleteSections } from '@/lib/membership/validateApplication';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -22,7 +23,16 @@ export default function ApplyPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState(null);
+  const [touched, setTouched] = useState({});   // fields the applicant has visited
+  const [tried, setTried] = useState(false);    // they have pressed Submit at least once
   const set = (k, v) => { setErr(''); setF(p => ({ ...p, [k]: v })); };
+  const blur = (k) => setTouched(t => ({ ...t, [k]: true }));
+
+  const errors = validateApplication(f);
+  // An error is only shown once the applicant has left that field, or after
+  // they try to submit — no wall of red before they have typed anything.
+  const showErr = (k) => (tried || touched[k]) ? errors[k] : '';
+  const missing = Object.keys(errors).length;
   // Read the chosen image as a base64 data URL, downscaled to keep it small.
   function pickPhoto(file) {
     setErr('');
@@ -57,12 +67,19 @@ export default function ApplyPage() {
       ? p.contribution_areas.filter(x => x !== a) : [...p.contribution_areas, a],
   }));
 
-  const ready = f.first_name && f.last_name && f.email && f.mobile && f.why_join
-    && f.contribution_areas.length && f.leadership_view && f.youth_issues && f.declaration_accepted;
-
   async function submit(e) {
     e.preventDefault();
-    if (!ready || busy) return;               // disables repeated clicks
+    if (busy) return;                          // disables repeated clicks
+    setTried(true);
+    if (missing) {
+      // Every incomplete field is now flagged; jump to the first one so the
+      // applicant is never left guessing what is blocking submission.
+      setErr(`Please complete all required fields — ${missing} still need${missing === 1 ? 's' : ''} attention (section ${incompleteSections(errors).join(', ')}).`);
+      const el = document.querySelector('[data-invalid="true"]');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el?.querySelector('input,select,textarea,button')?.focus?.();
+      return;
+    }
     setBusy(true); setErr('');
     try {
       const r = await fetch('/api/public/membership/apply', {
@@ -131,30 +148,31 @@ export default function ApplyPage() {
               </div>
             </div>
             <Grid>
-              <Field label="First Name" req><Input value={f.first_name} onChange={v => set('first_name', v)} /></Field>
-              <Field label="Last Name" req><Input value={f.last_name} onChange={v => set('last_name', v)} /></Field>
-              <Field label="Gender"><Select value={f.gender} onChange={v => set('gender', v)} options={GENDERS} /></Field>
-              <Field label="Age"><Input type="number" value={f.age} onChange={v => set('age', v)} /></Field>
-              <Field label="Union Council in Roundu"><Input value={f.union_council} onChange={v => set('union_council', v)} placeholder="e.g. Roundu" /></Field>
-              <Field label="Village / Area"><Input value={f.village} onChange={v => set('village', v)} /></Field>
-              <Field label="Mobile / WhatsApp Number" req><Input value={f.mobile} onChange={v => set('mobile', v)} placeholder="+92 3xx xxxxxxx" /></Field>
-              <Field label="Email Address" req><Input type="email" value={f.email} onChange={v => set('email', v)} placeholder="name@example.com" /></Field>
+              <Field label="First Name" req error={showErr('first_name')}><Input value={f.first_name} onChange={v => set('first_name', v)} onBlur={() => blur('first_name')} bad={!!showErr('first_name')} /></Field>
+              <Field label="Last Name" req error={showErr('last_name')}><Input value={f.last_name} onChange={v => set('last_name', v)} onBlur={() => blur('last_name')} bad={!!showErr('last_name')} /></Field>
+              <Field label="Gender" req error={showErr('gender')}><Select value={f.gender} onChange={v => set('gender', v)} options={GENDERS} onBlur={() => blur('gender')} bad={!!showErr('gender')} /></Field>
+              <Field label="Age" req error={showErr('age')}><Input type="number" value={f.age} onChange={v => set('age', v)} onBlur={() => blur('age')} bad={!!showErr('age')} /></Field>
+              <Field label="Union Council in Roundu" req error={showErr('union_council')}><Input value={f.union_council} onChange={v => set('union_council', v)} placeholder="e.g. Roundu" onBlur={() => blur('union_council')} bad={!!showErr('union_council')} /></Field>
+              <Field label="Village / Area" req error={showErr('village')}><Input value={f.village} onChange={v => set('village', v)} onBlur={() => blur('village')} bad={!!showErr('village')} /></Field>
+              <Field label="Mobile / WhatsApp Number" req error={showErr('mobile')}><Input value={f.mobile} onChange={v => set('mobile', v)} placeholder="+92 3xx xxxxxxx" onBlur={() => blur('mobile')} bad={!!showErr('mobile')} /></Field>
+              <Field label="Email Address" req error={showErr('email')}><Input type="email" value={f.email} onChange={v => set('email', v)} placeholder="name@example.com" onBlur={() => blur('email')} bad={!!showErr('email')} /></Field>
             </Grid>
           </Card>
 
           <Card title="B · Education & Profession">
             <Grid>
-              <Field label="Highest Level of Education"><Select value={f.education_level} onChange={v => set('education_level', v)} options={EDUCATION_LEVELS} /></Field>
-              <Field label="Field of Study / Profession"><Input value={f.field_of_study} onChange={v => set('field_of_study', v)} /></Field>
-              <Field label="Current Position"><Select value={f.current_position} onChange={v => set('current_position', v)} options={POSITIONS} /></Field>
+              <Field label="Highest Level of Education" req error={showErr('education_level')}><Select value={f.education_level} onChange={v => set('education_level', v)} options={EDUCATION_LEVELS} onBlur={() => blur('education_level')} bad={!!showErr('education_level')} /></Field>
+              <Field label="Field of Study / Profession" req error={showErr('field_of_study')}><Input value={f.field_of_study} onChange={v => set('field_of_study', v)} onBlur={() => blur('field_of_study')} bad={!!showErr('field_of_study')} /></Field>
+              <Field label="Current Position" req error={showErr('current_position')}><Select value={f.current_position} onChange={v => set('current_position', v)} options={POSITIONS} onBlur={() => blur('current_position')} bad={!!showErr('current_position')} /></Field>
             </Grid>
           </Card>
 
           <Card title="C · Motivation & Contribution">
-            <Field label="Why do you want to join تحریک نوجوانان روندو؟" req>
-              <Textarea value={f.why_join} onChange={v => set('why_join', v)} rows={4} />
+            <Field label="Why do you want to join تحریک نوجوانان روندو؟" req error={showErr('why_join')}>
+              <Textarea value={f.why_join} onChange={v => set('why_join', v)} rows={4}
+                onBlur={() => blur('why_join')} bad={!!showErr('why_join')} />
             </Field>
-            <Field label="Which areas are you most interested in contributing to?" req>
+            <Field label="Which areas are you most interested in contributing to?" req error={showErr('contribution_areas')}>
               <div className="flex flex-wrap gap-2 mt-1">
                 {CONTRIBUTION_AREAS.map(a => {
                   const on = f.contribution_areas.includes(a);
@@ -165,7 +183,7 @@ export default function ApplyPage() {
                 })}
               </div>
             </Field>
-            <Field label="Do you believe educated and visionary leadership is important for the future of Roundu?" req>
+            <Field label="Do you believe educated and visionary leadership is important for the future of Roundu?" req error={showErr('leadership_view')}>
               <div className="flex gap-2 mt-1">
                 {LEADERSHIP_OPTIONS.map(o => (
                   <button type="button" key={o} onClick={() => set('leadership_view', o)}
@@ -178,17 +196,22 @@ export default function ApplyPage() {
             <Field label="Would you like to explain your answer? (optional)">
               <Textarea value={f.leadership_note} onChange={v => set('leadership_note', v)} rows={2} />
             </Field>
-            <Field label="What are the biggest issues facing the youth of Roundu today?" req>
-              <Textarea value={f.youth_issues} onChange={v => set('youth_issues', v)} rows={4} />
+            <Field label="What are the biggest issues facing the youth of Roundu today?" req error={showErr('youth_issues')}>
+              <Textarea value={f.youth_issues} onChange={v => set('youth_issues', v)} rows={4}
+                onBlur={() => blur('youth_issues')} bad={!!showErr('youth_issues')} />
             </Field>
           </Card>
 
           <Card title="D · Declaration">
+            <div data-invalid={showErr('declaration_accepted') ? 'true' : undefined}>
             <label className="flex gap-3 items-start cursor-pointer">
               <input type="checkbox" checked={f.declaration_accepted} className="mt-1 w-4 h-4 shrink-0"
                 onChange={e => set('declaration_accepted', e.target.checked)} />
               <span className="text-sm text-gray-600 leading-relaxed">{DECLARATION_TEXT}</span>
             </label>
+            {showErr('declaration_accepted') &&
+              <p className="mt-2 text-[11px] font-semibold text-red-600">{showErr('declaration_accepted')}</p>}
+            </div>
           </Card>
 
           <Card title="E · WhatsApp Group (optional)">
@@ -204,10 +227,14 @@ export default function ApplyPage() {
 
           {err && <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">{err}</div>}
 
-          <button type="submit" disabled={!ready || busy}
+          {/* The button stays clickable on purpose: a disabled button gives no
+              reason why, so pressing it reveals exactly what is still missing. */}
+          <button type="submit" disabled={busy}
             className="w-full py-4 rounded-xl font-bold text-white text-lg shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>
-            {busy ? 'Submitting…' : 'Submit Application'}
+            style={{ background: missing && tried
+              ? 'linear-gradient(180deg,#9CA3AF,#6B7280)'
+              : `linear-gradient(180deg,${C.green},${C.deep})` }}>
+            {busy ? 'Submitting…' : missing && tried ? `${missing} field${missing === 1 ? '' : 's'} still required` : 'Submit Application'}
           </button>
           <p className="text-center text-xs text-gray-400">
             Already applied? <a href="/membership/status" className="font-semibold" style={{ color: C.green }}>Check your application status</a>
@@ -227,20 +254,25 @@ function Card({ title, children }) {
   </div>;
 }
 const Grid = ({ children }) => <div className="grid sm:grid-cols-2 gap-4">{children}</div>;
-function Field({ label, req, children }) {
-  return <div>
+function Field({ label, req, error, children }) {
+  return <div data-invalid={error ? 'true' : undefined}>
     <label className="block text-xs font-semibold text-gray-500 mb-1.5">
       {label}{req && <span className="text-red-500"> *</span>}
-    </label>{children}
+    </label>
+    {children}
+    {error && <p className="mt-1 text-[11px] font-semibold text-red-600">{error}</p>}
   </div>;
 }
-const base = 'w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#0B6B4F] transition bg-white';
-const Input = ({ value, onChange, type = 'text', placeholder }) =>
-  <input type={type} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} className={base} />;
-const Textarea = ({ value, onChange, rows = 3 }) =>
-  <textarea rows={rows} value={value} onChange={e => onChange(e.target.value)} className={base + ' leading-relaxed'} />;
-const Select = ({ value, onChange, options }) =>
-  <select value={value} onChange={e => onChange(e.target.value)} className={base}>
+const base = 'w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition bg-white';
+const ring = (bad) => `${base} ${bad ? 'border-red-300 focus:border-red-500 bg-red-50/40' : 'border-gray-200 focus:border-[#0B6B4F]'}`;
+const Input = ({ value, onChange, onBlur, bad, type = 'text', placeholder }) =>
+  <input type={type} value={value} placeholder={placeholder} onBlur={onBlur}
+    onChange={e => onChange(e.target.value)} className={ring(bad)} />;
+const Textarea = ({ value, onChange, onBlur, bad, rows = 3 }) =>
+  <textarea rows={rows} value={value} onBlur={onBlur}
+    onChange={e => onChange(e.target.value)} className={ring(bad) + ' leading-relaxed'} />;
+const Select = ({ value, onChange, onBlur, bad, options }) =>
+  <select value={value} onBlur={onBlur} onChange={e => onChange(e.target.value)} className={ring(bad)}>
     <option value="">— select —</option>
     {options.map(o => <option key={o} value={o}>{o}</option>)}
   </select>;

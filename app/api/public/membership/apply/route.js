@@ -6,6 +6,7 @@ import {
 } from '@/lib/membership/core';
 import { sendApplicationReceived } from '@/lib/membership/emails';
 import { uploadDataUrl } from '@/lib/storage';
+import { validateApplication, REQUIRED_LABELS } from '@/lib/membership/validateApplication';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,15 +23,17 @@ export async function POST(req) {
   const email      = normalizeEmail(b.email);
   const mobile     = normalizeMobile(b.mobile);
 
-  if (!first_name || !last_name) return fail('INVALID', 400, { message: 'First and last name are required.' });
-  if (!isValidEmail(email))      return fail('INVALID', 400, { message: 'Please enter a valid email address.' });
-  if (mobile.length < 8)         return fail('INVALID', 400, { message: 'Please enter a valid mobile number.' });
-  if (!b.declaration_accepted)   return fail('DECLARATION', 400, { message: 'You must accept the declaration to submit.' });
-  if (!String(b.why_join || '').trim())    return fail('INVALID', 400, { message: 'Please tell us why you want to join.' });
-  if (!Array.isArray(b.contribution_areas) || !b.contribution_areas.length)
-    return fail('INVALID', 400, { message: 'Please select at least one contribution area.' });
-  if (!String(b.leadership_view || '').trim()) return fail('INVALID', 400, { message: 'Please answer the leadership question.' });
-  if (!String(b.youth_issues || '').trim())    return fail('INVALID', 400, { message: 'Please describe the issues facing Roundu youth.' });
+  // Same rule set the form uses, re-checked here so a direct POST cannot
+  // create a half-empty application.
+  const errors = validateApplication(b);
+  if (Object.keys(errors).length) {
+    const names = Object.keys(errors).map(k => REQUIRED_LABELS[k] || k);
+    return fail('INCOMPLETE', 400, {
+      message: `Please complete every required field: ${names.join(', ')}.`,
+      fields: errors,
+    });
+  }
+  if (!isValidEmail(email)) return fail('INVALID', 400, { message: 'Please enter a valid email address.' });
 
   // ── Duplicate prevention (privacy-safe: never reveal whose record it is) ──
   const { data: dupes } = await sb.from('membership_applications')
