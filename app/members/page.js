@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Avatar from '@/components/member/Avatar';
+import VerifiedBadge from '@/components/ui/VerifiedBadge';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 import MembersAnalytics from '@/components/members/MembersAnalytics';
@@ -29,10 +30,7 @@ function MemberCard({ m }) {
           membership committee, so they all carry it. */}
       <div className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
         style={{ background: 'rgba(200,154,43,.14)', color: '#7A5C10' }}>
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2l2.4 1.8 3-.3 1 2.8 2.6 1.5-1 2.9 1 2.9-2.6 1.5-1 2.8-3-.3L12 22l-2.4-1.8-3 .3-1-2.8L3 16.2l1-2.9-1-2.9 2.6-1.5 1-2.8 3 .3L12 2z"/>
-          <path d="M10.6 14.6l-2.2-2.2 1.1-1.1 1.1 1.1 3.4-3.4 1.1 1.1-4.5 4.5z" fill="#fff"/>
-        </svg>
+        <VerifiedBadge size={12} decorative />
         Verified Member
       </div>
       {m.current_position && <div className="text-xs text-gray-500 mt-2">{m.current_position}</div>}

@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { Search, BadgeCheck, ArrowRight, SlidersHorizontal } from 'lucide-react';
+import { Search, ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Skeleton, EmptyState } from '@/components/ui';
+import { Skeleton, EmptyState, VerifiedBadge } from '@/components/ui';
 import { COLORS, FONT, MOTION } from '@/lib/design/tokens';
 import { initials } from '@/content/advisoryCouncil';
 
@@ -36,7 +36,7 @@ function Card({ m, i }) {
         {m.verified !== false && (
           <span className="absolute top-3 right-3 grid place-items-center w-7 h-7 rounded-full backdrop-blur-sm"
             style={{ background: 'rgba(6,45,33,.78)' }} title="Verified member">
-            <BadgeCheck size={15} strokeWidth={2.5} aria-label="Verified member" style={{ color: COLORS.gold400 }} />
+            <VerifiedBadge size={17} fill={COLORS.gold400} />
           </span>
         )}
       </div>

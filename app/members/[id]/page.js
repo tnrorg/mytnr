@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Avatar from '@/components/member/Avatar';
+import VerifiedBadge from '@/components/ui/VerifiedBadge';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 
@@ -46,10 +47,7 @@ export default function PublicMemberProfile() {
           <h1 className="mt-4 text-2xl font-black" style={{ color: C.deep }}>{m.full_name}</h1>
           <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold"
             style={{ background: 'rgba(200,154,43,.14)', color: '#7A5C10' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2l2.4 1.8 3-.3 1 2.8 2.6 1.5-1 2.9 1 2.9-2.6 1.5-1 2.8-3-.3L12 22l-2.4-1.8-3 .3-1-2.8L3 16.2l1-2.9-1-2.9 2.6-1.5 1-2.8 3 .3L12 2z"/>
-              <path d="M10.6 14.6l-2.2-2.2 1.1-1.1 1.1 1.1 3.4-3.4 1.1 1.1-4.5 4.5z" fill="#fff"/>
-            </svg>
+            <VerifiedBadge size={14} decorative />
             Verified Member
           </div>
 

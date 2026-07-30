@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
-import { BadgeCheck, MapPin, Building2, Mail, Phone, FileDown, MessageSquarePlus } from 'lucide-react';
+import { MapPin, Building2, Mail, Phone, FileDown, MessageSquarePlus } from 'lucide-react';
+import VerifiedBadge from '@/components/ui/VerifiedBadge';
 import { COLORS, FONT, MOTION } from '@/lib/design/tokens';
 import { initials } from '@/content/advisoryCouncil';
 
@@ -44,7 +45,7 @@ export default function ProfileHero({ p, onRequestGuidance }) {
             {p.verified !== false && (
               <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
                 style={{ background: 'rgba(200,154,43,.18)', color: COLORS.gold400 }}>
-                <BadgeCheck size={13} strokeWidth={2.5} aria-hidden="true" />Verified
+                <VerifiedBadge size={14} fill={COLORS.gold400} decorative />Verified
               </span>
             )}
           </h1>
