@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireAdmin } from '@/lib/guard';
+import { ROLE_KEYS } from '@/lib/membership/roles';
 import { ok, fail, readJson } from '@/lib/api';
 import { clientIp } from '@/lib/audit';
 import { generateMembershipId, logMembershipAudit } from '@/lib/membership/core';
@@ -57,6 +58,10 @@ export async function PATCH(req, { params }) {
       current_position: app.current_position, contribution_areas: app.contribution_areas,
       whatsapp_opt_in: app.whatsapp_opt_in,
       category_id: b.category_id || null,
+      // The admin confirms the role at approval. It defaults to whatever the
+      // applicant asked for, but the admin can override — that is the control
+      // that stops anyone self-appointing to a leadership body.
+      role: ROLE_KEYS.includes(b.role) ? b.role : (ROLE_KEYS.includes(app.applied_role) ? app.applied_role : 'general'),
       status: 'active', approved_by: admin.username, approved_at: now, issued_at: now,
       invite_token: inviteTok, invite_expires_at: inviteExpiry(), invite_sent_at: now,
     }).select('*').single();

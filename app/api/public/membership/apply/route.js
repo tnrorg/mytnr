@@ -7,6 +7,7 @@ import {
 import { sendApplicationReceived } from '@/lib/membership/emails';
 import { uploadDataUrl } from '@/lib/storage';
 import { validateApplication, REQUIRED_LABELS } from '@/lib/membership/validateApplication';
+import { ROLE_KEYS } from '@/lib/membership/roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,9 +67,15 @@ export async function POST(req) {
   }
 
   // ── Insert (status ALWAYS pending_review — never auto-active) ──
+  // The chosen type is recorded as a REQUEST only. The member row — and with
+  // it the actual role — is created at approval by an admin, so submitting
+  // "advisory" here grants nothing.
+  const applied_role = ROLE_KEYS.includes(b.applied_role) ? b.applied_role : 'general';
+
   const reference_no = await generateApplicationRef();
   const row = {
     reference_no,
+    applied_role,
     first_name, last_name,
     gender: b.gender || null,
     age: b.age ? Number(b.age) : null,

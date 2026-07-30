@@ -44,6 +44,17 @@ export async function POST(req) {
     affiliation: b.affiliation || null, summary: b.summary || null,
     expertise: toArray(b.expertise), duties: toArray(b.duties),
     photo_url, sort_order: Number(b.sort_order) || 0, active: b.active !== false,
+    // ── Professional profile portal fields ──
+    country: b.country || null, profession: b.profession || null,
+    organisation: b.organisation || null, tagline: b.tagline || null,
+    intro: b.intro || null, bio: b.bio || null,
+    email: b.email || null, mobile: b.mobile || null,
+    // Contact stays private unless explicitly published.
+    show_email: b.show_email === true, show_mobile: b.show_mobile === true,
+    verified: b.verified === true,
+    accepts_guidance: b.accepts_guidance !== false,
+    skills: toArray(b.skills), research_areas: toArray(b.research_areas),
+    cv_url: b.cv_url || null, cv_approved: b.cv_approved === true,
   };
   const { data, error } = await supabaseAdmin().from('leadership_profiles').insert(row).select().maybeSingle();
   if (error) {

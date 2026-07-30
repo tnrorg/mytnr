@@ -9,12 +9,14 @@ import {
 import {
   validateApplication, STEPS, stepErrors, isStepComplete, REQUIRED_LABELS,
 } from '@/lib/membership/validateApplication';
+import { ROLES, roleLabel as ROLE_LABEL } from '@/lib/membership/roles';
 import Stepper from '@/components/membership/Stepper';
 import { useApplicationDraft } from '@/components/membership/useApplicationDraft';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
 const BLANK = {
+  applied_role: '',
   photo_data: '',
   first_name: '', last_name: '', gender: '', age: '', village: '', union_council: '',
   mobile: '', email: '', education_level: '', field_of_study: '', current_position: '',
@@ -28,6 +30,7 @@ const BLANK = {
    internal field can never leak onto the review page by accident. */
 function reviewRows(f, key) {
   const yes = (b) => (b ? 'Yes' : 'No');
+  if (key === 'R') return [['Membership type', ROLE_LABEL(f.applied_role)]];
   if (key === 'A') return [
     ['Full name', [f.first_name, f.last_name].filter(Boolean).join(' ')],
     ['Gender', f.gender], ['Age', f.age],
@@ -212,6 +215,37 @@ export default function ApplyPage() {
         </div>
 
         <form onSubmit={submit} className="mt-6 space-y-6">
+          {stepKey === 'R' && <Card title="How would you like to join?">
+            <div data-invalid={showErr('applied_role') ? 'true' : undefined} className="space-y-2.5">
+              {ROLES.map(r => {
+                const on = f.applied_role === r.key;
+                return (
+                  <label key={r.key}
+                    className={`flex gap-3 items-start rounded-xl border p-4 cursor-pointer transition-colors duration-micro
+                      ${on ? 'border-[#176B49] bg-[rgba(23,107,73,.05)]' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <input type="radio" name="applied_role" value={r.key} checked={on}
+                      onChange={() => { set('applied_role', r.key); blur('applied_role'); }}
+                      className="mt-1 w-4 h-4 shrink-0" />
+                    <span className="min-w-0">
+                      <span className="block font-bold text-sm" style={{ color: C.deep }}>{r.label}</span>
+                      <span className="block text-[12.5px] text-gray-500 mt-0.5 leading-snug">{r.blurb}</span>
+                      <span className="block text-[11px] mt-1.5 font-semibold" style={{ color: C.green }}>
+                        After approval: {r.portal}
+                      </span>
+                    </span>
+                  </label>
+                );
+              })}
+              {showErr('applied_role') &&
+                <p className="text-[11px] font-semibold text-red-600">{showErr('applied_role')}</p>}
+            </div>
+            <p className="text-[12px] text-gray-400 leading-relaxed">
+              Every applicant fills in the same form. Advisory Council and Executive Committee
+              applications are reviewed against the eligibility criteria in the TNR Constitution —
+              the membership committee confirms the final role at approval.
+            </p>
+          </Card>}
+
           {stepKey === 'A' && <Card title="Personal Information">
             <div className="flex items-center gap-4 pb-4 mb-4 border-b border-gray-100">
               <div className="w-24 h-28 rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 grid place-items-center shrink-0">
@@ -345,7 +379,7 @@ export default function ApplyPage() {
               <p className="text-[13px] text-gray-500 -mt-1">
                 Check every answer below. Use “Edit” to correct anything before submitting.
               </p>
-              {STEPS.slice(0, 4).map((st, i) => (
+              {STEPS.slice(0, 5).map((st, i) => (
                 <div key={st.key} className="rounded-tnr border border-gray-100 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-[13px] font-black uppercase tracking-wide" style={{ color: C.deep }}>

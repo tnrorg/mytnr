@@ -13,10 +13,18 @@ export async function PATCH(req, { params }) {
   const { admin, res } = requireAdmin(req); if (res) return res;
   const b = await readJson(req);
   const patch = { updated_at: new Date().toISOString() };
-  for (const f of ['name', 'designation', 'qualification', 'field', 'affiliation', 'summary', 'slug', 'active'])
+  for (const f of ['name', 'designation', 'qualification', 'field', 'affiliation', 'summary',
+                   'slug', 'active', 'country', 'profession', 'organisation', 'tagline',
+                   'intro', 'bio', 'email', 'mobile', 'cv_url'])
     if (f in b) patch[f] = b[f];
+  // Booleans are coerced so an absent value can never accidentally publish a
+  // contact detail or grant a verified badge.
+  for (const f of ['show_email', 'show_mobile', 'verified', 'cv_approved', 'accepts_guidance'])
+    if (f in b) patch[f] = b[f] === true;
   if ('expertise' in b) patch.expertise = toArray(b.expertise);
   if ('duties' in b) patch.duties = toArray(b.duties);
+  if ('skills' in b) patch.skills = toArray(b.skills);
+  if ('research_areas' in b) patch.research_areas = toArray(b.research_areas);
   if ('sort_order' in b) patch.sort_order = Number(b.sort_order) || 0;
   if (b.photo_data) {
     try { patch.photo_url = await uploadDataUrl(b.photo_data, 'leadership'); }

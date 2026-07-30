@@ -18,7 +18,7 @@ export async function GET(req) {
              email, mobile, village, union_council, category_id, education_level,
              field_of_study, current_position, contribution_areas, status,
              public_visible, whatsapp_opt_in, approved_at, issued_at, expires_at,
-             created_at, updated_at`)
+             role, leadership_profile_id, created_at, updated_at`)
     .eq('id', member.id)
     .maybeSingle();
 

@@ -40,7 +40,14 @@ export default function LeadershipTab({ toast }) {
   }
 
   function edit(p) {
-    setForm({ ...p, expertise: asText(p.expertise), duties: asText(p.duties), photo_data: null });
+    setForm({
+      ...p,
+      expertise: asText(p.expertise), duties: asText(p.duties),
+      // The new array fields need the same textarea treatment, or editing a
+      // profile would wipe the skills and research areas already saved.
+      skills: asText(p.skills), research_areas: asText(p.research_areas),
+      photo_data: null,
+    });
   }
 
   async function save() {
@@ -175,6 +182,23 @@ export default function LeadershipTab({ toast }) {
               onChange={e => setForm(s => ({ ...s, affiliation: e.target.value }))} />
           </Field>
 
+            <Field label="Current Profession">
+              <input className="input" value={form.profession || ''} placeholder="e.g. Consultant Physician"
+                onChange={e => setForm(s => ({ ...s, profession: e.target.value }))} />
+            </Field>
+            <Field label="Organisation / University">
+              <input className="input" value={form.organisation || ''} placeholder="e.g. Aga Khan University"
+                onChange={e => setForm(s => ({ ...s, organisation: e.target.value }))} />
+            </Field>
+            <Field label="Country">
+              <input className="input" value={form.country || ''} placeholder="e.g. Pakistan"
+                onChange={e => setForm(s => ({ ...s, country: e.target.value }))} />
+            </Field>
+            <Field label="Professional Tagline">
+              <input className="input" value={form.tagline || ''} placeholder="One line shown under the name"
+                onChange={e => setForm(s => ({ ...s, tagline: e.target.value }))} />
+            </Field>
+
           <Field label="Short Summary (one line, shown on the card)">
             <input className="input" value={form.summary || ''}
               onChange={e => setForm(s => ({ ...s, summary: e.target.value }))} />
@@ -192,6 +216,58 @@ export default function LeadershipTab({ toast }) {
           </Field>
 
           <div className="grid sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2 space-y-3">
+              <Field label="Card Introduction (2–3 lines, shown on the roster card)">
+                <textarea className="input min-h-[70px]" value={form.intro || ''}
+                  onChange={e => setForm(s => ({ ...s, intro: e.target.value }))} />
+              </Field>
+              <Field label="Full Biography (shown in the About section of the profile)">
+                <textarea className="input min-h-[140px]" value={form.bio || ''}
+                  placeholder="Background, professional journey, vision, community contribution and leadership experience."
+                  onChange={e => setForm(s => ({ ...s, bio: e.target.value }))} />
+              </Field>
+              <Field label="Professional Skills — one per line">
+                <textarea className="input min-h-[80px]" value={form.skills || ''}
+                  placeholder={'Leadership\nResearch\nPublic Speaking'}
+                  onChange={e => setForm(s => ({ ...s, skills: e.target.value }))} />
+              </Field>
+              <Field label="Research Areas — one per line">
+                <textarea className="input min-h-[70px]" value={form.research_areas || ''}
+                  onChange={e => setForm(s => ({ ...s, research_areas: e.target.value }))} />
+              </Field>
+            </div>
+
+            <Field label="Email (private unless published below)">
+              <input className="input" value={form.email || ''} type="email"
+                onChange={e => setForm(s => ({ ...s, email: e.target.value }))} />
+            </Field>
+            <Field label="Mobile (private unless published below)">
+              <input className="input" value={form.mobile || ''}
+                onChange={e => setForm(s => ({ ...s, mobile: e.target.value }))} />
+            </Field>
+
+            <div className="sm:col-span-2 rounded-xl p-4 space-y-2" style={{ background: 'rgba(3,26,18,.35)' }}>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-tnr-cream/60">
+                Public visibility
+              </div>
+              {[['show_email', 'Show email publicly on the profile'],
+                ['show_mobile', 'Show mobile number publicly on the profile'],
+                ['verified', 'Show the Verified badge'],
+                ['accepts_guidance', 'Accept guidance requests from members'],
+                ['cv_approved', 'Publish the uploaded CV']].map(([k, label]) => (
+                <label key={k} className="flex items-center gap-2.5 text-sm text-tnr-cream/85 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4"
+                    checked={k === 'accepts_guidance' ? form[k] !== false : form[k] === true}
+                    onChange={e => setForm(s => ({ ...s, [k]: e.target.checked }))} />
+                  {label}
+                </label>
+              ))}
+              <p className="text-[11px] text-tnr-cream/40 pt-1">
+                Contact details stay hidden unless ticked here. When hidden they are not sent to the
+                browser at all, so they cannot be read from the page source.
+              </p>
+            </div>
+
             <Field label="URL Name (leave blank to generate)">
               <input className="input" value={form.slug || ''} placeholder="ali-shahid"
                 onChange={e => setForm(s => ({ ...s, slug: e.target.value }))} />
