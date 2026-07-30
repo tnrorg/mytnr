@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check": "node scripts/check-undefined.js",
+    "prebuild": "node scripts/check-undefined.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

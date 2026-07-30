@@ -66,7 +66,7 @@ export default function CouncilCard({ member }) {
         </ul>
       </div>
 
-      <a href={`/about/advisory-council/${member.slug}`}
+      <a href={`/council/${member.slug}`}
         className="mt-4 block text-center text-[12px] font-bold py-2.5 rounded-tnr
           transition-colors duration-micro hover:bg-[rgba(23,107,73,.14)]"
         style={{ background: 'rgba(23,107,73,.08)', color: C.green }}>

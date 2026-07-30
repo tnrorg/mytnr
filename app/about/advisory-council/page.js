@@ -1,12 +1,10 @@
 'use client';
+import CouncilDirectory from '@/components/council/CouncilDirectory';
 import DocPage, { Section, P, TickList, Callout, C } from '@/components/site/DocPage';
-import CouncilCard from '@/components/site/CouncilCard';
 import { COUNCIL_TAGLINE, COUNCIL_MISSION } from '@/content/advisoryCouncil';
-import { useLeadership } from '@/components/site/useLeadership';
 import { ADC_INTRO, ADC_CRITERIA, ADC_DUTIES, ADC_FACTS, EGC } from '@/content/aboutTnr';
 
 export default function AdvisoryCouncilPage() {
-  const { advisory } = useLeadership();
   return (
     <DocPage eyebrow="Governance" title="Advisory Council"
       lead="The strategic advisory and oversight body of TNR."
@@ -15,9 +13,7 @@ export default function AdvisoryCouncilPage() {
       <Section title="Role"><P>{ADC_INTRO}</P></Section>
 
       <Section title="Interim Advisory Council" kicker={COUNCIL_TAGLINE}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {advisory.map(m => <CouncilCard key={m.slug} member={m} />)}
-        </div>
+        <CouncilDirectory />
         <div className="mt-6"><Callout label="Our Collective Mission">{COUNCIL_MISSION}</Callout></div>
       </Section>
 
