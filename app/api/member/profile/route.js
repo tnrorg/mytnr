@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireMember } from '@/lib/membership/auth';
 import { ok, fail, readJson } from '@/lib/api';
-import { SECTIONS, PROFILE_FIELDS, SENSITIVE_FIELDS, FORBIDDEN_FIELDS, pick } from '@/lib/membership/profile';
+import { SECTIONS, PROFILE_FIELDS, SENSITIVE_FIELDS, SELF_EDITABLE_CORE, FORBIDDEN_FIELDS, pick } from '@/lib/membership/profile';
 import { uploadDataUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
@@ -41,6 +41,7 @@ export async function PATCH(req) {
   }
 
   // 2. Profile photo — members may change their own picture directly.
+  let photoUrl = null;
   if (b.photo_data) {
     const head = String(b.photo_data).slice(0, 40);
     if (!/^data:image\/(png|jpe?g|webp);base64,/i.test(head))
@@ -49,11 +50,23 @@ export async function PATCH(req) {
       return fail('PHOTO_TOO_BIG', 400, { message: 'Photo must be smaller than 4 MB.' });
     try {
       const url = await uploadDataUrl(b.photo_data, 'members');
-      if (url) await sb.from('membership_members')
-        .update({ photo_url: url, updated_at: new Date().toISOString() }).eq('id', member.id);
+      if (url) {
+        photoUrl = url;
+        await sb.from('membership_members')
+          .update({ photo_url: url, updated_at: new Date().toISOString() }).eq('id', member.id);
+      }
     } catch (e) {
       return fail('UPLOAD_FAILED', 502, { message: 'Could not upload the photo. Please try again.' });
     }
+  }
+
+  // 2a. Core details the member owns — name, mobile, village, union council.
+  //     Written immediately so the public profile reflects the change at once.
+  const core = pick(b, SELF_EDITABLE_CORE);
+  if (Object.keys(core).length) {
+    core.updated_at = new Date().toISOString();
+    const { error } = await sb.from('membership_members').update(core).eq('id', member.id);
+    if (error) return fail('SAVE_FAILED', 500, { message: 'Could not save your details.', detail: error.message });
   }
 
   // 2b. Free profile fields — written immediately.
@@ -63,6 +76,24 @@ export async function PATCH(req) {
     patch.updated_at = new Date().toISOString();
     const { error } = await sb.from('member_profiles').upsert(patch, { onConflict: 'member_id' });
     if (error) return fail('SAVE_FAILED', 500, { message: 'Could not save your profile.', detail: error.message });
+  }
+
+  // 2c. Keep the public leadership profile in step.
+  //     The council and executive cards read leadership_profiles, not
+  //     membership_members — without this, a council member updating their
+  //     photo here would still show the old picture on the public site.
+  if (member.leadership_profile_id) {
+    const mirror = {};
+    if (photoUrl) mirror.photo_url = photoUrl;
+    if (core.first_name || core.last_name) {
+      mirror.name = [core.first_name ?? member.first_name,
+                     core.last_name ?? member.last_name].filter(Boolean).join(' ');
+    }
+    if (Object.keys(mirror).length) {
+      mirror.updated_at = new Date().toISOString();
+      await sb.from('leadership_profiles')
+        .update(mirror).eq('id', member.leadership_profile_id);
+    }
   }
 
   // 3. Sensitive fields — queued for admin approval, never written now.
@@ -86,7 +117,7 @@ export async function PATCH(req) {
     saved: true,
     pending_approval: requests.map(r => r.field),
     message: requests.length
-      ? 'Saved. Changes to your name, contact or location need committee approval.'
-      : 'Profile updated.',
+      ? 'Profile updated. Your email change needs committee approval before it takes effect.'
+      : 'Profile updated. Your public profile has been refreshed.',
   });
 }
