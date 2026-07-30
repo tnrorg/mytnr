@@ -90,43 +90,60 @@ button, input, textarea, select, option { font-family: inherit; }
 .light-page option { background-color: #FFFFFF; color: #111827; }
 
 /* ── Admin console: snow-white page, mountain-green cards ──────────────
-   Same idea as `.vote-green` — the shell is light so the console reads as a
-   clean document, while every card keeps the TNR forest-green so the panels
-   stay recognisable. */
+   The shell is light so the console reads as a clean document; every card
+   keeps the TNR mountain green. Order matters below: the page-level rule
+   darkens text for the white background first, then the card rules put the
+   cream back on green surfaces. Relying on :not(.card *) alone was not
+   reliable, so card content is restored explicitly. */
 .admin-light { background: #FDFDFD; color: #15231D; }
 
-.admin-light .card,
-.admin-light .stat {
-  background: linear-gradient(165deg, #0B6B4F 0%, #063D2B 100%);
-  border-color: rgba(212, 167, 44, 0.32);
-  color: #F7F5EE;
-  box-shadow: 0 1px 3px rgba(6, 61, 43, .08);
+/* 1 — text sitting on the white page */
+.admin-light [class*="text-tnr-cream"] { color: #4B5563 !important; }
+.admin-light > main .heading-gold {
+  background: none; -webkit-text-fill-color: initial; color: #063D2B;
 }
 
-/* Sidebar stays a solid green panel rather than a translucent grey wash. */
+/* 2 — mountain-green surfaces */
+.admin-light .card,
+.admin-light .stat {
+  background: linear-gradient(165deg, #0E7A5A 0%, #07452F 100%);
+  border-color: rgba(212, 167, 44, 0.30);
+  color: #F7F5EE;
+  box-shadow: 0 1px 3px rgba(6, 61, 43, .10);
+}
 .admin-light aside {
   background: linear-gradient(180deg, #063D2B 0%, #04241A 100%);
   border-color: rgba(212, 167, 44, 0.22);
 }
 
-/* Cream text is correct inside green surfaces but invisible on the white
-   page, so repaint only the cream that sits outside a card or the sidebar.
-   `!important` is required to beat the Tailwind utilities already applied. */
-.admin-light [class*="text-tnr-cream"]:not(.card *):not(aside *):not(.stat *) {
-  color: #4B5563 !important;
+/* 3 — restore legible text on those green surfaces. Higher specificity than
+   rule 1, so card and sidebar content stays cream whatever utility it uses. */
+.admin-light .card [class*="text-tnr-cream"],
+.admin-light .stat [class*="text-tnr-cream"],
+.admin-light aside [class*="text-tnr-cream"] { color: #F1EDE2 !important; }
+.admin-light .card h1, .admin-light .card h2, .admin-light .card h3,
+.admin-light .card h4, .admin-light .card label, .admin-light .card th {
+  color: #FFFDF7;
 }
-/* Gold headings lose contrast on white — use the deep forest green instead. */
-.admin-light > main .heading-gold:not(.card *) {
-  background: none;
-  -webkit-text-fill-color: initial;
-  color: #063D2B;
+.admin-light .card p, .admin-light .card td, .admin-light .card li,
+.admin-light .card span:not([class*="text-"]) { color: #E4EFE9; }
+.admin-light .card .heading-gold { color: #EBC55C; }
+
+/* Inputs inside a green card: darker well, cream text. */
+.admin-light .card .input,
+.admin-light .card input, .admin-light .card textarea, .admin-light .card select {
+  background: rgba(3, 26, 18, .45);
+  border-color: rgba(212, 167, 44, .28);
+  color: #FFFDF7;
 }
-/* Bare inputs outside a card need dark-on-white treatment. */
-.admin-light .input:not(.card *):not(aside *) {
-  background: #fff;
-  border-color: #E5E7EB;
-  color: #15231D;
-}
-.admin-light .input:not(.card *):not(aside *)::placeholder { color: #9CA3AF; }
-/* Ghost buttons outside cards would otherwise be cream-on-white. */
-.admin-light .btn-ghost:not(.card *):not(aside *) { color: #063D2B; border-color: #D8DEDA; }
+.admin-light .card input::placeholder,
+.admin-light .card textarea::placeholder { color: rgba(241, 237, 226, .55); }
+.admin-light .card .btn-ghost { color: #FFFDF7; border-color: rgba(212, 167, 44, .45); }
+.admin-light .card .btn-ghost:hover { background: rgba(255, 255, 255, .10); }
+
+/* Inputs and ghost buttons that sit directly on the white page. */
+.admin-light > main > .input,
+.admin-light > main > div > .input { background: #fff; border-color: #E5E7EB; color: #15231D; }
+/* Destructive actions need to stay legible against the green. */
+.admin-light .card .text-red-400 { color: #FCA5A5; }
+.admin-light .card .text-red-300 { color: #FECACA; }
