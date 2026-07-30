@@ -4,10 +4,10 @@ import { clientIp } from '@/lib/audit';
 import {
   normalizeEmail, normalizeMobile, isValidEmail, generateApplicationRef,
 } from '@/lib/membership/core';
-import { sendApplicationReceived } from '@/lib/membership/emails';
+import { sendApplicationReceived, sendAdminNewApplication } from '@/lib/membership/emails';
 import { uploadDataUrl } from '@/lib/storage';
 import { validateApplication, REQUIRED_LABELS } from '@/lib/membership/validateApplication';
-import { ROLE_KEYS } from '@/lib/membership/roles';
+import { ROLE_KEYS, roleLabel } from '@/lib/membership/roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,7 +119,11 @@ export async function POST(req) {
   }).then(() => {}, () => {});
 
   // Confirmation email — never block submission if the mail server hiccups.
-  try { await sendApplicationReceived({ ...row, reference_no: data.reference_no }); } catch {}
+  // Neither email may block the submission — an SMTP hiccup must not lose an
+  // application that is already safely stored.
+  const saved = { ...row, reference_no: data.reference_no };
+  try { await sendApplicationReceived(saved); } catch {}
+  try { await sendAdminNewApplication(saved, roleLabel(applied_role)); } catch {}
 
   return ok({
     reference_no: data.reference_no,
