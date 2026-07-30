@@ -6,7 +6,11 @@ import {
   GENDERS, EDUCATION_LEVELS, POSITIONS, CONTRIBUTION_AREAS,
   LEADERSHIP_OPTIONS, DECLARATION_TEXT, DECLARATION_VERSION,
 } from '@/lib/membership/options';
-import { validateApplication, incompleteSections } from '@/lib/membership/validateApplication';
+import {
+  validateApplication, STEPS, stepErrors, isStepComplete, REQUIRED_LABELS,
+} from '@/lib/membership/validateApplication';
+import Stepper from '@/components/membership/Stepper';
+import { useApplicationDraft } from '@/components/membership/useApplicationDraft';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -19,11 +23,42 @@ const BLANK = {
   youth_issues: '', declaration_accepted: false, whatsapp_opt_in: false,
 };
 
+/* Human-readable summary of one step, for the Review screen. Deliberately
+   built from an explicit list rather than looping the form object, so an
+   internal field can never leak onto the review page by accident. */
+function reviewRows(f, key) {
+  const yes = (b) => (b ? 'Yes' : 'No');
+  if (key === 'A') return [
+    ['Full name', [f.first_name, f.last_name].filter(Boolean).join(' ')],
+    ['Gender', f.gender], ['Age', f.age],
+    ['Union Council', f.union_council], ['Village / Area', f.village],
+    ['Mobile / WhatsApp', f.mobile], ['Email', f.email],
+    ['Profile photo', f.photo_data ? 'Attached' : 'Not attached'],
+  ];
+  if (key === 'B') return [
+    ['Education', f.education_level], ['Field of study', f.field_of_study],
+    ['Current position', f.current_position === 'Other' ? f.position_other : f.current_position],
+  ];
+  if (key === 'C') return [
+    ['Why join TNR', f.why_join],
+    ['Contribution areas', (f.contribution_areas || []).join(', ')],
+    ['Leadership view', f.leadership_view],
+    ['Explanation', f.leadership_note || '—'],
+    ['Youth issues', f.youth_issues],
+  ];
+  if (key === 'D') return [
+    ['Declaration accepted', yes(f.declaration_accepted)],
+    ['Join WhatsApp group', yes(f.whatsapp_opt_in)],
+  ];
+  return [];
+}
+
 export default function ApplyPage() {
   const [f, setF] = useState(BLANK);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState(null);
+  const [step, setStep] = useState(0);
   const [councils, setCouncils] = useState(null);   // null = still loading
   const [touched, setTouched] = useState({});   // fields the applicant has visited
   const [tried, setTried] = useState(false);    // they have pressed Submit at least once
@@ -42,7 +77,10 @@ export default function ApplyPage() {
   const villagesFor = (name) => councils?.find(c => c.name === name)?.villages || [];
   const useAreaLists = !!councils?.length;
 
+  const { status: draftStatus, clearDraft } = useApplicationDraft(f, setF, BLANK);
   const errors = validateApplication(f);
+  const stepKey = STEPS[step].key;
+  const onReview = stepKey === 'REVIEW';
   // An error is only shown once the applicant has left that field, or after
   // they try to submit — no wall of red before they have typed anything.
   const showErr = (k) => (tried || touched[k]) ? errors[k] : '';
@@ -81,6 +119,28 @@ export default function ApplyPage() {
       ? p.contribution_areas.filter(x => x !== a) : [...p.contribution_areas, a],
   }));
 
+  /** Advance only when the current step validates, so a problem is caught on
+   *  the screen that caused it rather than at the very end. */
+  function next() {
+    setTried(true);
+    const bad = stepErrors(f, stepKey);
+    if (Object.keys(bad).length) {
+      setErr(`Please complete this step — ${Object.keys(bad).length} field${Object.keys(bad).length === 1 ? '' : 's'} need attention.`);
+      const el = document.querySelector('[data-invalid="true"]');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el?.querySelector('input,select,textarea,button')?.focus?.();
+      return;
+    }
+    setErr(''); setTried(false);
+    setStep(sx => Math.min(STEPS.length - 1, sx + 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function back() {
+    setErr(''); setTried(false);
+    setStep(sx => Math.max(0, sx - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   async function submit(e) {
     e.preventDefault();
     if (busy) return;                          // disables repeated clicks
@@ -101,6 +161,7 @@ export default function ApplyPage() {
         body: JSON.stringify({ ...f, declaration_version: DECLARATION_VERSION }),
       }).then(x => x.json());
       if (!r.ok) { setErr(r.message || 'Could not submit. Please try again.'); setBusy(false); return; }
+      clearDraft();
       setDone(r);
     } catch { setErr('Network error. Please try again.'); }
     setBusy(false);
@@ -136,8 +197,22 @@ export default function ApplyPage() {
         <h1 style={{ ...mont, color: C.deep }} className="text-3xl font-black">Membership Application</h1>
         <p className="mt-2 text-gray-500 text-sm">Join Tehreek-e-Naujawanan Roundu. All applications are reviewed by the membership committee.</p>
 
-        <form onSubmit={submit} className="mt-8 space-y-6">
-          <Card title="A · Personal Information">
+        <div className="mt-8 rounded-tnr-lg bg-white border border-gray-100 p-5 shadow-tnr-flat">
+          <Stepper steps={STEPS} current={step}
+            isComplete={(k) => isStepComplete(f, k)}
+            onJump={(i) => { setErr(''); setTried(false); setStep(i); }} />
+          <p className="mt-4 text-[13px] text-gray-500">{STEPS[step].blurb}</p>
+          {draftStatus !== 'idle' && (
+            <p className="mt-2 text-[11px] font-semibold" style={{ color: '#647169' }} aria-live="polite">
+              {draftStatus === 'restored'
+                ? '↻ Unfinished application restored — continue where you left off.'
+                : '✓ Draft saved on this device'}
+            </p>
+          )}
+        </div>
+
+        <form onSubmit={submit} className="mt-6 space-y-6">
+          {stepKey === 'A' && <Card title="Personal Information">
             <div className="flex items-center gap-4 pb-4 mb-4 border-b border-gray-100">
               <div className="w-24 h-28 rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 grid place-items-center shrink-0">
                 {f.photo_data
@@ -186,9 +261,9 @@ export default function ApplyPage() {
               <Field label="Mobile / WhatsApp Number" req error={showErr('mobile')}><Input value={f.mobile} onChange={v => set('mobile', v)} placeholder="+92 3xx xxxxxxx" onBlur={() => blur('mobile')} bad={!!showErr('mobile')} /></Field>
               <Field label="Email Address" req error={showErr('email')}><Input type="email" value={f.email} onChange={v => set('email', v)} placeholder="name@example.com" onBlur={() => blur('email')} bad={!!showErr('email')} /></Field>
             </Grid>
-          </Card>
+          </Card>}
 
-          <Card title="B · Education & Profession">
+          {stepKey === 'B' && <Card title="Education & Profession">
             <Grid>
               <Field label="Highest Level of Education" req error={showErr('education_level')}><Select value={f.education_level} onChange={v => set('education_level', v)} options={EDUCATION_LEVELS} onBlur={() => blur('education_level')} bad={!!showErr('education_level')} /></Field>
               <Field label="Field of Study / Profession" req error={showErr('field_of_study')}><Input value={f.field_of_study} onChange={v => set('field_of_study', v)} onBlur={() => blur('field_of_study')} bad={!!showErr('field_of_study')} /></Field>
@@ -204,9 +279,9 @@ export default function ApplyPage() {
                 </Field>
               )}
             </Grid>
-          </Card>
+          </Card>}
 
-          <Card title="C · Motivation & Contribution">
+          {stepKey === 'C' && <Card title="Motivation & Contribution">
             <Field label="Why do you want to join تحریک نوجوانان روندو؟" req error={showErr('why_join')}>
               <Textarea value={f.why_join} onChange={v => set('why_join', v)} rows={4}
                 onBlur={() => blur('why_join')} bad={!!showErr('why_join')} />
@@ -239,9 +314,9 @@ export default function ApplyPage() {
               <Textarea value={f.youth_issues} onChange={v => set('youth_issues', v)} rows={4}
                 onBlur={() => blur('youth_issues')} bad={!!showErr('youth_issues')} />
             </Field>
-          </Card>
+          </Card>}
 
-          <Card title="D · Declaration">
+          {stepKey === 'D' && <Card title="Declaration">
             <div data-invalid={showErr('declaration_accepted') ? 'true' : undefined}>
             <label className="flex gap-3 items-start cursor-pointer">
               <input type="checkbox" checked={f.declaration_accepted} className="mt-1 w-4 h-4 shrink-0"
@@ -251,9 +326,9 @@ export default function ApplyPage() {
             {showErr('declaration_accepted') &&
               <p className="mt-2 text-[11px] font-semibold text-red-600">{showErr('declaration_accepted')}</p>}
             </div>
-          </Card>
+          </Card>}
 
-          <Card title="E · WhatsApp Group (optional)">
+          {stepKey === 'D' && <Card title="WhatsApp Group (optional)">
             <label className="flex gap-3 items-center cursor-pointer">
               <input type="checkbox" checked={f.whatsapp_opt_in} className="w-4 h-4 shrink-0"
                 onChange={e => set('whatsapp_opt_in', e.target.checked)} />
@@ -262,19 +337,74 @@ export default function ApplyPage() {
               </span>
             </label>
             <p className="mt-2 text-xs text-gray-400">The group link is shared only with approved members after login.</p>
-          </Card>
+          </Card>}
 
-          {err && <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">{err}</div>}
+          {/* ── Review & Submit ── */}
+          {onReview && (
+            <Card title="Review Your Application">
+              <p className="text-[13px] text-gray-500 -mt-1">
+                Check every answer below. Use “Edit” to correct anything before submitting.
+              </p>
+              {STEPS.slice(0, 4).map((st, i) => (
+                <div key={st.key} className="rounded-tnr border border-gray-100 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-[13px] font-black uppercase tracking-wide" style={{ color: C.deep }}>
+                      {st.title}
+                    </h3>
+                    <button type="button" onClick={() => { setErr(''); setTried(false); setStep(i); }}
+                      className="text-[12px] font-bold underline" style={{ color: C.green }}>Edit</button>
+                  </div>
+                  <dl className="mt-3 space-y-1.5">
+                    {reviewRows(f, st.key).map(([k, v]) => (
+                      <div key={k} className="flex gap-3 text-[13px]">
+                        <dt className="w-40 shrink-0 text-gray-400">{k}</dt>
+                        <dd className="flex-1 text-gray-700 break-words">{v || <span className="text-red-500">Not provided</span>}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ))}
+              <p className="text-[12px] text-gray-400">
+                Your application is reviewed by the membership committee. Membership becomes
+                active only after approval — you will receive a reference number to track it.
+              </p>
+            </Card>
+          )}
 
-          {/* The button stays clickable on purpose: a disabled button gives no
-              reason why, so pressing it reveals exactly what is still missing. */}
-          <button type="submit" disabled={busy}
-            className="w-full py-4 rounded-xl font-bold text-white text-lg shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: missing && tried
-              ? 'linear-gradient(180deg,#9CA3AF,#6B7280)'
-              : `linear-gradient(180deg,${C.green},${C.deep})` }}>
-            {busy ? 'Submitting…' : missing && tried ? `${missing} field${missing === 1 ? '' : 's'} still required` : 'Submit Application'}
-          </button>
+          {err && <div className="rounded-tnr bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3" role="alert">{err}</div>}
+
+          {/* ── Step navigation ── */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {step > 0 && (
+              <button type="button" onClick={back} disabled={busy}
+                className="sm:w-40 py-3.5 rounded-tnr font-bold border transition-colors duration-micro
+                  hover:bg-tnr-neutral disabled:opacity-40"
+                style={{ borderColor: 'rgba(10,61,44,.16)', color: C.deep }}>
+                ← Back
+              </button>
+            )}
+            {!onReview ? (
+              /* Kept clickable on purpose: a disabled button gives no reason why,
+                 so pressing it reveals exactly what is still missing. */
+              <button type="button" onClick={next}
+                className="flex-1 py-3.5 rounded-tnr font-bold text-white shadow-tnr-raise
+                  transition-transform duration-micro hover:-translate-y-[2px]"
+                style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>
+                Continue →
+              </button>
+            ) : (
+              <button type="submit" disabled={busy}
+                className="flex-1 py-3.5 rounded-tnr font-bold text-white text-lg shadow-tnr-raise
+                  transition-transform duration-micro hover:-translate-y-[2px] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: missing && tried
+                  ? 'linear-gradient(180deg,#9CA3AF,#6B7280)'
+                  : `linear-gradient(180deg,${C.green},${C.deep})` }}>
+                {busy ? 'Submitting…' : missing && tried
+                  ? `${missing} field${missing === 1 ? '' : 's'} still required`
+                  : 'Submit Application'}
+              </button>
+            )}
+          </div>
           <p className="text-center text-xs text-gray-400">
             Already applied? <a href="/membership/status" className="font-semibold" style={{ color: C.green }}>Check your application status</a>
           </p>

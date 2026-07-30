@@ -1,6 +1,14 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import dynamic from 'next/dynamic';
+
+// Recharts is the heaviest thing on this page and is not needed for the first
+// paint, so it loads on the client only. If it fails, the cards, ranking table
+// and summary still render — the section no longer lives or dies by the chart.
+const DistributionDonut = dynamic(() => import('./DistributionDonut'), {
+  ssr: false,
+  loading: () => <div className="h-full w-full grid place-items-center text-xs text-gray-300">Loading chart…</div>,
+});
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -141,31 +149,8 @@ export default function MembersAnalytics() {
           Membership Distribution by Village / Area
         </div>
         <div className="relative mt-2" style={{ height: 320 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={s.segments} dataKey="members" nameKey="name" cx="50%" cy="50%"
-                innerRadius="58%" outerRadius="92%" paddingAngle={1.5} stroke="#fff" strokeWidth={2}
-                onMouseEnter={(_, i) => setActive(i)} onMouseLeave={() => setActive(null)}
-                onClick={(_, i) => setActive(a => a === i ? null : i)} isAnimationActive={false}>
-                {s.segments.map((seg, i) => (
-                  <Cell key={seg.name} fill={colors[i]}
-                    opacity={active === null || active === i ? 1 : .35}
-                    style={{ cursor: 'pointer', outline: 'none' }} />
-                ))}
-              </Pie>
-              <Tooltip content={({ active: on, payload }) => {
-                if (!on || !payload?.length) return null;
-                const d = payload[0].payload;
-                return <div className="rounded-xl bg-white border border-gray-100 px-3 py-2 text-xs"
-                  style={{ boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
-                  <div className="font-black" style={{ color: C.deep }}>{d.name}</div>
-                  <div className="text-gray-600 mt-0.5">
-                    {d.members} member{d.members === 1 ? '' : 's'} · {d.percent}%
-                  </div>
-                </div>;
-              }} />
-            </PieChart>
-          </ResponsiveContainer>
+          <DistributionDonut segments={s.segments} colors={colors}
+            active={active} setActive={setActive} />
 
           <div className="absolute inset-0 grid place-items-center pointer-events-none">
             <div className="text-center">
@@ -181,6 +166,20 @@ export default function MembersAnalytics() {
         </div>
         <Legend segments={s.segments} colors={colors} active={active} onHover={setActive} />
         <p className="mt-3 text-center text-[10px] text-gray-400">Tap or hover a segment for details</p>
+
+        {/* Text equivalent of the donut. Charts are unreadable to screen
+            readers, so the same figures are exposed as a real table. */}
+        <table className="tnr-sr-only">
+          <caption>Membership distribution by village or area</caption>
+          <thead><tr><th scope="col">Village / Area</th><th scope="col">Members</th><th scope="col">Share</th></tr></thead>
+          <tbody>
+            {s.segments.map(seg => (
+              <tr key={seg.name}>
+                <th scope="row">{seg.name}</th><td>{seg.members}</td><td>{seg.percent}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* ── RIGHT ── */}
@@ -240,8 +239,8 @@ export default function MembersAnalytics() {
       {[
         [s.totalAreas, 'Villages / Areas Represented', C.green],
         [s.total, 'Total Active Members', '#137F5D'],
-        ['100%', 'Approved Membership Data', C.deep],
-        ['1', 'One Community, One Vision', C.gold],
+        [s.community?.unionCouncils ?? '—', 'Union Councils', C.deep],
+        [s.community?.professionals ?? '—', 'Professionals', C.gold],
       ].map(([v, l, col]) => (
         <div key={l} className={card + ' text-center'}>
           <div className="text-3xl font-black leading-none" style={{ color: col }}>{v}</div>

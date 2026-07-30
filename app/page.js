@@ -11,6 +11,7 @@ import Hero from '@/components/home/Hero';
 import CommunityStats from '@/components/home/CommunityStats';
 import CoreAreas from '@/components/home/CoreAreas';
 import JoinCta from '@/components/home/JoinCta';
+import MembersPreview from '@/components/home/MembersPreview';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3', ink: '#15231D', bg: '#FDFDFD' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -32,7 +33,7 @@ export default function Home() {
       <CoreAreas />
       <AdvisoryCouncil />
       <ExecutiveCommittee />
-      <Panels />
+      <MembersPreview />
       <JoinCta />
       <SiteFooter />
       <AiFab />
@@ -96,68 +97,5 @@ function ExecutiveCommittee() {
   );
 }
 
-/* ───────────────────────── Three panels ───────────────────────── */
-function Panels() {
-  const Head = ({ title, link, href }) => (
-    <div className="flex items-center justify-between mb-4">
-      <h3 style={{ ...mont, color: C.deep }} className="text-sm font-black uppercase tracking-wide">{title}</h3>
-      <a href={href} className="text-xs font-semibold" style={{ color: C.green }}>{link} →</a>
-    </div>
-  );
-  return (
-    <section className="max-w-[1400px] mx-auto px-4 pb-14 w-full grid lg:grid-cols-3 gap-4">
-      {/* Announcements */}
-      <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-        <Head title="Latest Announcements" link="View All" href="/news" />
-        <div className="space-y-3">
-          {NEWS.map(([d, m, t, s, ago]) => (
-            <a key={t} href="/news" className="flex gap-3 group">
-              <div className="w-12 shrink-0 rounded-xl text-center py-1.5" style={{ background: '#0B6B4F12' }}>
-                <div style={{ ...mont, color: C.deep }} className="text-base font-black leading-none">{d}</div>
-                <div className="text-[9px] font-bold" style={{ color: C.green }}>{m}</div>
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-bold text-[#15231D] group-hover:text-[#0B6B4F] transition leading-snug">{t}</div>
-                <div className="text-xs text-gray-500 truncate">{s}</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">{ago}</div>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {/* Community statistics */}
-      <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-        <Head title="Community Statistics" link="View Reports" href="/statistics" />
-        <div className="grid grid-cols-2 gap-3">
-          {[['Total Members', '10,248+'], ['Students', '4,350+'], ['Professionals', '3,120+'], ['Overseas Members', '2,778+']].map(([l, v]) => (
-            <div key={l} className="rounded-xl p-3" style={{ background: '#0B6B4F0d' }}>
-              <div className="text-[11px] text-gray-500">{l}</div>
-              <div style={{ ...mont, color: C.deep }} className="text-lg font-black">{v}</div>
-            </div>
-          ))}
-        </div>
-        <a href="/statistics" className="mt-4 block text-center rounded-xl py-2.5 text-sm font-bold text-white"
-          style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>Explore Rondo Statistics</a>
-      </div>
-
-      {/* Connect worldwide */}
-      <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-        <Head title="Connect Worldwide" link="View Map" href="/community/map" />
-        <p className="text-sm text-gray-500 leading-relaxed">
-          TNR is present in more than <b className="text-[#063D2B]">25 countries</b>.
-          Find your chapter or representative.
-        </p>
-        <div className="mt-4 grid grid-cols-4 gap-2">
-          {['🌍', '🌏', '🌎', '🗺️', '🏔️', '🏙️', '🕌', '🎓'].map((e, i) => (
-            <div key={i} className="aspect-square rounded-xl grid place-items-center text-xl" style={{ background: '#0B6B4F0d' }}>{e}</div>
-          ))}
-        </div>
-        <a href="/community/chapters" className="mt-4 block text-center rounded-xl py-2.5 text-sm font-bold text-white"
-          style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>Explore Chapters</a>
-      </div>
-    </section>
-  );
-}
 
 
