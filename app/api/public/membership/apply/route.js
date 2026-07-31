@@ -6,7 +6,7 @@ import {
 } from '@/lib/membership/core';
 import { sendApplicationReceived, sendAdminNewApplication } from '@/lib/membership/emails';
 import { uploadDataUrl } from '@/lib/storage';
-import { validateApplication, REQUIRED_LABELS } from '@/lib/membership/validateApplication';
+import { validateApplication, REQUIRED_LABELS, ageFrom } from '@/lib/membership/validateApplication';
 import { ROLE_KEYS, roleLabel } from '@/lib/membership/roles';
 
 export const dynamic = 'force-dynamic';
@@ -78,7 +78,11 @@ export async function POST(req) {
     applied_role,
     first_name, last_name,
     gender: b.gender || null,
-    age: b.age ? Number(b.age) : null,
+    // Age is derived, never taken from the client — a typed age goes stale and
+    // can be inflated to clear the minimum. Both are stored: date_of_birth is
+    // the source of truth, age stays populated for anything already reading it.
+    date_of_birth: b.date_of_birth || null,
+    age: b.date_of_birth ? ageFrom(b.date_of_birth) : null,
     village: b.village || null,
     union_council: b.union_council || null,
     mobile, mobile_normalized: mobile,

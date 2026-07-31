@@ -7,7 +7,7 @@ import {
   LEADERSHIP_OPTIONS, DECLARATION_TEXT, DECLARATION_VERSION,
 } from '@/lib/membership/options';
 import {
-  validateApplication, STEPS, stepErrors, isStepComplete, REQUIRED_LABELS,
+  validateApplication, STEPS, stepErrors, isStepComplete, REQUIRED_LABELS, ageFrom, MIN_AGE, MAX_AGE
 } from '@/lib/membership/validateApplication';
 import { ROLES, roleLabel as ROLE_LABEL } from '@/lib/membership/roles';
 import Stepper from '@/components/membership/Stepper';
@@ -18,7 +18,7 @@ const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }
 const BLANK = {
   applied_role: '',
   photo_data: '',
-  first_name: '', last_name: '', gender: '', age: '', village: '', union_council: '',
+  first_name: '', last_name: '', gender: '', date_of_birth: '', village: '', union_council: '',
   mobile: '', email: '', education_level: '', field_of_study: '', current_position: '',
   position_other: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
@@ -33,7 +33,8 @@ function reviewRows(f, key) {
   if (key === 'R') return [['Membership type', ROLE_LABEL(f.applied_role)]];
   if (key === 'A') return [
     ['Full name', [f.first_name, f.last_name].filter(Boolean).join(' ')],
-    ['Gender', f.gender], ['Age', f.age],
+    ['Gender', f.gender],
+    ['Date of birth', f.date_of_birth ? `${f.date_of_birth} (age ${ageFrom(f.date_of_birth) ?? '—'})` : ''],
     ['Union Council', f.union_council], ['Village / Area', f.village],
     ['Mobile / WhatsApp', f.mobile], ['Email', f.email],
     ['Profile photo', f.photo_data ? 'Attached' : 'Not attached'],
@@ -54,6 +55,16 @@ function reviewRows(f, key) {
     ['Join WhatsApp group', yes(f.whatsapp_opt_in)],
   ];
   return [];
+}
+
+/** Earliest and latest date of birth the age limits allow. */
+function dobBounds() {
+  const t = new Date();
+  const iso = (d) => d.toISOString().slice(0, 10);
+  return {
+    min: iso(new Date(t.getFullYear() - MAX_AGE - 1, t.getMonth(), t.getDate() + 1)),
+    max: iso(new Date(t.getFullYear() - MIN_AGE, t.getMonth(), t.getDate())),
+  };
 }
 
 export default function ApplyPage() {
@@ -275,7 +286,14 @@ export default function ApplyPage() {
               <Field label="First Name" req error={showErr('first_name')}><Input value={f.first_name} onChange={v => set('first_name', v)} onBlur={() => blur('first_name')} bad={!!showErr('first_name')} /></Field>
               <Field label="Last Name" req error={showErr('last_name')}><Input value={f.last_name} onChange={v => set('last_name', v)} onBlur={() => blur('last_name')} bad={!!showErr('last_name')} /></Field>
               <Field label="Gender" req error={showErr('gender')}><Select value={f.gender} onChange={v => set('gender', v)} options={GENDERS} onBlur={() => blur('gender')} bad={!!showErr('gender')} /></Field>
-              <Field label="Age" req error={showErr('age')}><Input type="number" value={f.age} onChange={v => set('age', v)} onBlur={() => blur('age')} bad={!!showErr('age')} /></Field>
+              {/* min/max bound the picker itself, so an out-of-range date
+                  cannot be chosen — the validator still checks, since these
+                  attributes are trivially bypassed. */}
+              <Field label={`Date of Birth (age ${MIN_AGE}–${MAX_AGE})`} req error={showErr('date_of_birth')}>
+                <Input type="date" value={f.date_of_birth} onChange={v => set('date_of_birth', v)}
+                  min={dobBounds().min} max={dobBounds().max}
+                  onBlur={() => blur('date_of_birth')} bad={!!showErr('date_of_birth')} />
+              </Field>
               <Field label="Union Council in Roundu" req error={showErr('union_council')}>
                 {useAreaLists
                   ? <Select value={f.union_council} onChange={setCouncil} options={councils.map(c => c.name)}
@@ -469,8 +487,8 @@ function Field({ label, req, error, children }) {
 }
 const base = 'w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition bg-white';
 const ring = (bad) => `${base} ${bad ? 'border-red-300 focus:border-red-500 bg-red-50/40' : 'border-gray-200 focus:border-[#0B6B4F]'}`;
-const Input = ({ value, onChange, onBlur, bad, type = 'text', placeholder }) =>
-  <input type={type} value={value} placeholder={placeholder} onBlur={onBlur}
+const Input = ({ value, onChange, onBlur, bad, type = 'text', placeholder, min, max }) =>
+  <input type={type} value={value} placeholder={placeholder} onBlur={onBlur} min={min} max={max}
     onChange={e => onChange(e.target.value)} className={ring(bad)} />;
 const Textarea = ({ value, onChange, onBlur, bad, rows = 3 }) =>
   <textarea rows={rows} value={value} onBlur={onBlur}
