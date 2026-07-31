@@ -68,10 +68,18 @@ export default function MembershipCard({ m, verifyUrl }) {
           <div style={{ fontSize: 11.5, fontWeight: 900, color: DEEP, textAlign: 'center', marginTop: 6, lineHeight: 1.05 }}>
             {m?.full_name}
           </div>
+          {/* The office held reads far more usefully here than the status —
+              "TECHNICAL COORDINATOR" identifies the person, "ACTIVE MEMBER"
+              only repeats what the card being valid already implies. Members
+              with no office fall back to the status, and an expired or
+              suspended card always shows the status so it cannot be mistaken
+              for a valid one. */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, marginTop: 2 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: chip, color: chipFg,
               fontSize: 5, display: 'grid', placeItems: 'center', fontWeight: 900 }}>✓</span>
-            <span style={{ fontSize: 6.4, fontWeight: 800, color: chip, letterSpacing: '.08em' }}>{label}</span>
+            <span style={{ fontSize: 6.4, fontWeight: 800, color: chip, letterSpacing: '.08em' }}>
+              {valid && m?.designation ? String(m.designation).toUpperCase() : label}
+            </span>
           </div>
 
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 6 }}>

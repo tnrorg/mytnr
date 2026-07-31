@@ -48,7 +48,8 @@ export async function GET(req) {
   // (photo, village, status) rather than a copy taken during authentication.
   const { data: fresh } = await sb.from('membership_members')
     .select(`membership_id, full_name, first_name, photo_url, village, union_council,
-             status, issued_at, approved_at, expires_at, category_id, role`)
+             status, issued_at, approved_at, expires_at, category_id, role,
+             leadership_profile_id`)
     .eq('id', member.id).maybeSingle();
   const mm = fresh || member;
 
@@ -68,13 +69,29 @@ export async function GET(req) {
   // Sentence form for the certificate, which reads as prose.
   const memberPhrase = rolePhrase(mm.role || 'general', category);
 
+  // Office held, for members who hold one — e.g. "Technical Coordinator".
+  // Lives on the leadership profile, so it needs a second lookup. Matched by
+  // the stored link first, falling back to member_id for profiles created
+  // before that link existed.
+  let designation = null;
+  if (mm.leadership_profile_id) {
+    const { data: lp } = await sb.from('leadership_profiles')
+      .select('designation').eq('id', mm.leadership_profile_id).maybeSingle();
+    designation = lp?.designation || null;
+  }
+  if (!designation) {
+    const { data: lp } = await sb.from('leadership_profiles')
+      .select('designation').eq('member_id', member.id).maybeSingle();
+    designation = lp?.designation || null;
+  }
+
   return ok({
     certificate: cert,
     member: {
       membership_id: mm.membership_id, full_name: mm.full_name, first_name: mm.first_name,
       photo_url: mm.photo_url, village: mm.village, union_council: mm.union_council,
       status: mm.status, issued_at: mm.issued_at || mm.approved_at,
-      expires_at: mm.expires_at, category, role: mm.role || 'general', memberType, memberPhrase,
+      expires_at: mm.expires_at, category, role: mm.role || 'general', memberType, memberPhrase, designation,
     },
   });
   } catch (e) {
