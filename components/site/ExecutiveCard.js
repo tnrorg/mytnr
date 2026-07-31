@@ -58,9 +58,13 @@ export default function ExecutiveCard({ member }) {
           {named && <VerifiedBadge size={16} />}
         </h3>
 
-        {academicTitle(member.qualification, member.field) && (
+        {/* Current profession is what the card is for — what this person does
+            today. The degree only stands in when no profession is recorded,
+            and the full qualification is on their profile page either way.
+            Same precedence as the council roster cards. */}
+        {(member.profession || academicTitle(member.qualification, member.field)) && (
           <p className="mt-1 text-center text-[12.5px] font-semibold" style={{ color: C.green }}>
-            {academicTitle(member.qualification, member.field)}
+            {member.profession || academicTitle(member.qualification, member.field)}
           </p>
         )}
 
