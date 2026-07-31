@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { aGet, aPatch, aPost } from './adminApi';
+import { aGet, aPatch, aPost, aDel } from './adminApi';
 import { exportExcel } from './exporters';
 
 const TONE = {
@@ -33,6 +33,27 @@ export default function MembersDirectoryTab({ toast }) {
     const r = await aPatch('/api/admin/membership/members/' + m.id, patch);
     if (!r.ok) return toast?.(r.message || 'Failed', 'err');
     toast?.('Member updated', 'ok'); load();
+  }
+
+  /** Permanent deletion. The Membership ID must be typed to confirm, because
+   *  this cannot be undone and cascades to every record the member owns. */
+  async function remove(m) {
+    const typed = prompt(
+      `PERMANENTLY DELETE ${m.full_name}?\n\n` +
+      `This removes their membership, profile, CVs, certificates and all other records.\n` +
+      `Their previous applications are deleted too, so ${m.email} can register again.\n\n` +
+      `This cannot be undone.\n\n` +
+      `Type the Membership ID to confirm: ${m.membership_id}`);
+    if (!typed) return;
+    if (typed.trim().toUpperCase() !== m.membership_id.toUpperCase())
+      return toast?.('Membership ID did not match — nothing was deleted.', 'err');
+
+    const reason = prompt('Reason for deletion (recorded in the audit log):') || '';
+    const r = await aDel(`/api/admin/membership/members/${m.id}` +
+      `?confirm=${encodeURIComponent(m.membership_id)}&reason=${encodeURIComponent(reason)}`);
+    if (!r?.ok) return toast?.(r?.message || 'Could not delete the member.', 'err');
+    toast?.(r.message || 'Member deleted', 'ok');
+    load();
   }
 
   async function resend(m) {
@@ -101,7 +122,8 @@ export default function MembersDirectoryTab({ toast }) {
                   {['active', 'approved'].includes(m.status)
                     ? <button onClick={() => change(m, { status: 'suspended' })} className="text-red-400 hover:underline mr-2">Suspend</button>
                     : <button onClick={() => change(m, { status: 'active' }, `Reactivate ${m.full_name}?`)} className="text-green-400 hover:underline mr-2">Reactivate</button>}
-                  <button onClick={() => resend(m)} className="text-tnr-goldLight hover:underline">Resend Invite</button>
+                  <button onClick={() => resend(m)} className="text-tnr-goldLight hover:underline mr-2">Resend Invite</button>
+                  <button onClick={() => remove(m)} className="text-red-500 font-semibold hover:underline">Delete</button>
                 </td>
               </tr>
             ))}

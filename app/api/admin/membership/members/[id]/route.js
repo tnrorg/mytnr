@@ -67,3 +67,58 @@ export async function PATCH(req, { params }) {
 
   return ok({ updated: true, changes: notes });
 }
+
+// DELETE — permanently remove a member.
+//
+// Deliberately a HARD delete, not a soft one. `email_normalized` carries a
+// unique constraint, so a soft-deleted row would keep the address reserved and
+// the person could never register again — which is the whole point of this
+// action. All 20 child tables are ON DELETE CASCADE, so their rows go with it.
+//
+// Their previous applications are removed too. The apply route blocks a new
+// submission while an application is pending_review / under_review /
+// correction_requested / approved, so leaving the old one behind would block
+// re-registration just as effectively as the member row did.
+export async function DELETE(req, { params }) {
+  const { admin, res } = requireAdmin(req); if (res) return res;
+  const sb = supabaseAdmin();
+  const ip = clientIp(req);
+
+  const { data: m } = await sb.from('membership_members').select('*').eq('id', params.id).maybeSingle();
+  if (!m) return fail('NOT_FOUND', 404, { message: 'Member not found.' });
+
+  const url = new URL(req.url);
+  const confirm = url.searchParams.get('confirm');
+  if (confirm !== m.membership_id)
+    return fail('CONFIRM_REQUIRED', 400, {
+      message: 'Type the Membership ID to confirm permanent deletion.' });
+
+  // Audit BEFORE the row disappears — afterwards there is nothing to record.
+  await logMembershipAudit({
+    admin_name: admin.username, action: 'MEMBER_DELETED', target_type: 'member',
+    target_id: m.membership_id,
+    previous_value: {
+      membership_id: m.membership_id, full_name: m.full_name,
+      email: m.email, status: m.status, village: m.village,
+    },
+    new_value: null, reason: url.searchParams.get('reason') || null, ip,
+  });
+
+  // A public leadership profile must not outlive the member behind it.
+  if (m.leadership_profile_id) {
+    await sb.from('leadership_profiles').delete().eq('id', m.leadership_profile_id);
+  }
+
+  // Free the email and mobile for a fresh application.
+  await sb.from('membership_applications').delete().eq('email_normalized', m.email_normalized);
+
+  const { error } = await sb.from('membership_members').delete().eq('id', m.id);
+  if (error) return fail('DELETE_FAILED', 500, {
+    message: 'Could not delete the member.', detail: error.message });
+
+  return ok({
+    deleted: true,
+    membership_id: m.membership_id,
+    message: `${m.full_name} has been permanently deleted. ${m.email} can now register again.`,
+  });
+}
