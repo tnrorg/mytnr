@@ -32,10 +32,21 @@ export default function ExecutiveMemberPage({ params }) {
           <p className="text-[20px] font-black leading-tight" style={{ color: named ? C.deep : '#9CA3AF' }}>
             {named ? m.name : 'To Be Announced'}
           </p>
-          {m.qualification && <p className="mt-1 text-[15px] font-semibold" style={{ color: C.green }}>{m.qualification}</p>}
-          <p className="mt-3 text-[14px] text-gray-600 leading-relaxed">
-            Term of office: one (1) year, with the first six (6) months serving as a probationary period.
-          </p>
+          {/* Profession first, matching the cards; the degree stands in when
+              no profession is recorded. The generic "term of office" line that
+              used to sit here was identical on every profile, so it told the
+              reader nothing about the individual — it belongs on the
+              Executive Committee page, where it still appears. */}
+          {(m.profession || m.qualification) && (
+            <p className="mt-1 text-[15px] font-semibold" style={{ color: C.green }}>
+              {m.profession || m.qualification}
+            </p>
+          )}
+          {(m.organisation || m.country) && (
+            <p className="mt-1 text-[13.5px] text-gray-500">
+              {[m.organisation, m.country].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
       </div>
 
