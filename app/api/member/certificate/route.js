@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireMember } from '@/lib/membership/auth';
+import { roleLabel, rolePhrase } from '@/lib/membership/roles';
 import { ok, fail } from '@/lib/api';
 import { generateCertificateNo } from '@/lib/membership/verify';
 
@@ -47,15 +48,25 @@ export async function GET(req) {
   // (photo, village, status) rather than a copy taken during authentication.
   const { data: fresh } = await sb.from('membership_members')
     .select(`membership_id, full_name, first_name, photo_url, village, union_council,
-             status, issued_at, approved_at, expires_at, category_id`)
+             status, issued_at, approved_at, expires_at, category_id, role`)
     .eq('id', member.id).maybeSingle();
   const mm = fresh || member;
 
+  // The membership TYPE shown on the card and certificate.
+  //
+  // `role` is the authoritative one — it is what the applicant chose and the
+  // committee confirmed at approval (General, UC Team, CEC, Advisory Council).
+  // `category_id` is a separate, optional admin classification, so it wins
+  // only when it has actually been set. Previously neither was read properly
+  // and everybody was printed as "General Member".
   let category = null;
   if (mm.category_id) {
     const { data: c } = await sb.from('membership_categories').select('name').eq('id', mm.category_id).maybeSingle();
     category = c?.name || null;
   }
+  const memberType = category || roleLabel(mm.role || 'general');
+  // Sentence form for the certificate, which reads as prose.
+  const memberPhrase = rolePhrase(mm.role || 'general', category);
 
   return ok({
     certificate: cert,
@@ -63,7 +74,7 @@ export async function GET(req) {
       membership_id: mm.membership_id, full_name: mm.full_name, first_name: mm.first_name,
       photo_url: mm.photo_url, village: mm.village, union_council: mm.union_council,
       status: mm.status, issued_at: mm.issued_at || mm.approved_at,
-      expires_at: mm.expires_at, category,
+      expires_at: mm.expires_at, category, role: mm.role || 'general', memberType, memberPhrase,
     },
   });
   } catch (e) {

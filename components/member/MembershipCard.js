@@ -77,7 +77,9 @@ export default function MembershipCard({ m, verifyUrl }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 6 }}>
             <tbody>
               {[['MEMBERSHIP ID', m?.membership_id],
-                ['CATEGORY', m?.category || 'General Member'],
+                // memberType resolves to the confirmed membership type (Advisory Council,
+                // CEC, UC Team or General Member) rather than defaulting everyone to General.
+                ['CATEGORY', m?.memberType || m?.category || 'General Member'],
                 ['VILLAGE / AREA', m?.village || '—'],
                 ['UNION COUNCIL', m?.union_council || '—'],
                 ['DATE OF ISSUE', fmt(m?.issued_at)],

@@ -71,7 +71,7 @@ export default function CertificatePage() {
                 bearing Membership ID <b className="font-mono" style={{ color: G }}>{m.membership_id}</b>
                 {m.village ? <> of <b>{m.village}</b></> : null}
                 {m.union_council ? <>, Union Council <b>{m.union_council}</b></> : null},
-                is a duly registered {m.category || 'General'} Member of Tehreek-e-Nojawanan Roundu,
+                is a duly registered {m.memberPhrase || m.memberType || 'General Member'} of Tehreek-e-Nojawanan Roundu,
                 and is entitled to all rights and privileges of membership.
               </p>
 
