@@ -62,10 +62,13 @@ export async function POST(req) {
     const { data: existing } = await sb.from('leadership_profiles')
       .select('id, body, slug').eq('id', member.leadership_profile_id).maybeSingle();
     if (existing) {
-      await sb.from('leadership_profiles')
-        .update({ body, designation: b.designation || null, active: true, verified: true,
-                  member_id: member.id, updated_at: new Date().toISOString() })
-        .eq('id', existing.id);
+      const patch = { body, designation: b.designation || null, active: true,
+                      verified: true, updated_at: new Date().toISOString() };
+      let { error: upErr } = await sb.from('leadership_profiles')
+        .update({ ...patch, member_id: member.id }).eq('id', existing.id);
+      if (upErr && /member_id/.test(upErr.message || '')) {
+        await sb.from('leadership_profiles').update(patch).eq('id', existing.id);
+      }
       await sb.from('membership_members')
         .update({ role: BODY_ROLE[body] }).eq('id', member.id);
       await logAudit({ action: 'LEADERSHIP_REASSIGNED', actor: admin.username,
@@ -80,11 +83,12 @@ export async function POST(req) {
     .select('id').eq('body', body).eq('slug', slug).maybeSingle();
   if (clash) slug = `${slug}-${member.membership_id.toLowerCase()}`;
 
-  const { data: profile, error } = await sb.from('leadership_profiles').insert({
+  // `member_id` arrives with migration_leadership_member_link.sql. On a
+  // database where that has not been run yet the insert would fail outright,
+  // so the column is added separately and retried without it — the assignment
+  // still succeeds, just without the cascade link until the migration runs.
+  const baseRow = {
     body, slug,
-    // Ties the profile to the member. The FK is ON DELETE CASCADE, so removing
-    // the member removes their public card automatically — no orphans.
-    member_id: member.id,
     name: member.full_name,
     designation: b.designation || null,
     qualification: member.education_level || null,
@@ -100,8 +104,14 @@ export async function POST(req) {
     verified: true,
     active: true,
     sort_order: Number(b.sort_order) || 0,
-  }).select().maybeSingle();
+  };
 
+  let { data: profile, error } = await sb.from('leadership_profiles')
+    .insert({ ...baseRow, member_id: member.id }).select().maybeSingle();
+  if (error && /member_id/.test(error.message || '')) {
+    ({ data: profile, error } = await sb.from('leadership_profiles')
+      .insert(baseRow).select().maybeSingle());
+  }
   if (error) return fail('ASSIGN_FAILED', 500, { message: error.message });
 
   await sb.from('membership_members')
