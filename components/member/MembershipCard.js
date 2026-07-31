@@ -100,24 +100,27 @@ export default function MembershipCard({ m, verifyUrl }) {
             </tbody>
           </table>
 
+          {/* Reserves the band the absolutely-positioned signature occupies, so
+              the details table can never run into it. */}
+          <div style={{ height: 58 }} aria-hidden="true" />
+
           {/* Signature — anchored a fixed distance above the wave.
               It must be absolutely positioned: the card face is a fixed 348px
               and the details above already consume the column, so `margin-top:auto`
               had no free space to work with and extra padding simply overflowed
               off the bottom of the card and was clipped. */}
-          <div style={{ position: 'absolute', right: 4, bottom: 14, zIndex: 3 }}>
+          <div style={{ position: 'absolute', right: 4, bottom: 12, zIndex: 3 }}>
             <div style={{ textAlign: 'right' }}>
               {/* Real signature scan. `multiply` makes the white paper background
                   disappear against the white card — no image editing needed. */}
               <img src={t.signature_url || "/signature.png"} alt="Signature"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 style={{
-                  height: 44, width: 'auto', maxWidth: 150, objectFit: 'contain',
+                  height: 38, width: 'auto', maxWidth: 132, objectFit: 'contain',
                   display: 'block', margin: '0 0 2px auto',
                   mixBlendMode: 'multiply',
                   filter: 'grayscale(1) contrast(2.2) brightness(.72)',
                 }} />
-              <div style={{ width: 118, height: 1, background: GOLD, margin: '0 0 3px auto', opacity: .85 }} />
               <div style={{ fontSize: 5, fontWeight: 900, color: DEEP, letterSpacing: '.1em' }}>{t.signatory_title}</div>
               <div style={{ fontSize: 4.4, color: '#4B5563', fontWeight: 600, letterSpacing: '.08em', marginTop: 1 }}>{t.signature_note}</div>
             </div>
