@@ -20,7 +20,7 @@ function Card({ m, i }) {
 
       {/* Portrait fills the card width — at four across, a small left-aligned
           thumbnail left the row looking empty. */}
-      <div className="relative aspect-[4/3] bg-gray-100">
+      <div className="relative aspect-[4/3] shrink-0 bg-gray-100 overflow-hidden">
         {m.photo_url
           ? <img src={m.photo_url} alt={m.name} loading="lazy" className="w-full h-full object-cover object-top" />
           : <div role="img" aria-label={m.name}
@@ -39,41 +39,38 @@ function Card({ m, i }) {
 
       <div className="p-3 flex flex-col flex-1">
         {/* Badge sits with the name, the way a verified handle reads. */}
-        <h3 className="font-extrabold text-[14.5px] leading-snug flex items-center gap-1.5"
+        <h3 className="font-extrabold text-[14.5px] leading-snug flex items-center gap-1.5 h-[20px]"
           style={{ color: COLORS.green900 }}>
           <span className="truncate">{m.name}</span>
           <VerifiedBadge size={15} />
         </h3>
-        {(m.profession || academicTitle(m.qualification, m.field)) && (
-          <div className="mt-0.5 text-[12px] font-semibold leading-snug truncate" style={{ color: COLORS.green700 }}>
-            {m.profession || academicTitle(m.qualification, m.field)}
-          </div>
-        )}
-        {!!meta.length && (
-          <div className="mt-0.5 text-[11px] leading-snug truncate" style={{ color: COLORS.muted }}>
-            {meta.join(' · ')}
-          </div>
-        )}
+        <div className="mt-0.5 h-[17px] text-[12px] font-semibold leading-snug truncate"
+          style={{ color: COLORS.green700 }}>
+          {m.profession || academicTitle(m.qualification, m.field)}
+        </div>
+        {/* Fixed-height row: a member with no organisation or country must not
+            pull the rest of the card up relative to their neighbours. */}
+        <div className="mt-0.5 h-[15px] text-[11px] leading-snug truncate" style={{ color: COLORS.muted }}>
+          {meta.join(' · ')}
+        </div>
 
-        {m.intro && (
-          <p className="mt-1.5 text-[11px] leading-snug line-clamp-2" style={{ color: COLORS.muted }}>
-            {m.intro}
-          </p>
-        )}
+        {/* Two lines reserved whether or not an introduction exists. */}
+        <p className="mt-1.5 h-[30px] text-[11px] leading-snug line-clamp-2" style={{ color: COLORS.muted }}>
+          {m.intro}
+        </p>
 
-        {!!(m.expertise || []).length && (
-          <div className="mt-1.5 mb-3 flex flex-wrap gap-1">
-            {m.expertise.slice(0, 2).map(e => (
-              <span key={e} className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
-                style={{ background: 'rgba(23,107,73,.08)', color: COLORS.green700 }}>{e}</span>
-            ))}
-            {m.expertise.length > 2 && (
-              <span className="px-1 py-0.5 text-[10.5px]" style={{ color: COLORS.muted }}>
-                +{m.expertise.length - 2}
-              </span>
-            )}
-          </div>
-        )}
+        {/* One tag row, always present so the button sits at the same height. */}
+        <div className="mt-1.5 mb-3 h-[22px] flex flex-wrap gap-1 overflow-hidden">
+          {(m.expertise || []).slice(0, 2).map(e => (
+            <span key={e} className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
+              style={{ background: 'rgba(23,107,73,.08)', color: COLORS.green700 }}>{e}</span>
+          ))}
+          {(m.expertise || []).length > 2 && (
+            <span className="px-1 py-0.5 text-[10.5px]" style={{ color: COLORS.muted }}>
+              +{m.expertise.length - 2}
+            </span>
+          )}
+        </div>
 
         {/* Solid green button, matching the Executive Committee cards so both
             leadership sections share one call to action. */}

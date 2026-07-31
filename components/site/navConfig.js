@@ -50,18 +50,30 @@ export const NAV = [
     live('Become a Member', '/membership/apply'),
     live('Check Application Status', '/membership/status'),
     live('Verify Membership', '/membership/verify'),
+    live('Members Analytics', '/members'),
     live('Member Login', '/member/login'),
     soon('Eligibility & Guidelines', '/membership/eligibility'),
     soon('Volunteer With TNR', '/volunteer'),
   ]},
-
-  { label: 'Members', href: '/members' },
 
   { label: 'Opportunities', href: '/member/opportunities', items: [
     live('Browse Opportunities', '/member/opportunities'),
     soon('Jobs & Internships', '/opportunities/jobs'),
     soon('Scholarships', '/opportunities/scholarships'),
     soon('Training & Mentorship', '/opportunities/training'),
+  ]},
+
+  { label: 'Roundu Statistics', items: [
+    soon('Population', '/statistics/population'),
+    soon('Literacy Rate', '/statistics/literacy'),
+    soon('Education Statistics', '/statistics/education'),
+    soon('Health Statistics', '/statistics/health'),
+    soon('Schools, Colleges & Universities', '/statistics/institutions'),
+    soon('Doctors, Engineers & Teachers', '/statistics/professionals'),
+    soon('Overseas Professionals', '/statistics/overseas'),
+    soon('Employment Statistics', '/statistics/employment'),
+    soon('Tourism Statistics', '/statistics/tourism'),
+    soon('Interactive Reports', '/statistics/reports'),
   ]},
 
   { label: 'Media', items: [
