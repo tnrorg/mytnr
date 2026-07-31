@@ -1,7 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireAdmin } from '@/lib/guard';
 import { ok, fail } from '@/lib/api';
+import { ACTIVE_STATUSES } from '@/lib/membershipStats';
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(req) {
   const { res } = requireAdmin(req); if (res) return res;
@@ -11,7 +14,12 @@ export async function GET(req) {
 
   let q = supabaseAdmin().from('membership_members').select('*')
     .is('deleted_at', null).order('created_at', { ascending: false }).limit(1000);
-  if (status) q = q.eq('status', status);
+  // "Active" must cover BOTH `active` and `approved`. They are equivalent
+  // everywhere else (public directory, analytics, login), so filtering on the
+  // literal string alone made approved members visible under All and nowhere
+  // else — the count mismatch this fixes.
+  if (status === 'active') q = q.in('status', ACTIVE_STATUSES);
+  else if (status) q = q.eq('status', status);
   if (search) q = q.or(
     `full_name.ilike.%${search}%,email.ilike.%${search}%,membership_id.ilike.%${search}%,village.ilike.%${search}%`
   );
