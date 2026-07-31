@@ -27,7 +27,14 @@ const ROLE_COLORS = {
 export default function MembershipOverview() {
   const [d, setD] = useState(null);
   const [err, setErr] = useState('');
-  const [open, setOpen] = useState(null);      // expanded council
+  // A Set, not a single value: expanding one council must not collapse
+  // another. Comparing cards side by side is the whole point of this view.
+  const [open, setOpen] = useState(() => new Set());
+  const toggle = (name) => setOpen(prev => {
+    const next = new Set(prev);
+    next.has(name) ? next.delete(name) : next.add(name);
+    return next;
+  });
 
   useEffect(() => {
     aGet('/api/admin/membership/overview')
@@ -67,9 +74,17 @@ export default function MembershipOverview() {
     <Card>
       <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
         <h3 className="font-black text-tnr-cream">Union Councils & Villages</h3>
-        <span className="text-[11px] text-tnr-cream/50">
-          {d.listedCouncils} councils · {d.listedVillages} villages listed · {d.total} active members
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] text-tnr-cream/50">
+            {d.listedCouncils} councils · {d.listedVillages} villages listed · {d.total} active members
+          </span>
+          <button
+            onClick={() => setOpen(prev =>
+              prev.size ? new Set() : new Set(d.councils.map(c => c.name)))}
+            className="text-[11px] font-semibold text-tnr-goldLight hover:underline whitespace-nowrap">
+            {open.size ? 'Collapse all' : 'Expand all'}
+          </button>
+        </div>
       </div>
       <p className="text-xs text-tnr-cream/45 mb-4">
         Councils with no members yet still appear, so you can see where recruitment has not reached.
@@ -77,7 +92,7 @@ export default function MembershipOverview() {
 
       <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {d.councils.map((c, i) => {
-          const expanded = open === c.name;
+          const expanded = open.has(c.name);
           return (
             <div key={c.name}
               className="rounded-xl p-4 border transition-colors duration-standard
@@ -107,7 +122,7 @@ export default function MembershipOverview() {
               </ul>
 
               {c.villages.length > 4 && (
-                <button onClick={() => setOpen(expanded ? null : c.name)}
+                <button onClick={() => toggle(c.name)}
                   className="mt-2 text-[11px] font-semibold text-tnr-goldLight hover:underline">
                   {expanded ? 'Show less' : `Show all ${c.villages.length}`}
                 </button>
