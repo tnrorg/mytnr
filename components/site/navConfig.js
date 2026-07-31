@@ -63,15 +63,15 @@ export const NAV = [
     soon('Training & Mentorship', '/opportunities/training'),
   ]},
 
-  { label: 'Roundu Statistics', items: [
+  // The first entry is live and computed from membership records. The rest are
+  // district-level facts about Roundu that member data cannot answer — they
+  // need official sources, so they stay marked as planned.
+  { label: 'Roundu Statistics', href: '/statistics', items: [
+    live('TNR Membership in Numbers', '/statistics'),
     soon('Population', '/statistics/population'),
     soon('Literacy Rate', '/statistics/literacy'),
-    soon('Education Statistics', '/statistics/education'),
     soon('Health Statistics', '/statistics/health'),
     soon('Schools, Colleges & Universities', '/statistics/institutions'),
-    soon('Doctors, Engineers & Teachers', '/statistics/professionals'),
-    soon('Overseas Professionals', '/statistics/overseas'),
-    soon('Employment Statistics', '/statistics/employment'),
     soon('Tourism Statistics', '/statistics/tourism'),
     soon('Interactive Reports', '/statistics/reports'),
   ]},
