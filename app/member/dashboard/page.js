@@ -1,5 +1,8 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { roleLabel } from '@/lib/membership/roles';
+import { profileCompletion } from '@/lib/membership/profile';
+import { mGet } from '@/components/member/memberApi';
 import MemberShell from '@/components/member/MemberShell';
 import Avatar from '@/components/member/Avatar';
 
@@ -16,6 +19,12 @@ const QUICK = [
 ];
 
 export default function MemberDashboard() {
+  // Completion needs the CV sections, not just the member row.
+  const [profile, setProfile] = useState(null);
+  useEffect(() => {
+    mGet('/api/member/profile').then(r => r?.ok && setProfile(r));
+  }, []);
+
   return (
     <MemberShell active="/member/dashboard">
       {(m) => (
@@ -52,7 +61,7 @@ export default function MemberDashboard() {
 
           {/* Stats — real values only; features arrive in later phases */}
           <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[['Profile Completion', profilePct(m) + '%'], ['CVs Created', '0'],
+            {[['Profile Completion', profileCompletion(m, profile || {}).percent + '%'], ['CVs Created', '0'],
               ['Cover Letters', '0'], ['Certificates', '0']].map(([l, v]) => (
               <div key={l} className="rounded-2xl bg-white border border-gray-100 shadow-sm p-4 text-center">
                 <div style={{ ...mont, color: C.deep }} className="text-2xl font-black">{v}</div>
@@ -60,6 +69,30 @@ export default function MemberDashboard() {
               </div>
             ))}
           </div>
+
+          {/* A bare percentage is not actionable. Name the section worth the
+              most and show what completing it is worth. */}
+          {(() => {
+            const c = profileCompletion(m, profile || {});
+            if (!profile || !c.missing.length) return null;
+            return (
+              <a href="/member/profile"
+                className="mt-6 flex items-center gap-4 rounded-2xl bg-white border border-gray-100 p-4
+                  hover:border-[#0B6B4F]/30 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-bold" style={{ color: C.deep }}>
+                    Add your {c.missing[0].label.toLowerCase()} to reach {c.percent + c.missing[0].weight}%
+                  </div>
+                  <div className="mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="h-full rounded-full transition-[width] duration-500"
+                      style={{ width: `${c.percent}%`,
+                               background: `linear-gradient(90deg,${C.green},${C.gold})` }} />
+                  </div>
+                </div>
+                <span className="text-xs font-bold shrink-0" style={{ color: C.green }}>Complete →</span>
+              </a>
+            );
+          })()}
 
           <h2 style={{ ...mont, color: C.deep }} className="mt-8 text-sm font-black uppercase tracking-wide">Quick Actions</h2>
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -85,11 +118,6 @@ export default function MemberDashboard() {
   );
 }
 
-// Honest completion measure from the fields we actually have today.
-function profilePct(m) {
-  if (!m) return 0;
-  const fields = ['first_name', 'last_name', 'email', 'mobile', 'gender', 'village',
-    'union_council', 'education_level', 'field_of_study', 'current_position', 'photo_url'];
-  const filled = fields.filter(f => m[f]).length;
-  return Math.round((filled / fields.length) * 100);
-}
+// Completion now lives in lib/membership/profile.js, weighted across the whole
+// profile — see profileCompletion(). The old version here counted only the
+// registration fields, which are all mandatory, so everyone scored 100%.
