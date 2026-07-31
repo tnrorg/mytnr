@@ -30,49 +30,62 @@ export async function GET(req) {
 
     const rows = members || [];
     const norm = (v) => (v || '').trim();
+    // Match case-insensitively: a member whose record says "HARDASS" and a
+    // managed village called "Hardass" are the same place, and counting them
+    // separately splits the village in two on every card and chart.
+    const key = (v) => norm(v).toLowerCase();
 
-    // Head-counts keyed by council and by "council::village".
+    // Head-counts keyed by council and by "council::village", both folded.
     const byCouncil = new Map();
     const byVillage = new Map();
+    // Remembers the spelling a member actually used, for anything that turns
+    // out not to be on the managed list.
+    const seenLabel = new Map();
     for (const m of rows) {
       const c = norm(m.union_council) || 'Unassigned';
       const v = norm(m.village) || 'Not recorded';
-      byCouncil.set(c, (byCouncil.get(c) || 0) + 1);
-      const key = `${c}::${v}`;
-      byVillage.set(key, (byVillage.get(key) || 0) + 1);
+      const ck = key(c) || 'unassigned';
+      const vk = `${ck}::${key(v) || 'not recorded'}`;
+      byCouncil.set(ck, (byCouncil.get(ck) || 0) + 1);
+      byVillage.set(vk, (byVillage.get(vk) || 0) + 1);
+      if (!seenLabel.has(ck)) seenLabel.set(ck, c);
+      if (!seenLabel.has(vk)) seenLabel.set(vk, v);
     }
 
     // Start from the admin-managed lists so empty areas are visible.
     const councils = (ucs || []).map(uc => {
+      const ck = key(uc.name);
       const vs = (villages || []).filter(v => v.union_council_id === uc.id).map(v => ({
-        name: v.name,
+        name: v.name,                                   // always the managed spelling
         active: v.active,
-        members: byVillage.get(`${uc.name}::${v.name}`) || 0,
+        members: byVillage.get(`${ck}::${key(v.name)}`) || 0,
       }));
-      // Villages members typed that are not on the managed list yet.
-      const known = new Set(vs.map(v => v.name));
-      for (const [key, count] of byVillage) {
-        const [c, v] = key.split('::');
-        if (c === uc.name && !known.has(v)) vs.push({ name: v, members: count, unlisted: true });
+      // Villages members typed that are genuinely not on the managed list.
+      const known = new Set(vs.map(v => key(v.name)));
+      for (const [vk, count] of byVillage) {
+        const [c, v] = vk.split('::');
+        if (c === ck && !known.has(v)) {
+          vs.push({ name: seenLabel.get(vk) || v, members: count, unlisted: true });
+        }
       }
       return {
         name: uc.name,
         active: uc.active,
-        members: byCouncil.get(uc.name) || 0,
+        members: byCouncil.get(ck) || 0,
         villages: vs.sort((a, b) => b.members - a.members || a.name.localeCompare(b.name)),
       };
     });
 
     // Councils that appear on member records but are not on the managed list.
-    const listed = new Set(councils.map(c => c.name));
-    for (const [name, members] of byCouncil) {
-      if (listed.has(name)) continue;
+    const listed = new Set(councils.map(c => key(c.name)));
+    for (const [ck, members] of byCouncil) {
+      if (listed.has(ck)) continue;
       const vs = [];
-      for (const [key, count] of byVillage) {
-        const [c, v] = key.split('::');
-        if (c === name) vs.push({ name: v, members: count, unlisted: true });
+      for (const [vk, count] of byVillage) {
+        const [c, v] = vk.split('::');
+        if (c === ck) vs.push({ name: seenLabel.get(vk) || v, members: count, unlisted: true });
       }
-      councils.push({ name, members, villages: vs, unlisted: true });
+      councils.push({ name: seenLabel.get(ck) || ck, members, villages: vs, unlisted: true });
     }
     councils.sort((a, b) => b.members - a.members || a.name.localeCompare(b.name));
 
