@@ -47,7 +47,7 @@ export default function AssignLeader({ body, bodyLabel, onDone, toast }) {
       </p>
 
       <input className={input} value={q} onChange={e => { setQ(e.target.value); setPicked(null); }}
-        placeholder="e.g. TNR-MN-0001, name@example.com, or a name" />
+        placeholder="e.g. TNR-0001, name@example.com, or a name" />
 
       {!!hits.length && !picked && (
         <ul className="mt-2 space-y-1 max-h-56 overflow-y-auto">

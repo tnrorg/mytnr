@@ -30,7 +30,7 @@ export default function VerifyPage() {
     setRes(r);
   };
 
-  // Support /membership/verify?id=TNR-MN-0001 from the QR code.
+  // Support /membership/verify?id=TNR-0001 from the QR code.
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('id');
     if (id) { setQ(id); run(id); }
@@ -50,7 +50,7 @@ export default function VerifyPage() {
 
         <form onSubmit={e => { e.preventDefault(); run(); }}
           className="mt-8 rounded-2xl bg-white border border-gray-100 shadow-sm p-6 space-y-3">
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="TNR-MN-0001"
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="TNR-0001"
             className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-sm text-center font-mono outline-none focus:border-[#0B6B4F]" />
           <button disabled={busy || !q.trim()} className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-40"
             style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>
