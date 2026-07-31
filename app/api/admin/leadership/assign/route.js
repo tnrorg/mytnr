@@ -64,7 +64,7 @@ export async function POST(req) {
     if (existing) {
       await sb.from('leadership_profiles')
         .update({ body, designation: b.designation || null, active: true, verified: true,
-                  updated_at: new Date().toISOString() })
+                  member_id: member.id, updated_at: new Date().toISOString() })
         .eq('id', existing.id);
       await sb.from('membership_members')
         .update({ role: BODY_ROLE[body] }).eq('id', member.id);
@@ -82,6 +82,9 @@ export async function POST(req) {
 
   const { data: profile, error } = await sb.from('leadership_profiles').insert({
     body, slug,
+    // Ties the profile to the member. The FK is ON DELETE CASCADE, so removing
+    // the member removes their public card automatically — no orphans.
+    member_id: member.id,
     name: member.full_name,
     designation: b.designation || null,
     qualification: member.education_level || null,

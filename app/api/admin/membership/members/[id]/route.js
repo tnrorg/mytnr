@@ -104,13 +104,32 @@ export async function DELETE(req, { params }) {
     new_value: null, reason: url.searchParams.get('reason') || null, ip,
   });
 
-  // A public leadership profile must not outlive the member behind it.
+  // ── Everything that does NOT cascade automatically ──────────────────────
+  // The 23 portal tables (CVs, cover letters, certificates, documents,
+  // education, experience, skills, notifications, tickets, volunteering,
+  // events, saved opportunities …) are ON DELETE CASCADE from
+  // membership_members, so they go when the row goes.
+  //
+  // These three are keyed differently and must be removed by hand:
+
+  // 1. Public leadership profile — a separate table, and deleting it also
+  //    cascades its education, experience, publications, certifications,
+  //    awards, projects and gallery rows.
   if (m.leadership_profile_id) {
     await sb.from('leadership_profiles').delete().eq('id', m.leadership_profile_id);
   }
+  await sb.from('leadership_profiles').delete().eq('member_id', m.id);
 
-  // Free the email and mobile for a fresh application.
+  // 2. Guidance requests they SENT. Keyed by membership_id as plain text, so
+  //    there is no foreign key to cascade — without this their name and the
+  //    body of their message would stay in council members' inboxes.
+  await sb.from('council_guidance_requests').delete().eq('membership_id', m.membership_id);
+
+  // 3. Applications — frees the email and mobile for a fresh registration.
   await sb.from('membership_applications').delete().eq('email_normalized', m.email_normalized);
+  if (m.mobile_normalized) {
+    await sb.from('membership_applications').delete().eq('mobile_normalized', m.mobile_normalized);
+  }
 
   const { error } = await sb.from('membership_members').delete().eq('id', m.id);
   if (error) return fail('DELETE_FAILED', 500, {

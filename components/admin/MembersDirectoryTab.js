@@ -15,10 +15,21 @@ export default function MembersDirectoryTab({ toast }) {
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const load = () => {
     const q = new URLSearchParams({ status, search });
-    aGet('/api/admin/membership/members?' + q).then(r => r.ok && setRows(r.members || []));
+    // The error was previously discarded, so a failed request rendered as
+    // "No members yet" — identical to a genuinely empty list.
+    setLoading(true);
+    aGet('/api/admin/membership/members?' + q)
+      .then(r => {
+        setLoading(false);
+        if (r?.ok) { setRows(r.members || []); setErr(''); }
+        else { setErr(r?.detail || r?.message || 'Could not load members.'); setRows([]); }
+      })
+      .catch(e => { setLoading(false); setErr(e.message || 'Request failed.'); setRows([]); });
   };
   useEffect(() => { const t = setTimeout(load, 250); return () => clearTimeout(t);
     /* eslint-disable-next-line */ }, [status, search]);
@@ -80,6 +91,12 @@ export default function MembersDirectoryTab({ toast }) {
           })), 'Members', 'tnr-membership.xlsx')}>⬇ Export Excel</button>
       </div>
 
+      {err && (
+        <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          {err}
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2 items-center">
         <input className="input max-w-xs" placeholder="Search name / email / ID / village"
           value={search} onChange={e => setSearch(e.target.value)} />
@@ -127,8 +144,11 @@ export default function MembersDirectoryTab({ toast }) {
                 </td>
               </tr>
             ))}
-            {!rows.length && <tr><td colSpan={7} className="px-3 py-10 text-center text-tnr-cream/40">
-              No members yet. Approve an application to create the first member.</td></tr>}
+            {!rows.length && !err && <tr><td colSpan={7} className="px-3 py-10 text-center text-tnr-cream/40">
+              {loading ? 'Loading members…'
+                : status || search
+                  ? 'No members match this filter.'
+                  : 'No members yet. Approve an application to create the first member.'}</td></tr>}
           </tbody>
         </table>
       </div>
