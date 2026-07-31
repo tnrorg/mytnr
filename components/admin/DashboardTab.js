@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import MembershipOverview from './MembershipOverview';
 import { aGet } from './adminApi';
 import { Card, Stat, Badge } from './ui';
 export default function DashboardTab() {
@@ -30,6 +31,14 @@ export default function DashboardTab() {
         <p className="text-right text-xs text-tnr-goldLight mt-1">{d.progress}% turnout</p>
       </> : <p className="text-tnr-cream/50 text-sm">No active election.</p>}
     </Card>
+
+    {/* Membership overview — union councils, villages and member types.
+        The stats above are the ELECTION system; this section is membership. */}
+    <div className="pt-2">
+      <h2 className="text-lg font-black text-tnr-cream mb-3">Membership Overview</h2>
+      <MembershipOverview />
+    </div>
+
     {/* Recent Activity is visible to Super Admins only. */}
     {d.show_activity && <Card>
       <h3 className="font-bold text-tnr-goldLight mb-3">Recent Activity</h3>
