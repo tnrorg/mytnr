@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/guard';
 import { ok, fail, readJson } from '@/lib/api';
 import { clientIp } from '@/lib/audit';
 import { logMembershipAudit } from '@/lib/membership/core';
+import { ROLE_KEYS } from '@/lib/membership/roles';
 
 export const dynamic = 'force-dynamic';
 const STATUSES = ['approved', 'active', 'suspended', 'inactive', 'expired'];
@@ -40,6 +41,22 @@ export async function PATCH(req, { params }) {
   if (b.category_id !== undefined && b.category_id !== m.category_id) {
     patch.category_id = b.category_id || null;
     notes.push('category changed');
+  }
+  // Village and Union Council are editable here so an admin can move a member
+  // whose area was renamed or misspelled. Without this there was no way to
+  // correct a stranded record short of editing the database directly.
+  for (const f of ['village', 'union_council']) {
+    if (b[f] === undefined) continue;
+    const next = String(b[f] || '').trim() || null;
+    if (next !== (m[f] || null)) {
+      patch[f] = next;
+      notes.push(`${f.replace('_', ' ')} ${m[f] || '—'} → ${next || '—'}`);
+    }
+  }
+  if (b.role !== undefined && b.role !== m.role) {
+    if (!ROLE_KEYS.includes(b.role)) return fail('BAD_ROLE', 400, { message: 'Unknown membership type.' });
+    patch.role = b.role;
+    notes.push(`membership type ${m.role || 'general'} → ${b.role}`);
   }
   if (!notes.length) return ok({ updated: false });
 

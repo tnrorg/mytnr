@@ -4,7 +4,7 @@ import MemberShell from '@/components/member/MemberShell';
 import { mGet, mPost } from '@/components/member/memberApi';
 const C = { deep: '#063D2B', green: '#0B6B4F' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
-const base = 'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#0B6B4F]';
+const base = 'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#0B6B4F] bg-white text-[#15231D]';
 const CATS = ['Membership','Profile','CV Builder','Cover Letter','Membership Card','Certificate','Login','Technical Problem','General Inquiry'];
 
 export default function Support() {
