@@ -1,4 +1,5 @@
 'use client';
+import { academicTitle } from '@/lib/membership/options';
 import VerifiedBadge from '@/components/ui/VerifiedBadge';
 import { COLORS, FONT } from '@/lib/design/tokens';
 import { useState } from 'react';
@@ -57,8 +58,10 @@ export default function ExecutiveCard({ member }) {
           {named && <VerifiedBadge size={16} />}
         </h3>
 
-        {member.qualification && (
-          <p className="mt-1 text-center text-[12.5px] font-semibold" style={{ color: C.green }}>{member.qualification}</p>
+        {academicTitle(member.qualification, member.field) && (
+          <p className="mt-1 text-center text-[12.5px] font-semibold" style={{ color: C.green }}>
+            {academicTitle(member.qualification, member.field)}
+          </p>
         )}
 
         <p className="mt-3 text-center text-[13px] text-gray-500 leading-relaxed flex-1">{member.summary}</p>

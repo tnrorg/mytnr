@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Skeleton, EmptyState, VerifiedBadge } from '@/components/ui';
 import { COLORS, FONT, MOTION } from '@/lib/design/tokens';
 import { initials } from '@/content/advisoryCouncil';
+import { academicTitle } from '@/lib/membership/options';
 
 const glass = 'rounded-tnr-lg bg-white/90 backdrop-blur-sm shadow-tnr-flat ' +
   'border border-[rgba(200,154,43,.35)]';
@@ -43,9 +44,9 @@ function Card({ m, i }) {
           <span className="truncate">{m.name}</span>
           <VerifiedBadge size={15} />
         </h3>
-        {(m.profession || m.qualification) && (
+        {(m.profession || academicTitle(m.qualification, m.field)) && (
           <div className="mt-0.5 text-[12px] font-semibold leading-snug truncate" style={{ color: COLORS.green700 }}>
-            {m.profession || m.qualification}
+            {m.profession || academicTitle(m.qualification, m.field)}
           </div>
         )}
         {!!meta.length && (

@@ -204,7 +204,7 @@ export default function LeadershipTab({ toast }) {
               <input className="input" value={form.designation || ''}
                 onChange={e => setForm(s => ({ ...s, designation: e.target.value }))} />
             </Field>
-            <Field label="Qualification (PhD, Masters…)">
+            <Field label="Qualification — e.g. BS Software Engineering, MS Chemistry">
               <input className="input" value={form.qualification || ''}
                 onChange={e => setForm(s => ({ ...s, qualification: e.target.value }))} />
             </Field>

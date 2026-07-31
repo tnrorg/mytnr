@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { MapPin, Building2, Mail, Phone, FileDown, MessageSquarePlus } from 'lucide-react';
 import VerifiedBadge from '@/components/ui/VerifiedBadge';
+import { academicTitle } from '@/lib/membership/options';
 import { COLORS, FONT, MOTION } from '@/lib/design/tokens';
 import { initials } from '@/content/advisoryCouncil';
 
@@ -51,9 +52,9 @@ export default function ProfileHero({ p, onRequestGuidance }) {
             )}
           </h1>
 
-          {(p.profession || p.qualification) && (
+          {(p.profession || academicTitle(p.qualification, p.field)) && (
             <p className="mt-1.5 text-[15px] font-semibold" style={{ color: 'rgba(255,255,255,.86)' }}>
-              {[p.profession, p.qualification].filter(Boolean).join(' · ')}
+              {[p.profession, academicTitle(p.qualification, p.field)].filter(Boolean).join(' · ')}
             </p>
           )}
           {p.tagline && (

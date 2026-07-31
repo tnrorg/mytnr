@@ -87,7 +87,9 @@ export default function CouncilProfilePage() {
                 <Field label="Current Profession"><input className={input} value={f.profession || ''} onChange={set('profession')} /></Field>
                 <Field label="Organisation / University"><input className={input} value={f.organisation || ''} onChange={set('organisation')} /></Field>
                 <Field label="Country"><input className={input} value={f.country || ''} onChange={set('country')} /></Field>
-                <Field label="Highest Qualification"><input className={input} value={f.qualification || ''} onChange={set('qualification')} /></Field>
+                <Field label="Highest Qualification" hint="Write it as you would on a CV — e.g. BS Software Engineering, MS Chemistry, MBBS.">
+                  <input className={input} value={f.qualification || ''} onChange={set('qualification')} />
+                </Field>
               </div>
               <Field label="Professional Tagline" hint="One line shown under your name.">
                 <input className={input} value={f.tagline || ''} onChange={set('tagline')} />
