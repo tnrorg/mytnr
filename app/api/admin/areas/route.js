@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireAdmin } from '@/lib/guard';
 import { logAudit, clientIp } from '@/lib/audit';
 import { ok, fail, readJson } from '@/lib/api';
+import { cleanAreaName } from '@/lib/membership/areaName';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
@@ -27,7 +28,8 @@ export async function GET(req) {
 export async function POST(req) {
   const { admin, res } = requireAdmin(req); if (res) return res;
   const b = await readJson(req);
-  const name = String(b.name || '').trim();
+  // Tidied on the way in, so a stray space cannot create a duplicate area.
+  const name = cleanAreaName(b.name);
   if (!name) return fail('INVALID', 400, { message: 'A name is required.' });
 
   const sb = supabaseAdmin();

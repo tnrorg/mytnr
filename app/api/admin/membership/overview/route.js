@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/guard';
 import { ok, fail } from '@/lib/api';
 import { ACTIVE_STATUSES } from '@/lib/membershipStats';
 import { ROLES } from '@/lib/membership/roles';
+import { cleanAreaName } from '@/lib/membership/areaName';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -30,10 +31,13 @@ export async function GET(req) {
 
     const rows = members || [];
     const norm = (v) => (v || '').trim();
-    // Match case-insensitively: a member whose record says "HARDASS" and a
-    // managed village called "Hardass" are the same place, and counting them
-    // separately splits the village in two on every card and chart.
-    const key = (v) => norm(v).toLowerCase();
+    // Match on a normalised key, not the raw string. Case alone was not
+    // enough: a member record reading "UC BAGORDO /BAGHIZA" would not match the
+    // corrected "UC BAGORDO/BAGHIZA" on the managed list, so the council fell
+    // through as "unlisted" and the page displayed the member's spelling
+    // instead of the managed one. cleanAreaName folds the punctuation spacing
+    // as well, so the managed spelling always wins on screen.
+    const key = (v) => cleanAreaName(v).toLowerCase();
 
     // Head-counts keyed by council and by "council::village", both folded.
     const byCouncil = new Map();

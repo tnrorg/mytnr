@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { requireAdmin } from '@/lib/guard';
 import { logAudit, clientIp } from '@/lib/audit';
 import { ok, fail, readJson } from '@/lib/api';
+import { cleanAreaName } from '@/lib/membership/areaName';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
@@ -44,7 +45,7 @@ export async function PATCH(req, { params }) {
   const isVillage = b.type === 'village';
 
   const patch = {};
-  if ('name' in b) patch.name = String(b.name || '').trim();
+  if ('name' in b) patch.name = cleanAreaName(b.name);
   if ('active' in b) patch.active = !!b.active;
   if ('sort_order' in b) patch.sort_order = Number(b.sort_order) || 0;
   if ('union_council_id' in b) patch.union_council_id = b.union_council_id;
