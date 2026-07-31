@@ -39,7 +39,7 @@ export default function OverviewCharts({ councilChart, villageChart, roles, role
                 <PieChart>
                   <Pie data={councilChart} dataKey="value" nameKey="name" cx="50%" cy="50%"
                     innerRadius="52%" outerRadius="86%" paddingAngle={1.5}
-                    stroke="#04241A" strokeWidth={2} isAnimationActive={false}>
+                    stroke="#FFFFFF" strokeWidth={2} isAnimationActive={false}>
                     {councilChart.map(d => <Cell key={d.name} fill={d.fill} />)}
                   </Pie>
                   <Tooltip content={tip} />
@@ -66,7 +66,7 @@ export default function OverviewCharts({ councilChart, villageChart, roles, role
                 <PieChart>
                   <Pie data={roleData} dataKey="value" nameKey="name" cx="50%" cy="50%"
                     innerRadius="52%" outerRadius="86%" paddingAngle={1.5}
-                    stroke="#04241A" strokeWidth={2} isAnimationActive={false}>
+                    stroke="#FFFFFF" strokeWidth={2} isAnimationActive={false}>
                     {roleData.map(d => <Cell key={d.name} fill={d.fill} />)}
                   </Pie>
                   <Tooltip content={tip} />
