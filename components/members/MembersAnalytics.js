@@ -18,7 +18,7 @@ const PALETTE = ['#063D2B', '#0B5836', '#0B6B4F', '#137F5D', '#1E9670',
                  '#35A886', '#57B79A', '#7CC7AF', '#A3D7C5', '#C6E5DA'];
 const OTHER = '#D4A72C';
 
-const card = 'rounded-2xl bg-white border border-gray-100 p-5';
+const card = 'rounded-tnr-lg bg-white p-5 shadow-tnr-flat border border-[rgba(200,154,43,.35)]';
 const head = 'text-[11px] font-black tracking-[.14em] uppercase';
 
 function Skeleton() {
@@ -73,7 +73,9 @@ export default function MembersAnalytics() {
   }, []);
 
   const colors = useMemo(
-    () => (s?.segments || []).map((seg, i) => seg.isOther ? OTHER : PALETTE[i % PALETTE.length]),
+    // Same generator the admin dashboard uses, so a village is the same colour
+    // on both sides of the platform. Gold stays reserved for "Other Areas".
+    () => (s?.segments || []).map((seg, i) => (seg.isOther ? OTHER : areaColor(i))),
     [s]);
 
   if (err) return <div className={card + ' text-center py-10'}>
@@ -101,7 +103,7 @@ export default function MembersAnalytics() {
     <div className="grid lg:grid-cols-12 gap-4">
 
       {/* ── LEFT ── */}
-      <div className="lg:col-span-3 space-y-4 order-1">
+      <div className="lg:col-span-3 space-y-4 order-1 lg:order-none">
         <div className={card}>
           <div className={head} style={{ color: C.green }}>Total Members</div>
           <div className="mt-3 flex items-center gap-3">
@@ -116,13 +118,13 @@ export default function MembersAnalytics() {
           </div>
         </div>
 
-        <div className={card + ' lg:order-none order-4'}>
+        <div className={card + ' order-4 lg:order-none'}>
           <div className={head} style={{ color: C.green }}>Top 5 Areas</div>
           <ol className="mt-3 space-y-1">
             {s.top5.map(r => (
               <li key={r.area} className="flex items-center gap-2.5 py-1.5 border-b border-gray-50 last:border-0">
                 <span className="w-5 h-5 rounded-full grid place-items-center text-[10px] font-black text-white shrink-0"
-                  style={{ background: PALETTE[(r.rank - 1) % PALETTE.length] }}>{r.rank}</span>
+                  style={{ background: areaColor(r.rank - 1) }}>{r.rank}</span>
                 <span className="flex-1 text-sm text-gray-700 truncate">{r.area}</span>
                 <span className="text-sm font-black" style={{ color: C.deep }}>{r.members}</span>
               </li>
@@ -144,7 +146,7 @@ export default function MembersAnalytics() {
       </div>
 
       {/* ── CENTRE ── */}
-      <div className={card + ' lg:col-span-5 order-2'}>
+      <div className={card + ' lg:col-span-5 order-3 lg:order-none'}>
         <div className={head + ' text-center'} style={{ color: C.green }}>
           Membership Distribution by Village / Area
         </div>
@@ -183,7 +185,7 @@ export default function MembersAnalytics() {
       </div>
 
       {/* ── RIGHT ── */}
-      <div className={card + ' lg:col-span-4 order-3 lg:order-none'}>
+      <div className={card + ' lg:col-span-4 order-4 lg:order-none'}>
         <div className={head} style={{ color: C.green }}>Members by Village / Area</div>
         <div className="mt-3 max-h-[360px] overflow-y-auto -mx-1 px-1">
           <table className="w-full text-sm">
@@ -199,7 +201,7 @@ export default function MembersAnalytics() {
                 <tr key={r.area} className="border-t border-gray-50">
                   <td className="py-2">
                     <span className="w-5 h-5 rounded-full grid place-items-center text-[10px] font-black text-white"
-                      style={{ background: r.rank <= 10 ? PALETTE[(r.rank - 1) % PALETTE.length] : '#C6E5DA' }}>
+                      style={{ background: areaColor(r.rank - 1) }}>
                       {r.rank}
                     </span>
                   </td>

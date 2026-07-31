@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { aGet } from './adminApi';
 import { Card } from './ui';
+import { areaColor } from '@/lib/design/tokens';
 
 // Recharts is heavy and not needed for first paint, and isolating it means a
 // chart problem cannot take the cards and tables down with it.
@@ -10,15 +11,6 @@ const OverviewCharts = dynamic(() => import('./OverviewCharts'), {
   ssr: false,
   loading: () => <div className="h-72 grid place-items-center text-xs text-tnr-cream/40">Loading charts…</div>,
 });
-
-/* A distinct colour per area. Generated from the golden-angle hue sequence so
-   adjacent slices are always far apart on the wheel — with 20+ villages a
-   hand-picked palette would repeat, and neighbouring segments would blur. */
-export const areaColor = (i, total = 1) => {
-  const hue = (i * 137.508) % 360;
-  const light = 42 + (i % 3) * 8;          // vary lightness so hues repeat later
-  return `hsl(${hue.toFixed(1)} 52% ${light}%)`;
-};
 
 const ROLE_COLORS = {
   advisory: '#C89A2B', cec: '#0E7A5A', uc_team: '#4FB088', general: '#A2D7C2',

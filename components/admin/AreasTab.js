@@ -33,7 +33,9 @@ export default function AreasTab({ toast }) {
     const name = prompt('New name', row.name); if (!name || name === row.name) return;
     const r = await aPatch(`/api/admin/areas/${row.id}`, { type, name });
     if (!r?.ok) return toast(r?.message || 'Could not rename', 'err');
-    toast('Renamed'); load();
+    // Report how many member records were corrected — silently rewriting
+    // people's data without saying so would be worse than not doing it.
+    toast(r.message || 'Renamed'); load();
   }
   async function toggle(type, row) {
     const r = await aPatch(`/api/admin/areas/${row.id}`, { type, active: !row.active });
@@ -42,10 +44,12 @@ export default function AreasTab({ toast }) {
   }
   async function remove(type, row) {
     const extra = type === 'council' ? '\n\nIts villages will be deleted too.' : '';
-    if (!confirm(`Delete “${row.name}”?${extra}\n\nExisting member records keep the text already saved on them.`)) return;
+    if (!confirm(`Delete “${row.name}”?${extra}\n\n` +
+      `Members already listed under it keep the name on their record — they are not ` +
+      `changed or removed, but the area will no longer appear in the dropdowns.`)) return;
     const r = await aDel(`/api/admin/areas/${row.id}?type=${type}`);
     if (!r?.ok) return toast(r?.message || 'Could not delete', 'err');
-    toast('Deleted'); load();
+    toast(r.message || 'Deleted', r.affected ? 'err' : 'ok'); load();
   }
 
   const input = 'rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-tnr-cream outline-none focus:border-tnr-gold';
