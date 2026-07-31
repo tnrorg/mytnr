@@ -79,7 +79,10 @@ export default function MembershipOverview() {
         {d.councils.map((c, i) => {
           const expanded = open === c.name;
           return (
-            <div key={c.name} className="rounded-xl p-4" style={{ background: 'rgba(3,26,18,.35)' }}>
+            <div key={c.name}
+              className="rounded-xl p-4 border transition-colors duration-standard
+                hover:border-[rgba(200,154,43,.7)]"
+              style={{ background: 'rgba(3,26,18,.35)', borderColor: 'rgba(200,154,43,.35)' }}>
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: areaColor(i) }} />
                 <h4 className="font-bold text-sm text-tnr-cream truncate">{c.name}</h4>
