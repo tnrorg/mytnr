@@ -214,14 +214,23 @@ function AboutCard({ profile, onSaved }) {
 /* ── Repeatable sections ── */
 function SectionCard({ sec, label, fields, items, reload }) {
   const [adding, setAdding] = useState(false);
+  // id of the entry being edited — the same form serves both, so there is one
+  // set of inputs to maintain rather than two that can drift apart.
+  const [editingId, setEditingId] = useState(null);
   const [f, setF] = useState({});
   const [busy, setBusy] = useState(false);
 
-  const add = async () => {
+  const openForm = ()      => { setEditingId(null); setF({}); setAdding(true); };
+  const openEdit = (it)    => { setEditingId(it.id); setF({ ...it }); setAdding(true); };
+  const closeForm = ()     => { setEditingId(null); setF({}); setAdding(false); };
+
+  const save = async () => {
     setBusy(true);
-    const r = await mPost(`/api/member/profile/${sec}`, f);
+    const r = editingId
+      ? await mPatch(`/api/member/profile/${sec}`, { ...f, id: editingId })
+      : await mPost(`/api/member/profile/${sec}`, f);
     setBusy(false);
-    if (r.ok) { setF({}); setAdding(false); reload(); }
+    if (r.ok) { closeForm(); reload(); }
   };
   const del = async (id) => {
     if (!confirm('Delete this entry?')) return;
@@ -235,7 +244,8 @@ function SectionCard({ sec, label, fields, items, reload }) {
     .filter(Boolean).join(' · ');
 
   return (
-    <Card title={label} action={<button onClick={() => setAdding(!adding)} className="text-xs font-bold" style={{ color: C.green }}>
+    <Card title={label} action={<button onClick={() => (adding ? closeForm() : openForm())}
+      className="text-xs font-bold" style={{ color: C.green }}>
       {adding ? 'Cancel' : '+ Add'}</button>}>
       {!items.length && !adding && <p className="text-sm text-gray-400">No entries yet.</p>}
 
@@ -250,13 +260,21 @@ function SectionCard({ sec, label, fields, items, reload }) {
                   {it.start_date || '—'} → {it.end_date || 'Present'}
                 </div>)}
             </div>
-            <button onClick={() => del(it.id)} className="text-xs text-red-500 hover:underline shrink-0">Delete</button>
+            <div className="flex items-center gap-3 shrink-0">
+              <button onClick={() => openEdit(it)}
+                className="text-xs font-semibold hover:underline" style={{ color: C.green }}>Edit</button>
+              <button onClick={() => del(it.id)}
+                className="text-xs text-red-500 hover:underline">Delete</button>
+            </div>
           </div>
         ))}
       </div>
 
       {adding && (
         <div className="mt-3 rounded-xl bg-gray-50 p-4">
+          <div className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: C.deep }}>
+            {editingId ? `Edit ${label.replace(/s$/, '')}` : `New ${label.replace(/s$/, '')}`}
+          </div>
           <div className="grid sm:grid-cols-2 gap-3">
             {fields.map(([k, l, t]) => (
               <F key={k} l={l} full={t === 'textarea'}>
@@ -266,8 +284,17 @@ function SectionCard({ sec, label, fields, items, reload }) {
               </F>
             ))}
           </div>
-          <button onClick={add} disabled={busy} className="mt-3 px-5 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-40"
-            style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>{busy ? 'Saving…' : 'Add Entry'}</button>
+          <div className="mt-3 flex gap-2">
+            <button onClick={save} disabled={busy}
+              className="px-5 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-40"
+              style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>
+              {busy ? 'Saving…' : editingId ? 'Save Changes' : 'Add Entry'}
+            </button>
+            <button onClick={closeForm} disabled={busy}
+              className="px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 text-gray-600">
+              Cancel
+            </button>
+          </div>
         </div>
       )}
     </Card>
