@@ -45,11 +45,10 @@ export async function PATCH(req, { params }) {
     if (exists && exists.length)
       return fail('DUPLICATE', 409, { message: `A member already exists for this email (${exists[0].membership_id}).` });
 
-    // One number for life: the reference issued at submission becomes the
-    // membership ID on approval, so an applicant never has to learn a second
-    // number. generateMembershipId() is only a fallback for older applications
-    // created before this change.
-    const membership_id = app.reference_no || await generateMembershipId();
+    // The membership number is claimed HERE, at approval — not at submission.
+    // That is what keeps it gapless: only real members advance the sequence,
+    // so a rejected application never leaves a hole in the numbering.
+    const membership_id = await generateMembershipId();
     const inviteTok = makeInviteToken();
     const now = new Date().toISOString();
     const { data: member, error: insErr } = await sb.from('membership_members').insert({
