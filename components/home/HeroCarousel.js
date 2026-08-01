@@ -117,8 +117,11 @@ export default function HeroCarousel() {
         </AnimatePresence>
 
         {/* ── Copy ── */}
-        <div className={`relative max-w-tnr-wide mx-auto px-5 sm:px-8 py-20 lg:py-28
-            min-h-[520px] sm:min-h-[580px] lg:min-h-[660px] flex flex-col justify-center
+        {/* Copy sits in the lower part of the frame rather than dead centre:
+            it leaves the top of the photograph clear for faces and sky, which
+            is where the eye lands first. The bottom padding clears the dots. */}
+        <div className={`relative max-w-tnr-wide mx-auto px-5 sm:px-8 pt-24 pb-24 lg:pt-32 lg:pb-28
+            min-h-[520px] sm:min-h-[580px] lg:min-h-[660px] flex flex-col justify-end
             ${s.align === 'center' ? 'items-center text-center' : 'items-start'}`}>
           <AnimatePresence mode="wait">
             <motion.div
