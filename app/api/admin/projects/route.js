@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
-const HINT = 'Run supabase/migration_projects.sql in the Supabase SQL Editor.';
+const HINT = 'Run supabase/migration_projects_v2.sql in the Supabase SQL Editor.';
 
 export async function GET(req) {
   const { res } = requireAdmin(req); if (res) return res;
