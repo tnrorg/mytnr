@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { aGet, aPatch } from './adminApi';
 import { Card, Field } from './ui';
 import { MESSAGE_KEYS, blankMessage } from '@/lib/leadershipMessages';
+import { resizeImage } from '@/lib/imageResize';
 
 /* Founder's and President's messages shown on the home page.
  *
@@ -47,15 +48,18 @@ function MessageEditor({ row, toast, onSaved }) {
 
   const set = (k) => (e) => setF(s => ({ ...s, [k]: e.target.value }));
 
-  function pick(field, maxMb) {
-    return (e) => {
+  // Resized in the browser first: a phone photo plus base64 overhead exceeds
+  // the server's request size limit and fails with an unhelpful error.
+  // Signatures keep their transparency, so they stay PNG.
+  function pick(field, opts) {
+    return async (e) => {
       const file = e.target.files?.[0]; if (!file) return;
-      if (file.size > maxMb * 1024 * 1024) return toast(`Image must be under ${maxMb} MB`, 'err');
-      const rd = new FileReader();
-      rd.onload = () => setF(s => ({
-        ...s, [`${field}_data`]: rd.result, [`${field}_url`]: rd.result,
-      }));
-      rd.readAsDataURL(file);
+      try {
+        const { dataUrl } = await resizeImage(file, opts);
+        setF(s => ({ ...s, [`${field}_data`]: dataUrl, [`${field}_url`]: dataUrl }));
+      } catch (ex) {
+        toast(ex.message || 'Could not read that image', 'err');
+      }
     };
   }
 
@@ -107,8 +111,9 @@ function MessageEditor({ row, toast, onSaved }) {
             ? <img src={f.photo_url} alt="" className="h-16 w-16 rounded-full object-cover object-top" />
             : <div className="h-16 w-16 rounded-full bg-white/10 grid place-items-center text-[10px] text-tnr-cream/50">None</div>}
           <div>
-            <input type="file" accept="image/*" onChange={pick('photo', 3)} className="text-xs text-tnr-cream/70" />
-            <p className="text-[11px] text-tnr-cream/40 mt-1">Square headshot works best. Max 3 MB.</p>
+            <input type="file" accept="image/*" className="text-xs text-tnr-cream/70"
+              onChange={pick('photo', { maxWidth: 800, maxHeight: 800 })} />
+            <p className="text-[11px] text-tnr-cream/40 mt-1">Square headshot works best. Any size — it is resized for you.</p>
           </div>
         </div>
       </div>
@@ -119,8 +124,9 @@ function MessageEditor({ row, toast, onSaved }) {
             ? <img src={f.signature_url} alt="" className="h-12 bg-white rounded-lg px-2 object-contain" />
             : <div className="h-12 w-24 rounded-lg bg-white/10 grid place-items-center text-[10px] text-tnr-cream/50">None</div>}
           <div>
-            <input type="file" accept="image/*" onChange={pick('signature', 2)} className="text-xs text-tnr-cream/70" />
-            <p className="text-[11px] text-tnr-cream/40 mt-1">PNG on white. Max 2 MB.</p>
+            <input type="file" accept="image/*" className="text-xs text-tnr-cream/70"
+              onChange={pick('signature', { maxWidth: 600, maxHeight: 300, keepPng: true })} />
+            <p className="text-[11px] text-tnr-cream/40 mt-1">PNG with a transparent or white background.</p>
           </div>
         </div>
       </div>

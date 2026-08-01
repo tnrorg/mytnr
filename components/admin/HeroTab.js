@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { aGet, aPost, aPatch, aDel } from './adminApi';
 import { Card, Field } from './ui';
 import { SLIDE_LIMITS, blankSlide, clampField } from '@/lib/heroSlides';
+import { resizeImage, kb } from '@/lib/imageResize';
 
 /* Hero carousel editor.
  *
@@ -63,12 +64,19 @@ function SlideEditor({ row, isNew, toast, onDone, onCancel }) {
   const set = (k) => (e) => setF(s => ({ ...s, [k]: e.target.value }));
   const setNum = (k) => (e) => setF(s => ({ ...s, [k]: e.target.value }));
 
-  function pickImage(e) {
+  // Photos are resized in the browser before they are sent. A phone photo is
+  // several MB, base64 adds a third, and the server rejects bodies above about
+  // 4.5 MB — which is what made a second, larger slide fail to save while the
+  // first went through.
+  async function pickImage(e) {
     const file = e.target.files?.[0]; if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return toast('Image must be under 5 MB', 'err');
-    const rd = new FileReader();
-    rd.onload = () => setF(s => ({ ...s, image_data: rd.result, image_url: rd.result }));
-    rd.readAsDataURL(file);
+    try {
+      const { dataUrl, width, height, bytes } = await resizeImage(file, { maxWidth: 1920, maxHeight: 1280 });
+      setF(s => ({ ...s, image_data: dataUrl, image_url: dataUrl }));
+      toast(`Image ready — ${width}×${height}, ${kb(bytes)}`);
+    } catch (ex) {
+      toast(ex.message || 'Could not read that image', 'err');
+    }
   }
 
   async function save(overrides = {}) {
@@ -121,7 +129,8 @@ function SlideEditor({ row, isNew, toast, onDone, onCancel }) {
       <div>
         <input type="file" accept="image/*" onChange={pickImage} className="text-xs text-tnr-cream/70" />
         <p className="text-[11px] text-tnr-cream/40 mt-1">
-          Wide landscape photo, around 1920×1080. Max 5 MB.
+          Wide landscape photo. Any size — it is resized to 1920px wide
+          automatically, so large phone photos are fine.
         </p>
         {f.image_url && (
           <button className="btn-ghost !py-1 !px-2 text-xs mt-2"
