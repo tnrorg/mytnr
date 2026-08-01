@@ -18,7 +18,7 @@ const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }
 const BLANK = {
   applied_role: '',
   photo_data: '',
-  first_name: '', last_name: '', gender: '', gender_self_describe: '', date_of_birth: '', village: '', union_council: '',
+  first_name: '', last_name: '', gender: '', date_of_birth: '', village: '', union_council: '',
   mobile: '', email: '', education_level: '', field_of_study: '', current_position: '',
   position_other: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
@@ -33,7 +33,7 @@ function reviewRows(f, key) {
   if (key === 'R') return [['Membership type', ROLE_LABEL(f.applied_role)]];
   if (key === 'A') return [
     ['Full name', [f.first_name, f.last_name].filter(Boolean).join(' ')],
-    ['Gender', f.gender === 'Prefer to self-describe' ? f.gender_self_describe || f.gender : f.gender],
+    ['Gender', f.gender],
     ['Date of birth', f.date_of_birth ? `${f.date_of_birth} (age ${ageFrom(f.date_of_birth) ?? '—'})` : ''],
     ['Union Council', f.union_council], ['Village / Area', f.village],
     ['Mobile / WhatsApp', f.mobile], ['Email', f.email],
@@ -295,12 +295,6 @@ export default function ApplyPage() {
               <Field label="First Name" req error={showErr('first_name')}><Input value={f.first_name} onChange={v => set('first_name', v)} onBlur={() => blur('first_name')} bad={!!showErr('first_name')} /></Field>
               <Field label="Last Name" req error={showErr('last_name')}><Input value={f.last_name} onChange={v => set('last_name', v)} onBlur={() => blur('last_name')} bad={!!showErr('last_name')} /></Field>
               <Field label="Gender" req error={showErr('gender')}><Select value={f.gender} onChange={v => set('gender', v)} options={GENDERS} onBlur={() => blur('gender')} bad={!!showErr('gender')} /></Field>
-              {f.gender === 'Prefer to self-describe' && (
-                <Field label="How do you describe your gender?" req error={showErr('gender_self_describe')}>
-                  <Input value={f.gender_self_describe} onChange={v => set('gender_self_describe', v)}
-                    onBlur={() => blur('gender_self_describe')} bad={!!showErr('gender_self_describe')} />
-                </Field>
-              )}
               {/* min/max bound the picker itself, so an out-of-range date
                   cannot be chosen — the validator still checks, since these
                   attributes are trivially bypassed. */}

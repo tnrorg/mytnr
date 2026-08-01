@@ -94,11 +94,7 @@ export async function POST(req) {
     reference_no: placeholder,
     applied_role,
     first_name, last_name,
-    // A self-described gender is stored as the value itself, so reports and
-    // exports read the person's own words rather than the bucket label.
-    gender: b.gender === 'Prefer to self-describe'
-      ? (String(b.gender_self_describe || '').trim() || null)
-      : (b.gender || null),
+    gender: b.gender || null,
     // Age is derived, never taken from the client — a typed age goes stale and
     // can be inflated to clear the minimum. Both are stored: date_of_birth is
     // the source of truth, age stays populated for anything already reading it.
