@@ -3,7 +3,8 @@ import { requireAdmin } from '@/lib/guard';
 import { uploadDataUrl } from '@/lib/storage';
 import { logAudit, clientIp } from '@/lib/audit';
 import { ok, fail, readJson } from '@/lib/api';
-import { projectFromBody, resolveGallery } from '@/lib/projectWrite';
+import { projectFromBody } from '@/lib/projectWrite';
+import { resolveGallery } from '@/lib/gallery';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
@@ -29,7 +30,7 @@ export async function POST(req) {
   row.image_url = b.image_url || null;
   try {
     if (b.image_data) row.image_url = await uploadDataUrl(b.image_data, 'projects');
-    row.gallery = await resolveGallery(b, uploadDataUrl);
+    row.gallery = await resolveGallery(b, uploadDataUrl, 'projects');
   } catch (e) {
     return fail('UPLOAD_FAILED', 500, { message: 'Image upload failed: ' + e.message });
   }

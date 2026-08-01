@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { aGet, aPost, aPatch, aDel } from './adminApi';
 import { Card, Field } from './ui';
 import AreaSelect from './AreaSelect';
+import GalleryPicker from './GalleryPicker';
 import {
   KINDS, LEVELS, SERVES, SECTORS, KIND_LABEL, LEVEL_LABEL,
   blankInstitution, teachersPresent, summarise,
@@ -186,6 +187,22 @@ function Editor({ row, isNew, toast, onDone, onCancel }) {
           school belong in “Attached in”.
         </p>
       )}
+
+      <label className="block mt-3">
+        <span className="label !mb-0.5">Where the absent teachers are serving</span>
+        <span className="block text-[10px] text-tnr-cream/40 mb-1 leading-snug">
+          The school and city each teacher posted here is actually on duty at.
+        </span>
+        <textarea className="input min-h-[64px]" value={f.elsewhere_note || ''}
+          onChange={set('elsewhere_note')}
+          placeholder="e.g. 1 at GHS Skardu, 1 at GBHS Gilgit" />
+      </label>
+      <p className="text-[11px] text-tnr-cream/50">
+        Record the <b>station</b>, not the person. Naming an individual teacher on a
+        public page is a claim about them personally and carries a different kind of
+        risk; the posting itself is the fact that matters, and anyone who needs the
+        name can ask the department.
+      </p>
     </div>
 
     {/* ── Fees ── */}
@@ -236,13 +253,15 @@ function Editor({ row, isNew, toast, onDone, onCancel }) {
       </p>
     </div>
 
-    <span className="label">Photo <span className="text-tnr-cream/40">(optional)</span></span>
+    <span className="label">Cover photo <span className="text-tnr-cream/40">(optional)</span></span>
     <div className="flex items-center gap-3 mt-1 mb-4">
       {f.image_url
         ? <img src={f.image_url} alt="" className="h-16 w-28 rounded-lg object-cover" />
         : <div className="h-16 w-28 rounded-lg bg-white/10 grid place-items-center text-[10px] text-tnr-cream/50">None</div>}
       <input type="file" accept="image/*" onChange={pickImage} className="text-xs text-tnr-cream/70" />
     </div>
+
+    <GalleryPicker f={f} setF={setF} toast={toast} label="School photo gallery" />
 
     <div className="flex flex-wrap items-center gap-2">
       <button className="btn" disabled={busy} onClick={() => save()}>

@@ -4,6 +4,7 @@ import { uploadDataUrl } from '@/lib/storage';
 import { logAudit, clientIp } from '@/lib/audit';
 import { ok, fail, readJson } from '@/lib/api';
 import { institutionFromBody } from '@/lib/institutionWrite';
+import { resolveGallery } from '@/lib/gallery';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
@@ -17,11 +18,15 @@ export async function PATCH(req, { params }) {
   // Partial: publishing or hiding cannot blank out the staffing figures.
   const patch = { ...institutionFromBody(b, { partial: true }), updated_at: new Date().toISOString() };
 
-  if (b.image_data) {
-    try { patch.image_url = await uploadDataUrl(b.image_data, 'institutions'); }
-    catch (e) { return fail('UPLOAD_FAILED', 500, { message: 'Image upload failed: ' + e.message }); }
-  } else if ('image_url' in b) {
-    patch.image_url = b.image_url || null;
+  try {
+    if (b.image_data) patch.image_url = await uploadDataUrl(b.image_data, 'institutions');
+    else if ('image_url' in b) patch.image_url = b.image_url || null;
+
+    if ('gallery' in b || 'gallery_add' in b) {
+      patch.gallery = await resolveGallery(b, uploadDataUrl, 'institutions');
+    }
+  } catch (e) {
+    return fail('UPLOAD_FAILED', 500, { message: 'Image upload failed: ' + e.message });
   }
 
   const { data, error } = await supabaseAdmin().from('tnr_institutions')

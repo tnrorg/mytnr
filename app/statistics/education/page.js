@@ -1,11 +1,13 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { School, Users, UserMinus, HandCoins, Landmark, MapPin, Layers } from 'lucide-react';
+import { School, Users, HandCoins, Landmark, MapPin, Layers, LayoutGrid, List, Images } from 'lucide-react';
 import StatsShell, { BreakdownCard, statCard } from '@/components/stats/StatsShell';
 import {
   KIND_LABEL, LEVEL_LABEL, SERVES_LABEL, SECTOR_LABEL,
   teachersPresent, pupilTeacherRatio, summarise,
 } from '@/lib/institutions';
+import InstitutionDetail from '@/components/stats/InstitutionDetail';
+import { allPhotos } from '@/lib/gallery';
 import { COLORS } from '@/lib/design/tokens';
 
 /* Education statistics — the institutions register.
@@ -23,6 +25,8 @@ export default function EducationStatisticsPage() {
   const [council, setCouncil] = useState('');
   const [village, setVillage] = useState('');
   const [kind, setKind] = useState('');
+  const [view, setView] = useState('list');   // 'list' | 'gallery'
+  const [openId, setOpenId] = useState(null);
 
   useEffect(() => {
     let off = false;
@@ -153,7 +157,24 @@ export default function EducationStatisticsPage() {
             <BreakdownCard icon={Users} title="Boys / Girls / Co-education" note="Who each institution serves." rows={s.byServes} colorFrom={8} />
           </div>
 
-          <InstitutionList list={filtered} />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-extrabold" style={{ color: COLORS.green900 }}>
+              Institutions ({filtered.length})
+            </h2>
+            <div className="flex rounded-tnr overflow-hidden border" style={{ borderColor: 'rgba(10,61,44,.16)' }}>
+              <ViewBtn on={view === 'list'} onClick={() => setView('list')} icon={List} label="List" />
+              <ViewBtn on={view === 'gallery'} onClick={() => setView('gallery')} icon={LayoutGrid} label="Gallery" />
+            </div>
+          </div>
+
+          {view === 'list'
+            ? <InstitutionList list={filtered} onOpen={setOpenId} />
+            : <InstitutionGallery list={filtered} onOpen={setOpenId} />}
+
+          {openId && (
+            <InstitutionDetail item={filtered.find(x => x.id === openId)}
+              onClose={() => setOpenId(null)} />
+          )}
         </>
       )}
     </StatsShell>
@@ -246,17 +267,74 @@ function AreaTable({ title, icon: Icon, rows }) {
 
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : null;
 
-function InstitutionList({ list }) {
-  if (!list.length) {
-    return <div className={statCard + ' text-center text-[13px]'} style={{ color: COLORS.muted }}>
-      No institutions match these filters.
-    </div>;
-  }
+function ViewBtn({ on, onClick, icon: Icon, label }) {
+  return (
+    <button onClick={onClick} aria-pressed={on}
+      className="flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-bold transition"
+      style={{ background: on ? COLORS.green700 : '#fff', color: on ? '#fff' : COLORS.muted }}>
+      <Icon size={15} strokeWidth={2.4} aria-hidden="true" />{label}
+    </button>
+  );
+}
+
+const NoMatch = () => (
+  <div className={statCard + ' text-center text-[13px]'} style={{ color: COLORS.muted }}>
+    No institutions match these filters.
+  </div>
+);
+
+/* Photo-led grid. Institutions without a photo still appear as a green tile,
+   so the gallery is never a partial, misleading subset of the register. */
+function InstitutionGallery({ list, onOpen }) {
+  if (!list.length) return <NoMatch />;
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {list.map(i => {
+        const photos = allPhotos(i);
+        const present = teachersPresent(i);
+        return (
+          <button key={i.id} onClick={() => onOpen(i.id)}
+            className="text-left rounded-tnr-lg overflow-hidden bg-white shadow-tnr-flat border transition
+              hover:shadow-tnr-raise hover:-translate-y-0.5"
+            style={{ borderColor: 'rgba(200,154,43,.35)' }}>
+            <div className="relative h-44 bg-tnr-neutral">
+              {photos[0]
+                ? <img src={photos[0]} alt="" className="h-full w-full object-cover" />
+                : <div className="h-full w-full grid place-items-center px-4 text-center text-[13px] font-bold"
+                    style={{ background: `linear-gradient(160deg,${COLORS.green800},${COLORS.green950})`, color: 'rgba(255,255,255,.75)' }}>
+                    {i.name}
+                  </div>}
+              {photos.length > 1 && (
+                <span className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-full
+                  text-[11px] font-bold text-white" style={{ background: 'rgba(6,45,33,.72)' }}>
+                  <Images size={12} strokeWidth={2.5} aria-hidden="true" />{photos.length}
+                </span>
+              )}
+            </div>
+            <div className="p-4">
+              <h3 className="font-bold text-[14px] leading-snug" style={{ color: COLORS.green900 }}>{i.name}</h3>
+              <div className="mt-1 text-[12px]" style={{ color: COLORS.muted }}>
+                {[LEVEL_LABEL[i.level], i.village || i.union_council].filter(Boolean).join(' · ')}
+              </div>
+              <div className="mt-2 text-[12px]" style={{ color: COLORS.muted }}>
+                <b style={{ color: COLORS.green900 }}>{present}</b> teachers present
+                {i.students_total > 0 && <> · {i.students_total.toLocaleString()} students</>}
+              </div>
+              <span className="mt-3 inline-block text-[12px] font-bold underline" style={{ color: COLORS.green700 }}>
+                View school profile
+              </span>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function InstitutionList({ list, onOpen }) {
+  if (!list.length) return <NoMatch />;
   return (
     <div className={statCard}>
-      <h2 className="font-extrabold mb-4" style={{ color: COLORS.green900 }}>
-        Institutions ({list.length})
-      </h2>
       <ul className="space-y-4">
         {list.map(i => {
           const present = teachersPresent(i);
@@ -294,6 +372,13 @@ function InstitutionList({ list }) {
                 </div>
               )}
 
+              {i.elsewhere_note && (
+                <div className="mt-2.5 rounded-tnr px-3.5 py-2.5 text-[12px] leading-relaxed"
+                  style={{ background: 'rgba(170,60,60,.08)', color: '#8A2F2F' }}>
+                  <b>Posted here, serving elsewhere:</b> {i.elsewhere_note}
+                </div>
+              )}
+
               {i.notes && (
                 <p className="mt-2.5 text-[13px] leading-relaxed" style={{ color: COLORS.charcoal }}>{i.notes}</p>
               )}
@@ -305,6 +390,19 @@ function InstitutionList({ list }) {
                   {i.last_verified && <>Last checked {fmtDate(i.last_verified)}</>}
                 </div>
               )}
+
+              <div className="mt-3 flex items-center gap-3">
+                <button onClick={() => onOpen(i.id)}
+                  className="text-[12px] font-bold underline" style={{ color: COLORS.green700 }}>
+                  View school profile
+                </button>
+                {allPhotos(i).length > 0 && (
+                  <span className="flex items-center gap-1 text-[11px]" style={{ color: COLORS.muted }}>
+                    <Images size={12} strokeWidth={2.5} aria-hidden="true" />
+                    {allPhotos(i).length} photo{allPhotos(i).length === 1 ? '' : 's'}
+                  </span>
+                )}
+              </div>
             </li>
           );
         })}
