@@ -33,7 +33,10 @@ export default function CommunityStats() {
   if (failed) return null;
 
   return (
-    <section className="max-w-tnr-wide mx-auto px-4 -mt-6 mb-16 w-full" style={FONT}
+    // Sits flush below the hero. It used to be pulled up 24px, which read as a
+    // deliberate ledge over the old flat hero but looks like a misalignment
+    // over the carousel's full-bleed photography.
+    <section className="max-w-tnr-wide mx-auto px-4 mt-10 mb-16 w-full" style={FONT}
       aria-label="Community statistics">
       <RevealGroup className="rounded-tnr-xl grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px overflow-hidden"
         style={{ background: 'rgba(255,255,255,.08)' }}>

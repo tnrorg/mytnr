@@ -31,7 +31,9 @@ export default function LeadershipMessages() {
   return (
     <section className="w-full py-16 sm:py-20" style={{ ...FONT, background: COLORS.snow }}
       aria-label="Messages from TNR leadership">
-      <div className="max-w-[1180px] mx-auto px-4">
+      {/* Same wide container as the rest of the home page — the narrower one
+          this used to sit in left a large empty margin either side on desktop. */}
+      <div className="max-w-tnr-wide mx-auto px-4 sm:px-8">
         <Reveal className="text-center">
           <div className="text-[11px] font-bold uppercase tracking-[.18em]" style={{ color: COLORS.green700 }}>
             In Their Words
@@ -57,7 +59,11 @@ function MessageCard({ m, flip, delay }) {
 
   // One class, not two competing ones — emitting both grid-cols utilities would
   // leave the winner up to stylesheet order.
-  const cols = flip ? 'md:grid-cols-[1fr_300px]' : 'md:grid-cols-[300px_1fr]';
+  // Portrait panel grows on wide screens so the card fills the space instead of
+  // leaving a long, thin column of text.
+  const cols = flip
+    ? 'md:grid-cols-[1fr_300px] xl:grid-cols-[1fr_380px]'
+    : 'md:grid-cols-[300px_1fr] xl:grid-cols-[380px_1fr]';
 
   return (
     <Reveal delay={delay}>
@@ -83,10 +89,10 @@ function MessageCard({ m, flip, delay }) {
                 style={{ border: `2px solid ${COLORS.gold500}`, opacity: 0.85 }} aria-hidden="true" />
               {m.photo_url ? (
                 <img src={m.photo_url} alt={m.name || 'Leadership portrait'}
-                  className="h-[132px] w-[132px] rounded-full object-cover object-top"
+                  className="h-[132px] w-[132px] xl:h-[164px] xl:w-[164px] rounded-full object-cover object-top"
                   style={{ border: `3px solid ${COLORS.green950}` }} />
               ) : (
-                <div className="h-[132px] w-[132px] rounded-full grid place-items-center text-3xl font-black"
+                <div className="h-[132px] w-[132px] xl:h-[164px] xl:w-[164px] rounded-full grid place-items-center text-3xl font-black"
                   style={{ background: 'rgba(255,255,255,.08)', color: COLORS.gold400 }} aria-hidden="true">
                   {initials || '—'}
                 </div>
@@ -105,7 +111,7 @@ function MessageCard({ m, flip, delay }) {
           </div>
 
           {/* ── Message ── */}
-          <div className={`relative px-6 py-8 sm:px-9 sm:py-10 ${flip ? 'md:order-1' : ''}`}>
+          <div className={`relative px-6 py-8 sm:px-9 sm:py-10 xl:px-14 xl:py-12 ${flip ? 'md:order-1' : ''}`}>
             {/* Oversized quote glyph, decorative only. */}
             <span aria-hidden="true"
               className="pointer-events-none absolute select-none leading-none"
