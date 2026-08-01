@@ -19,6 +19,7 @@ import CommitteeTab from '@/components/admin/CommitteeTab';
 import RemindersTab from '@/components/admin/RemindersTab';
 import LeadershipTab from '@/components/admin/LeadershipTab';
 import MessagesTab from '@/components/admin/MessagesTab';
+import HeroTab from '@/components/admin/HeroTab';
 import CardTemplateTab from '@/components/admin/CardTemplateTab';
 import AreasTab from '@/components/admin/AreasTab';
 // Loaded on demand, only after the SERVER confirms Super Admin.
@@ -31,6 +32,7 @@ const VoterDataTab = dynamicImport(() => import('@/components/admin/VoterDataTab
 const TOP_TABS = [
   ['dashboard', 'Dashboard', '📊'],
   ['leadership', 'Leadership', '🏅'],
+  ['hero', 'Hero Slides', '🖼️'],
   ['messages', 'Home Messages', '💬'],
 ];
 const ELECTION_TABS = [
@@ -143,6 +145,7 @@ export default function Admin() {
       </div>
       {tab === 'dashboard' && <DashboardTab />}
       {tab === 'leadership' && <LeadershipTab toast={toast} />}
+      {tab === 'hero' && <HeroTab toast={toast} />}
       {tab === 'messages' && <MessagesTab toast={toast} />}
       {tab === 'members' && <MembersTab toast={toast} />}
       {tab === 'candidates' && <CandidatesTab toast={toast} elections={elections} />}
