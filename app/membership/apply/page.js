@@ -18,7 +18,7 @@ const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }
 const BLANK = {
   applied_role: '',
   photo_data: '',
-  first_name: '', last_name: '', gender: '', date_of_birth: '', village: '', union_council: '',
+  first_name: '', last_name: '', gender: '', gender_self_describe: '', date_of_birth: '', village: '', union_council: '',
   mobile: '', email: '', education_level: '', field_of_study: '', current_position: '',
   position_other: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
@@ -33,7 +33,7 @@ function reviewRows(f, key) {
   if (key === 'R') return [['Membership type', ROLE_LABEL(f.applied_role)]];
   if (key === 'A') return [
     ['Full name', [f.first_name, f.last_name].filter(Boolean).join(' ')],
-    ['Gender', f.gender],
+    ['Gender', f.gender === 'Prefer to self-describe' ? f.gender_self_describe || f.gender : f.gender],
     ['Date of birth', f.date_of_birth ? `${f.date_of_birth} (age ${ageFrom(f.date_of_birth) ?? '—'})` : ''],
     ['Union Council', f.union_council], ['Village / Area', f.village],
     ['Mobile / WhatsApp', f.mobile], ['Email', f.email],
@@ -174,7 +174,10 @@ export default function ApplyPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...f, declaration_version: DECLARATION_VERSION }),
       }).then(x => x.json());
-      if (!r.ok) { setErr(r.message || 'Could not submit. Please try again.'); setBusy(false); return; }
+      if (!r.ok) {
+        setErr([r.message, r.detail].filter(Boolean).join(' — ') || 'Could not submit. Please try again.');
+        setBusy(false); return;
+      }
       clearDraft();
       setDone(r);
     } catch { setErr('Network error. Please try again.'); }
@@ -259,14 +262,17 @@ export default function ApplyPage() {
           </Card>}
 
           {stepKey === 'A' && <Card title="Personal Information">
-            <div className="flex items-center gap-4 pb-4 mb-4 border-b border-gray-100">
+            <div className="flex items-center gap-4 pb-4 mb-4 border-b border-gray-100"
+              data-invalid={showErr('photo_data') ? 'true' : undefined}>
               <div className="w-24 h-28 rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 grid place-items-center shrink-0">
                 {f.photo_data
                   ? <img src={f.photo_data} alt="Selected photo" className="w-full h-full object-cover" />
                   : <span className="text-3xl text-gray-300">👤</span>}
               </div>
               <div className="min-w-0">
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5">Profile Photo</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+                  Profile Photo<span className="text-red-500"> *</span>
+                </label>
                 <input type="file" accept="image/png,image/jpeg,image/webp"
                   onChange={e => pickPhoto(e.target.files?.[0])}
                   className="block w-full text-xs text-gray-600
@@ -274,8 +280,11 @@ export default function ApplyPage() {
                     file:text-xs file:font-bold file:text-white file:cursor-pointer
                     file:bg-[#0B6B4F] hover:file:bg-[#063D2B]" />
                 <p className="mt-1.5 text-[11px] text-gray-400">
-                  A clear passport-style photo. JPG, PNG or WEBP.
+                  A clear passport-style photo. JPG, PNG or WEBP. This appears on your membership card.
                 </p>
+                {showErr('photo_data') && (
+                  <p className="mt-1 text-[11px] font-semibold text-red-600">{showErr('photo_data')}</p>
+                )}
                 {f.photo_data && (
                   <button type="button" onClick={() => set('photo_data', '')}
                     className="mt-1 text-[11px] font-semibold text-red-500 hover:underline">Remove photo</button>
@@ -286,6 +295,12 @@ export default function ApplyPage() {
               <Field label="First Name" req error={showErr('first_name')}><Input value={f.first_name} onChange={v => set('first_name', v)} onBlur={() => blur('first_name')} bad={!!showErr('first_name')} /></Field>
               <Field label="Last Name" req error={showErr('last_name')}><Input value={f.last_name} onChange={v => set('last_name', v)} onBlur={() => blur('last_name')} bad={!!showErr('last_name')} /></Field>
               <Field label="Gender" req error={showErr('gender')}><Select value={f.gender} onChange={v => set('gender', v)} options={GENDERS} onBlur={() => blur('gender')} bad={!!showErr('gender')} /></Field>
+              {f.gender === 'Prefer to self-describe' && (
+                <Field label="How do you describe your gender?" req error={showErr('gender_self_describe')}>
+                  <Input value={f.gender_self_describe} onChange={v => set('gender_self_describe', v)}
+                    onBlur={() => blur('gender_self_describe')} bad={!!showErr('gender_self_describe')} />
+                </Field>
+              )}
               {/* min/max bound the picker itself, so an out-of-range date
                   cannot be chosen — the validator still checks, since these
                   attributes are trivially bypassed. */}

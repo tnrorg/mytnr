@@ -63,7 +63,17 @@ export async function POST(req) {
     if (approxBytes > 4 * 1024 * 1024)
       return fail('PHOTO_TOO_BIG', 400, { message: 'Profile photo must be smaller than 4 MB.' });
     try { photo_url = await uploadDataUrl(b.photo_data, 'members'); }
-    catch (e) { photo_url = null; }   // never block an application over a photo
+    catch (e) {
+      // The photo is a required field and appears on the membership card, so a
+      // failed upload can no longer be swallowed — an application without one
+      // would reach the committee incomplete.
+      return fail('UPLOAD_FAILED', 502, {
+        message: 'Your photo could not be uploaded. Please try a smaller image or a different file.',
+        detail: e.message,
+      });
+    }
+    if (!photo_url) return fail('UPLOAD_FAILED', 502, {
+      message: 'Your photo could not be uploaded. Please try again.' });
   }
 
   // ── Insert (status ALWAYS pending_review — never auto-active) ──
@@ -72,12 +82,23 @@ export async function POST(req) {
   // "advisory" here grants nothing.
   const applied_role = ROLE_KEYS.includes(b.applied_role) ? b.applied_role : 'general';
 
-  const reference_no = await generateApplicationRef();
+  // The reference is NOT taken from the sequence yet.
+  //
+  // Sequences do not roll back, so generating the number before the insert
+  // meant every failed submission burned one — that is why the visible
+  // references jumped 0009 → 0016. The row goes in with a temporary unique
+  // placeholder, and the real number is claimed only once the insert has
+  // succeeded, so a failure costs nothing.
+  const placeholder = `PENDING-${crypto.randomUUID()}`;
   const row = {
-    reference_no,
+    reference_no: placeholder,
     applied_role,
     first_name, last_name,
-    gender: b.gender || null,
+    // A self-described gender is stored as the value itself, so reports and
+    // exports read the person's own words rather than the bucket label.
+    gender: b.gender === 'Prefer to self-describe'
+      ? (String(b.gender_self_describe || '').trim() || null)
+      : (b.gender || null),
     // Age is derived, never taken from the client — a typed age goes stale and
     // can be inflated to clear the minimum. Both are stored: date_of_birth is
     // the source of truth, age stays populated for anything already reading it.
@@ -110,13 +131,37 @@ export async function POST(req) {
   };
 
   const { data, error } = await sb.from('membership_applications').insert(row)
-    .select('reference_no, created_at').single();
+    .select('id, created_at').single();
   if (error) {
     // Unique index race → treat as duplicate, not a server error
     if (error.code === '23505')
       return fail('DUPLICATE', 409, { message: 'An application with these details already exists.' });
-    return fail('SUBMIT_FAILED', 500, { message: 'Could not submit your application. Please try again.' });
+
+    // A missing column means a migration has not been run. Say so plainly —
+    // "please try again" is useless advice when retrying cannot possibly work,
+    // and it hid this exact problem until someone opened the server logs.
+    const missingColumn = /column .* does not exist|schema cache/i.test(error.message || '');
+    if (missingColumn) {
+      return fail('SCHEMA_OUT_OF_DATE', 500, {
+        message: 'The application form is not fully set up yet. Please contact the TNR team.',
+        detail: error.message,
+        hint: 'Run the pending migrations in supabase/ — most likely migration_date_of_birth.sql or migration_member_roles.sql.',
+      });
+    }
+    return fail('SUBMIT_FAILED', 500, {
+      message: 'Could not submit your application. Please try again.',
+      detail: error.message,
+    });
   }
+
+  // Insert succeeded — now claim the reference number.
+  let reference_no = placeholder;
+  try {
+    reference_no = await generateApplicationRef();
+    const { error: refErr } = await sb.from('membership_applications')
+      .update({ reference_no }).eq('id', data.id);
+    if (refErr) reference_no = placeholder;   // keep the row; admin can still see it
+  } catch { /* the application is saved either way */ }
 
   await sb.from('membership_status_history').insert({
     to_status: 'pending_review', reason: 'Application submitted', changed_by: 'applicant',
@@ -125,12 +170,12 @@ export async function POST(req) {
   // Confirmation email — never block submission if the mail server hiccups.
   // Neither email may block the submission — an SMTP hiccup must not lose an
   // application that is already safely stored.
-  const saved = { ...row, reference_no: data.reference_no };
+  const saved = { ...row, reference_no };
   try { await sendApplicationReceived(saved); } catch {}
   try { await sendAdminNewApplication(saved, roleLabel(applied_role)); } catch {}
 
   return ok({
-    reference_no: data.reference_no,
+    reference_no,
     submitted_at: data.created_at,
     message: 'Application submitted successfully.',
   });
