@@ -18,6 +18,7 @@ import LogsTab from '@/components/admin/LogsTab';
 import CommitteeTab from '@/components/admin/CommitteeTab';
 import RemindersTab from '@/components/admin/RemindersTab';
 import LeadershipTab from '@/components/admin/LeadershipTab';
+import MessagesTab from '@/components/admin/MessagesTab';
 import CardTemplateTab from '@/components/admin/CardTemplateTab';
 import AreasTab from '@/components/admin/AreasTab';
 // Loaded on demand, only after the SERVER confirms Super Admin.
@@ -27,7 +28,11 @@ const VoterDataTab = dynamicImport(() => import('@/components/admin/VoterDataTab
 
 // Sidebar structure. All election functions live INSIDE the Election Portal group,
 // leaving room for future platform modules (Membership, Community, Welfare…).
-const TOP_TABS = [['dashboard', 'Dashboard', '📊'], ['leadership', 'Leadership', '🏅']];
+const TOP_TABS = [
+  ['dashboard', 'Dashboard', '📊'],
+  ['leadership', 'Leadership', '🏅'],
+  ['messages', 'Home Messages', '💬'],
+];
 const ELECTION_TABS = [
   ['elections', 'Elections', '🗳️'], ['candidates', 'Candidates', '🎖️'], ['members', 'Members', '👥'],
   ['ecommittee', 'Committee', '🤝'], ['reminders', 'Reminders', '📧'],
@@ -138,6 +143,7 @@ export default function Admin() {
       </div>
       {tab === 'dashboard' && <DashboardTab />}
       {tab === 'leadership' && <LeadershipTab toast={toast} />}
+      {tab === 'messages' && <MessagesTab toast={toast} />}
       {tab === 'members' && <MembersTab toast={toast} />}
       {tab === 'candidates' && <CandidatesTab toast={toast} elections={elections} />}
       {tab === 'elections' && <ElectionsTab toast={toast} admin={admin} reloadElections={reloadElections} />}

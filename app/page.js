@@ -7,6 +7,7 @@ import { CEC_INTRO } from '@/content/executiveCommittee';
 import { useLeadership } from '@/components/site/useLeadership';
 import Hero from '@/components/home/Hero';
 import CommunityStats from '@/components/home/CommunityStats';
+import LeadershipMessages from '@/components/home/LeadershipMessages';
 import CoreAreas from '@/components/home/CoreAreas';
 import JoinCta from '@/components/home/JoinCta';
 import MembersPreview from '@/components/home/MembersPreview';
@@ -29,6 +30,10 @@ export default function Home() {
       <SiteNav />
       <Hero />
       <CommunityStats />
+      {/* Founder's then President's message — a human voice after the figures,
+          before the leadership rosters. Renders nothing until an admin
+          publishes one (Admin → Home Messages). */}
+      <LeadershipMessages />
       {/* Leadership leads: who guides TNR, then what TNR does. */}
       <CouncilSection />
       <ExecutiveCommittee />
