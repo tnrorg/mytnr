@@ -6,6 +6,7 @@ import {
   PROJECT_STATUSES, PROJECT_CATEGORIES, STATUS_LABEL, blankProject, summarise, money,
 } from '@/lib/projects';
 import { resizeImage } from '@/lib/imageResize';
+import AreaSelect from './AreaSelect';
 
 /* Development projects — what the public accountability page shows.
  *
@@ -214,9 +215,12 @@ function ProjectEditor({ row, isNew, toast, onDone, onCancel }) {
           {PROJECT_CATEGORIES.map(c => <option key={c} value={c} />)}
         </datalist>
       </Field>
-      <Field label="Union Council"><input className="input" value={f.union_council || ''} onChange={set('union_council')} /></Field>
-      <Field label="Village / Area"><input className="input" value={f.village || ''} onChange={set('village')} /></Field>
     </div>
+
+    {/* Areas come from the managed list, not free text — otherwise "Hardass"
+        and "HARDASS" split one village across two rows of the public table. */}
+    <AreaSelect council={f.union_council} village={f.village}
+      onChange={(patch) => setF(s => ({ ...s, ...patch }))} />
 
     {/* ── Money ── */}
     <div className="rounded-xl border border-tnr-line/60 p-3 mb-3">
