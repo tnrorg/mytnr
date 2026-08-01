@@ -74,7 +74,6 @@ export const NAV = [
     soon('Population', '/statistics/population'),
     soon('Literacy Rate', '/statistics/literacy'),
     soon('Health Statistics', '/statistics/health'),
-    soon('Schools, Colleges & Universities', '/statistics/institutions'),
     soon('Tourism Statistics', '/statistics/tourism'),
     soon('Interactive Reports', '/statistics/reports'),
   ]},
