@@ -15,6 +15,14 @@
  *
  * Usage:  node scripts/check-undefined.js            (app/ + components/ + lib/)
  *         node scripts/check-undefined.js path/a.js  (specific files)
+ *
+ * LIMITATION — read before trusting this.
+ * It only checks SCREAMING_CASE data constants. A missing camelCase import
+ * (e.g. `areaColor` used without importing it) crashed the members page at
+ * runtime and this script did NOT catch it. Extending it to camelCase was
+ * tried and produced 116 false positives, because without stripping string
+ * literals and doing real scope analysis it cannot tell a helper call from
+ * a word inside a message. `next build` remains the only complete check.
  */
 const fs = require('fs');
 const path = require('path');

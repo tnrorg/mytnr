@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { areaColor } from '@/lib/design/tokens';
 
 // Recharts is the heaviest thing on this page and is not needed for the first
 // paint, so it loads on the client only. If it fails, the cards, ranking table
@@ -13,9 +14,8 @@ const DistributionDonut = dynamic(() => import('./DistributionDonut'), {
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', ink: '#15231D' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
 
-// Forest-green scale with gold for the combined slice — no rainbow.
-const PALETTE = ['#063D2B', '#0B5836', '#0B6B4F', '#137F5D', '#1E9670',
-                 '#35A886', '#57B79A', '#7CC7AF', '#A3D7C5', '#C6E5DA'];
+// Colours come from the shared token so a village is the same colour here and
+// on the admin dashboard. Gold stays reserved for the combined "Other" slice.
 const OTHER = '#D4A72C';
 
 const card = 'rounded-tnr-lg bg-white p-5 shadow-tnr-flat border border-[rgba(200,154,43,.35)]';
