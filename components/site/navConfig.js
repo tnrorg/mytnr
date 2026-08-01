@@ -68,6 +68,9 @@ export const NAV = [
   // need official sources, so they stay marked as planned.
   { label: 'Roundu Statistics', href: '/statistics', items: [
     live('TNR Membership in Numbers', '/statistics'),
+    live('Education Statistics', '/statistics/education'),
+    live('Employment Statistics', '/statistics/employment'),
+    live('Projects Statistics', '/statistics/projects'),
     soon('Population', '/statistics/population'),
     soon('Literacy Rate', '/statistics/literacy'),
     soon('Health Statistics', '/statistics/health'),

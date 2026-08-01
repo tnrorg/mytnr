@@ -48,8 +48,30 @@ export async function GET() {
         .map(x => ({ ...x, percent: total ? Math.round((x.count / total) * 1000) / 10 : 0 }));
     };
 
+    /** Build a fixed set of buckets (order preserved), dropping empty ones. */
+    const groups = (defs) => defs
+      .map(([label, test]) => ({ label, count: rows.filter(test).length }))
+      .filter(g => g.count > 0)
+      .map(g => ({ ...g, percent: total ? Math.round((g.count / total) * 1000) / 10 : 0 }));
+
+    // "Student" is what people type in the current position field, so it is the
+    // only reliable signal available. Anyone who left the field blank is shown
+    // as "Not stated" rather than being quietly counted as unemployed — the
+    // form never asked whether they have a job.
+    const pos = (r) => String(r.current_position || '').trim();
+    const isStudent = (r) => /student/i.test(pos(r));
+
     return ok({
       total,
+      employmentStatus: groups([
+        ['In work or self-employed', r => pos(r) && !isStudent(r)],
+        ['Studying',                 isStudent],
+        ['Not stated',               r => !pos(r)],
+      ]),
+      educationRecorded: groups([
+        ['Qualification recorded', r => String(r.education_level || '').trim()],
+        ['Not stated',             r => !String(r.education_level || '').trim()],
+      ]),
       // Only sections member records can actually answer.
       education:     tally(r => r.education_level),
       fieldOfStudy:  tally(r => r.field_of_study),
