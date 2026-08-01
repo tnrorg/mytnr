@@ -1,5 +1,6 @@
 import './globals.css';
 import { Mulish } from 'next/font/google';
+import BackToTop from '@/components/site/BackToTop';
 
 const mulish = Mulish({
   subsets: ['latin'],
@@ -28,6 +29,9 @@ export default function RootLayout({ children }) {
             Hidden until focused — see .tnr-skip-link in globals.css. */}
         <a href="#main" className="tnr-skip-link">Skip to main content</a>
         {children}
+        {/* One back-to-top control for the whole site — public pages, the
+            member portal and the admin panel all get it. */}
+        <BackToTop />
       </body>
     </html>
   );

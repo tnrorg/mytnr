@@ -136,7 +136,9 @@ export default function AiFab() {
       )}
 
       {/* ── Button ── */}
-      <div className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6 z-[60] flex items-center gap-2 flex-row-reverse">
+      {/* id is how BackToTop knows to sit above this instead of on top of it. */}
+      <div id="tnr-ai-fab"
+        className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6 z-[60] flex items-center gap-2 flex-row-reverse">
         <button onClick={() => setOpen(o => !o)} aria-label="Ask TNR AI" aria-expanded={open}
           className="relative grid place-items-center w-14 h-14 rounded-full shadow-2xl transition-transform hover:scale-105 active:scale-95"
           style={{ background: `linear-gradient(145deg,${GREEN},${DEEP})`, border: `2px solid ${GOLD}` }}>
