@@ -51,6 +51,11 @@ alter table tnr_projects add column if not exists start_date      date;
 alter table tnr_projects add column if not exists target_date     date;
 alter table tnr_projects add column if not exists completion_date date;
 
+-- Photo gallery. An array of public URLs rather than a child table: the only
+-- thing a photo needs here is its position in the strip, and a separate table
+-- would add a join for no gain.
+alter table tnr_projects add column if not exists gallery text[] not null default '{}';
+
 alter table tnr_projects add column if not exists progress_percent int not null default 0;
 alter table tnr_projects add column if not exists source           text not null default '';
 alter table tnr_projects add column if not exists last_verified    date;

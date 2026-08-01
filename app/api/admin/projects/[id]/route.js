@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/guard';
 import { uploadDataUrl } from '@/lib/storage';
 import { logAudit, clientIp } from '@/lib/audit';
 import { ok, fail, readJson } from '@/lib/api';
-import { projectFromBody } from '@/lib/projectWrite';
+import { projectFromBody, resolveGallery } from '@/lib/projectWrite';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
@@ -18,11 +18,15 @@ export async function PATCH(req, { params }) {
   // cannot blank out its details.
   const patch = { ...projectFromBody(b, { partial: true }), updated_at: new Date().toISOString() };
 
-  if (b.image_data) {
-    try { patch.image_url = await uploadDataUrl(b.image_data, 'projects'); }
-    catch (e) { return fail('UPLOAD_FAILED', 500, { message: 'Image upload failed: ' + e.message }); }
-  } else if ('image_url' in b) {
-    patch.image_url = b.image_url || null;
+  try {
+    if (b.image_data) patch.image_url = await uploadDataUrl(b.image_data, 'projects');
+    else if ('image_url' in b) patch.image_url = b.image_url || null;
+
+    if ('gallery' in b || 'gallery_add' in b) {
+      patch.gallery = await resolveGallery(b, uploadDataUrl);
+    }
+  } catch (e) {
+    return fail('UPLOAD_FAILED', 500, { message: 'Image upload failed: ' + e.message });
   }
 
   const { data, error } = await supabaseAdmin().from('tnr_projects')

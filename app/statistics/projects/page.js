@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { Landmark, MapPin, Tag, Building2 } from 'lucide-react';
+import { Landmark, MapPin, Tag, Building2, LayoutGrid, List, Images } from 'lucide-react';
 import StatsShell, { BreakdownCard, statCard } from '@/components/stats/StatsShell';
+import ProjectDetail from '@/components/stats/ProjectDetail';
 import {
-  PROJECT_STATUSES, STATUS_LABEL, STATUS_TONE, money, exactMoney, summarise,
+  PROJECT_STATUSES, STATUS_LABEL, STATUS_TONE, money, exactMoney, summarise, allPhotos,
 } from '@/lib/projects';
 import { COLORS } from '@/lib/design/tokens';
 
@@ -21,6 +22,8 @@ export default function ProjectStatisticsPage() {
   const [council, setCouncil] = useState('');
   const [village, setVillage] = useState('');
   const [status, setStatus] = useState('');
+  const [view, setView] = useState('list');   // 'list' | 'gallery'
+  const [openId, setOpenId] = useState(null);
 
   useEffect(() => {
     let off = false;
@@ -135,10 +138,38 @@ export default function ProjectStatisticsPage() {
               rows={s.byDepartment} colorFrom={9} />
           </div>
 
-          <ProjectList projects={filtered} cur={cur} />
+          {/* ── List / gallery ── */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-extrabold" style={{ color: COLORS.green900 }}>
+              Projects ({filtered.length})
+            </h2>
+            <div className="flex rounded-tnr overflow-hidden border" style={{ borderColor: 'rgba(10,61,44,.16)' }}>
+              <ViewBtn on={view === 'list'} onClick={() => setView('list')} icon={List} label="List" />
+              <ViewBtn on={view === 'gallery'} onClick={() => setView('gallery')} icon={LayoutGrid} label="Gallery" />
+            </div>
+          </div>
+
+          {view === 'list'
+            ? <ProjectList projects={filtered} cur={cur} onOpen={setOpenId} />
+            : <ProjectGallery projects={filtered} cur={cur} onOpen={setOpenId} />}
+
+          {openId && (
+            <ProjectDetail cur={cur} onClose={() => setOpenId(null)}
+              project={filtered.find(p => p.id === openId)} />
+          )}
         </>
       )}
     </StatsShell>
+  );
+}
+
+function ViewBtn({ on, onClick, icon: Icon, label }) {
+  return (
+    <button onClick={onClick} aria-pressed={on}
+      className="flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-bold transition"
+      style={{ background: on ? COLORS.green700 : '#fff', color: on ? '#fff' : COLORS.muted }}>
+      <Icon size={15} strokeWidth={2.4} aria-hidden="true" />{label}
+    </button>
   );
 }
 
@@ -261,17 +292,68 @@ function AreaTable({ title, icon: Icon, rows, cur }) {
 
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : null;
 
-function ProjectList({ projects, cur }) {
-  if (!projects.length) {
-    return <div className={statCard + ' text-center text-[13px]'} style={{ color: COLORS.muted }}>
-      No projects match these filters.
-    </div>;
-  }
+/* Photo-led grid. Projects without a photo still appear — as a green tile with
+   the title — so the gallery is never a partial, misleading subset. */
+function ProjectGallery({ projects, cur, onOpen }) {
+  if (!projects.length) return <NoMatch />;
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {projects.map(p => {
+        const photos = allPhotos(p);
+        const tone = STATUS_TONE[p.status] || {};
+        return (
+          <button key={p.id} onClick={() => onOpen(p.id)}
+            className="text-left rounded-tnr-lg overflow-hidden bg-white shadow-tnr-flat border transition
+              hover:shadow-tnr-raise hover:-translate-y-0.5"
+            style={{ borderColor: 'rgba(200,154,43,.35)' }}>
+            <div className="relative h-44 bg-tnr-neutral">
+              {photos[0]
+                ? <img src={photos[0]} alt="" className="h-full w-full object-cover" />
+                : <div className="h-full w-full grid place-items-center px-4 text-center text-[13px] font-bold"
+                    style={{ background: `linear-gradient(160deg,${COLORS.green800},${COLORS.green950})`, color: 'rgba(255,255,255,.75)' }}>
+                    {p.title}
+                  </div>}
+              {photos.length > 1 && (
+                <span className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-full
+                  text-[11px] font-bold text-white" style={{ background: 'rgba(6,45,33,.72)' }}>
+                  <Images size={12} strokeWidth={2.5} aria-hidden="true" />{photos.length}
+                </span>
+              )}
+              <span className="absolute bottom-2.5 left-2.5 text-[11px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: tone.bg, color: tone.fg }}>
+                {STATUS_LABEL[p.status] || p.status}
+              </span>
+            </div>
+            <div className="p-4">
+              <h3 className="font-bold text-[14px] leading-snug" style={{ color: COLORS.green900 }}>{p.title}</h3>
+              <div className="mt-1 text-[12px]" style={{ color: COLORS.muted }}>
+                {[p.village, p.union_council, p.year].filter(Boolean).join(' · ')}
+              </div>
+              {p.approved_cost > 0 && (
+                <div className="mt-2 text-[13px] font-bold tabular-nums" style={{ color: COLORS.green900 }}
+                  title={exactMoney(p.approved_cost, cur)}>{money(p.approved_cost, cur)}</div>
+              )}
+              <span className="mt-3 inline-block text-[12px] font-bold underline" style={{ color: COLORS.green700 }}>
+                View full details
+              </span>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const NoMatch = () => (
+  <div className={statCard + ' text-center text-[13px]'} style={{ color: COLORS.muted }}>
+    No projects match these filters.
+  </div>
+);
+
+function ProjectList({ projects, cur, onOpen }) {
+  if (!projects.length) return <NoMatch />;
   return (
     <div className={statCard}>
-      <h2 className="font-extrabold mb-4" style={{ color: COLORS.green900 }}>
-        Projects ({projects.length})
-      </h2>
       <ul className="space-y-4">
         {projects.map(p => {
           const tone = STATUS_TONE[p.status] || {};
@@ -341,6 +423,19 @@ function ProjectList({ projects, cur }) {
                   {p.last_verified && <>Last checked {fmtDate(p.last_verified)}</>}
                 </div>
               )}
+
+              <div className="mt-3 flex items-center gap-3">
+                <button onClick={() => onOpen(p.id)}
+                  className="text-[12px] font-bold underline" style={{ color: COLORS.green700 }}>
+                  View full details
+                </button>
+                {allPhotos(p).length > 0 && (
+                  <span className="flex items-center gap-1 text-[11px]" style={{ color: COLORS.muted }}>
+                    <Images size={12} strokeWidth={2.5} aria-hidden="true" />
+                    {allPhotos(p).length} photo{allPhotos(p).length === 1 ? '' : 's'}
+                  </span>
+                )}
+              </div>
             </li>
           );
         })}

@@ -136,6 +136,80 @@ function PageSettings({ toast }) {
   </Card>;
 }
 
+/* ── Gallery ─────────────────────────────────────────────────────────────── */
+/* Existing photos are held as URLs in `gallery`; newly picked files sit in
+ * `gallery_add` as data URLs until save. Keeping them apart means a save that
+ * fails cannot lose photos that were already stored. */
+function GalleryPicker({ f, setF, toast }) {
+  const saved = f.gallery || [];
+  const pending = f.gallery_add || [];
+  const busyRef = pending.length + saved.length;
+
+  async function add(e) {
+    const files = [...(e.target.files || [])];
+    e.target.value = '';                       // allow re-picking the same file
+    if (!files.length) return;
+    if (busyRef + files.length > 30) return toast('Up to 30 photos per project.', 'err');
+
+    const out = [];
+    for (const file of files) {
+      try {
+        const { dataUrl } = await resizeImage(file, { maxWidth: 1600, maxHeight: 1200 });
+        out.push(dataUrl);
+      } catch (ex) { toast(`${file.name}: ${ex.message}`, 'err'); }
+    }
+    if (out.length) setF(s => ({ ...s, gallery_add: [...(s.gallery_add || []), ...out] }));
+  }
+
+  const move = (i, delta) => setF(s => {
+    const g = [...(s.gallery || [])];
+    const j = i + delta;
+    if (j < 0 || j >= g.length) return s;
+    [g[i], g[j]] = [g[j], g[i]];
+    return { ...s, gallery: g };
+  });
+
+  return <div className="rounded-xl border border-tnr-line/60 p-3 mb-4">
+    <div className="flex items-center justify-between mb-2">
+      <div className="text-xs font-bold text-tnr-goldLight">Photo gallery</div>
+      <div className="text-[11px] text-tnr-cream/40">{busyRef} photo{busyRef === 1 ? '' : 's'}</div>
+    </div>
+
+    {(saved.length > 0 || pending.length > 0) && (
+      <div className="flex flex-wrap gap-2 mb-3">
+        {saved.map((src, i) => (
+          <div key={src} className="relative group">
+            <img src={src} alt="" className="h-16 w-24 rounded-lg object-cover" />
+            <div className="absolute inset-x-0 bottom-0 flex justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition">
+              <Mini onClick={() => move(i, -1)} title="Move left">‹</Mini>
+              <Mini onClick={() => setF(s => ({ ...s, gallery: s.gallery.filter(u => u !== src) }))} title="Remove">×</Mini>
+              <Mini onClick={() => move(i, 1)} title="Move right">›</Mini>
+            </div>
+          </div>
+        ))}
+        {pending.map((src, i) => (
+          <div key={`new-${i}`} className="relative">
+            <img src={src} alt="" className="h-16 w-24 rounded-lg object-cover opacity-70" />
+            <span className="absolute top-1 left-1 text-[9px] px-1.5 py-0.5 rounded bg-tnr-gold text-tnr-black font-bold">NEW</span>
+            <button title="Remove"
+              onClick={() => setF(s => ({ ...s, gallery_add: s.gallery_add.filter((_, k) => k !== i) }))}
+              className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white text-xs leading-none">×</button>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <input type="file" accept="image/*" multiple onChange={add} className="text-xs text-tnr-cream/70" />
+    <p className="text-[11px] text-tnr-cream/40 mt-1">
+      Pick several at once. Resized automatically. New photos upload when you save.
+    </p>
+  </div>;
+}
+
+const Mini = ({ children, ...p }) => (
+  <button {...p} className="h-5 w-5 rounded bg-black/70 text-white text-xs leading-none">{children}</button>
+);
+
 /* ── One project ────────────────────────────────────────────────────────── */
 function ProjectEditor({ row, isNew, toast, onDone, onCancel }) {
   const [f, setF] = useState(row);
@@ -273,13 +347,15 @@ function ProjectEditor({ row, isNew, toast, onDone, onCancel }) {
       </p>
     </div>
 
-    <span className="label">Photo <span className="text-tnr-cream/40">(optional)</span></span>
+    <span className="label">Cover photo <span className="text-tnr-cream/40">(optional)</span></span>
     <div className="flex items-center gap-3 mt-1 mb-4">
       {f.image_url
         ? <img src={f.image_url} alt="" className="h-16 w-28 rounded-lg object-cover" />
         : <div className="h-16 w-28 rounded-lg bg-white/10 grid place-items-center text-[10px] text-tnr-cream/50">None</div>}
       <input type="file" accept="image/*" onChange={pickImage} className="text-xs text-tnr-cream/70" />
     </div>
+
+    <GalleryPicker f={f} setF={setF} toast={toast} />
 
     <div className="flex flex-wrap items-center gap-2">
       <button className="btn" disabled={busy} onClick={() => save()}>
