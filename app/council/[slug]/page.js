@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import {
   GraduationCap, Briefcase, BookOpen, Award, FolderGit2, Images,
   ScrollText, ExternalLink, FileDown, Microscope, ClipboardList,
+  Languages as LanguagesIcon, HeartHandshake,
 } from 'lucide-react';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
