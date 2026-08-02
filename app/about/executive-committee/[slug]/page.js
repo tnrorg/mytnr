@@ -47,6 +47,18 @@ export default function ExecutiveMemberPage({ params }) {
               {[m.organisation, m.country].filter(Boolean).join(' · ')}
             </p>
           )}
+
+          {/* This page describes the OFFICE. Everything the person entered in
+              their own portal — biography, education, experience, publications,
+              skills, gallery — lives on their professional profile, so link to
+              it rather than duplicating a partial copy here. */}
+          {named && (
+            <a href={`/council/${m.slug}`}
+              className="mt-4 inline-block text-[13px] font-bold py-2.5 px-5 rounded-xl text-white transition hover:opacity-90"
+              style={{ background: C.deep }}>
+              View full professional profile →
+            </a>
+          )}
         </div>
       </div>
 

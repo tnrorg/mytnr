@@ -26,10 +26,12 @@ const CHILD_TABLES = [
 export async function GET(_req, { params }) {
   const sb = supabaseAdmin();
 
+  // Any published leadership profile, not just the Advisory Council: an
+  // Executive Committee member who fills in the same portal form was getting
+  // "profile not available" on their own public link.
   const { data: p, error } = await sb.from('leadership_profiles')
     .select('*')
     .eq('slug', params.slug)
-    .eq('body', 'advisory')
     .eq('active', true)
     .maybeSingle();
 
@@ -39,7 +41,7 @@ export async function GET(_req, { params }) {
   // Build the public shape explicitly. An allow-list means a column added to
   // the table later cannot leak onto the public profile by accident.
   const profile = {
-    slug: p.slug, name: p.name, designation: p.designation,
+    slug: p.slug, body: p.body, name: p.name, designation: p.designation,
     qualification: p.qualification, field: p.field, affiliation: p.affiliation,
     profession: p.profession, organisation: p.organisation, country: p.country,
     tagline: p.tagline, intro: p.intro, bio: p.bio, summary: p.summary,

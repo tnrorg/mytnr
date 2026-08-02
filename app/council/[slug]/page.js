@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
   GraduationCap, Briefcase, BookOpen, Award, FolderGit2, Images,
-  ScrollText, ExternalLink, FileDown,
+  ScrollText, ExternalLink, FileDown, Microscope, ClipboardList,
 } from 'lucide-react';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
@@ -30,6 +30,18 @@ export default function CouncilProfilePage() {
   const s = d?.sections || {};
   const has = (k) => !(s[k] || []).length;
 
+  // Everything factual the member entered, minus what the hero already shows
+  // as headline text. Blank fields drop out rather than printing an empty row.
+  const details = !p ? [] : [
+    ['Current Profession', p.profession],
+    ['Organisation / University', p.organisation],
+    ['Country', p.country],
+    ['Highest Qualification', p.qualification],
+    ['Field of Study', p.field],
+    ['Affiliation', p.affiliation],
+    ['Role in TNR', p.designation],
+  ].filter(([, v]) => v);
+
   return (
     <main id="main" className="light-page min-h-screen flex flex-col bg-tnr-snow"
       style={{ color: COLORS.charcoal, ...FONT }}>
@@ -40,7 +52,7 @@ export default function CouncilProfilePage() {
           <EmptyState icon="🔒" title={err}
             message="This profile may not be published yet."
             action={<a href="/about/advisory-council" className="text-sm font-bold underline"
-              style={{ color: COLORS.green700 }}>Back to the Advisory Council</a>} />
+              style={{ color: COLORS.green700 }}>Back to Leadership</a>} />
         </section>
       )}
 
@@ -59,11 +71,41 @@ export default function CouncilProfilePage() {
 
           <div className="max-w-tnr mx-auto px-5 py-14 w-full space-y-14 flex-1">
 
+            {/* Every field the member filled in their portal appears here.
+                `intro` is the short card line and `bio` the long piece — they
+                used to collapse into one another, so whichever the member had
+                not written simply vanished from their public page. */}
             <Section id="about" title="About" empty={!p.bio && !p.summary && !p.intro}>
+              <div className={`${glass} p-6 space-y-4`}>
+                {p.intro && (
+                  <p className="text-[16px] font-semibold leading-[1.7] whitespace-pre-line"
+                    style={{ color: COLORS.charcoal }}>{p.intro}</p>
+                )}
+                {p.bio && (
+                  <p className="text-[15px] leading-[1.85] whitespace-pre-line" style={{ color: COLORS.muted }}>
+                    {p.bio}
+                  </p>
+                )}
+                {/* Only shown when it adds something the bio does not. */}
+                {p.summary && p.summary !== p.bio && p.summary !== p.intro && (
+                  <p className="text-[15px] leading-[1.85] whitespace-pre-line" style={{ color: COLORS.muted }}>
+                    {p.summary}
+                  </p>
+                )}
+              </div>
+            </Section>
+
+            <Section id="details" title="Professional Details" empty={!details.length}>
               <div className={`${glass} p-6`}>
-                <p className="text-[15px] leading-[1.85] whitespace-pre-line" style={{ color: COLORS.muted }}>
-                  {p.bio || p.summary || p.intro}
-                </p>
+                <dl className="grid sm:grid-cols-2 gap-x-8">
+                  {details.map(([k, v]) => (
+                    <div key={k} className="flex justify-between gap-4 py-2.5 border-b"
+                      style={{ borderColor: COLORS.neutral }}>
+                      <dt className="text-[12.5px] shrink-0" style={{ color: COLORS.muted }}>{k}</dt>
+                      <dd className="text-[13.5px] font-semibold text-right" style={{ color: COLORS.charcoal }}>{v}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
             </Section>
 
@@ -187,6 +229,32 @@ export default function CouncilProfilePage() {
               </div>
             </Section>
 
+            <Section id="research" title="Research Areas" empty={!(p.research_areas || []).length}>
+              <div className={`${glass} p-6`}>
+                <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
+                  {(p.research_areas || []).map(r => (
+                    <li key={r} className="flex gap-2.5 text-[14px]" style={{ color: COLORS.charcoal }}>
+                      <Microscope size={15} strokeWidth={2} aria-hidden="true"
+                        className="mt-0.5 shrink-0" style={{ color: COLORS.green700 }} />{r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Section>
+
+            <Section id="duties" title="Role & Responsibilities" empty={!(p.duties || []).length}>
+              <div className={`${glass} p-6`}>
+                <ul className="space-y-2.5">
+                  {(p.duties || []).map(t => (
+                    <li key={t} className="flex gap-2.5 text-[14px] leading-relaxed" style={{ color: COLORS.charcoal }}>
+                      <ClipboardList size={15} strokeWidth={2} aria-hidden="true"
+                        className="mt-1 shrink-0" style={{ color: COLORS.gold500 }} />{t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Section>
+
             <Section id="projects" title="Projects & Community Contributions" count={s.projects?.length} empty={has('projects')}>
               <div className="grid sm:grid-cols-2 gap-4">
                 {s.projects.map(pr => (
@@ -222,8 +290,9 @@ export default function CouncilProfilePage() {
             </Section>
 
             <div className="pt-4">
-              <a href="/about/advisory-council" className="text-sm font-bold hover:underline" style={{ color: COLORS.green700 }}>
-                ← Back to the Advisory Council
+              <a href={p.body === 'executive' ? '/about/executive-committee' : '/about/advisory-council'}
+                className="text-sm font-bold hover:underline" style={{ color: COLORS.green700 }}>
+                ← Back to {p.body === 'executive' ? 'the Executive Committee' : 'the Advisory Council'}
               </a>
             </div>
           </div>
