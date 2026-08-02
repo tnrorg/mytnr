@@ -21,9 +21,16 @@ create table if not exists leadership_messages (
 );
 
 insert into leadership_messages (key, heading, designation, sort_order) values
-  ('founder',   'Founder''s Message',   'Founder',           1),
-  ('president', 'President''s Message', 'Central President', 2)
+  ('founder',   'From Our Founder',   'Founder',           1),
+  ('president', 'From Our President', 'Central President', 2)
 on conflict (key) do nothing;
+
+-- Bring the earlier seed wording into line, but only where an admin has not
+-- already chosen their own heading.
+update leadership_messages set heading = 'From Our Founder'
+  where key = 'founder'   and heading in ('', 'Founder''s Message');
+update leadership_messages set heading = 'From Our President'
+  where key = 'president' and heading in ('', 'President''s Message');
 
 -- RLS on with no public policy: reads go through the service-role API route,
 -- matching every other table in this project.

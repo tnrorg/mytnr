@@ -14,6 +14,12 @@ import { COLORS, FONT } from '@/lib/design/tokens';
  * The two cards mirror each other (photo left, then photo right) so the pair
  * reads as a conversation rather than a stacked list.
  */
+/* Fallback only — the real heading is the admin-entered one on each row. */
+const DEFAULT_HEADING = {
+  founder: 'From Our Founder',
+  president: 'From Our President',
+};
+
 export default function LeadershipMessages() {
   const [rows, setRows] = useState(null);
 
@@ -33,21 +39,28 @@ export default function LeadershipMessages() {
       aria-label="Messages from TNR leadership">
       {/* Same wide container as the rest of the home page — the narrower one
           this used to sit in left a large empty margin either side on desktop. */}
-      <div className="max-w-tnr-wide mx-auto px-4 sm:px-8">
-        <Reveal className="text-center">
-          <div className="text-[11px] font-bold uppercase tracking-[.18em]" style={{ color: COLORS.green700 }}>
-            In Their Words
-          </div>
-          <h2 className="mt-1.5 text-2xl sm:text-[2rem] font-extrabold tracking-tight"
-            style={{ color: COLORS.green900 }}>
-            Messages from Our Leadership
-          </h2>
-          <div className="mt-3 h-[2px] w-12 mx-auto" style={{ background: COLORS.gold500 }} />
-        </Reveal>
+      {/* Each message carries its own heading rather than sharing one — a
+          single "Messages from Our Leadership" banner made the Founder's and
+          the President's words read as one undifferentiated block. */}
+      <div className="max-w-tnr-wide mx-auto px-4 sm:px-8 space-y-14 sm:space-y-16">
+        {rows.map((m, i) => (
+          <div key={m.key}>
+            <Reveal className="text-center" delay={i * 0.04}>
+              <div className="text-[11px] font-bold uppercase tracking-[.18em]" style={{ color: COLORS.green700 }}>
+                In Their Words
+              </div>
+              <h2 className="mt-1.5 text-2xl sm:text-[2rem] font-extrabold tracking-tight"
+                style={{ color: COLORS.green900 }}>
+                {m.heading || DEFAULT_HEADING[m.key] || 'Message'}
+              </h2>
+              <div className="mt-3 h-[2px] w-12 mx-auto" style={{ background: COLORS.gold500 }} />
+            </Reveal>
 
-        <div className="mt-10 sm:mt-12 space-y-8">
-          {rows.map((m, i) => <MessageCard key={m.key} m={m} flip={i % 2 === 1} delay={i * 0.08} />)}
-        </div>
+            <div className="mt-8 sm:mt-10">
+              <MessageCard m={m} flip={i % 2 === 1} delay={i * 0.08} />
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -121,13 +134,9 @@ function MessageCard({ m, flip, delay }) {
               }}>“</span>
 
             <div className="relative">
-              {m.heading && (
-                <h3 className="text-[13px] font-bold uppercase tracking-[.14em]"
-                  style={{ color: COLORS.green700 }}>{m.heading}</h3>
-              )}
-
+              {/* No heading repeated here — it now sits above the card. */}
               {/* Paragraph breaks are preserved from the admin textarea. */}
-              <div className="mt-4 space-y-3.5 text-[15px] leading-[1.75]" style={{ color: COLORS.charcoal }}>
+              <div className="space-y-3.5 text-[15px] leading-[1.75]" style={{ color: COLORS.charcoal }}>
                 {String(m.message).split(/\n{2,}/).map((p, i) => (
                   <p key={i}>{p.split('\n').map((line, j, all) => (
                     <span key={j}>{line}{j < all.length - 1 && <br />}</span>
