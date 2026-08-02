@@ -7,6 +7,31 @@ const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' }
 
 /* A dropdown entry. Planned pages render as a non-clickable row with a "Soon"
    chip rather than a link to a 404 — the roadmap stays visible and honest. */
+/* The gold person icon used to go straight to the application form, which was
+ * wrong for the many people who have already applied: they arrived at a blank
+ * form instead of a way in. It now opens a small menu with both routes. */
+function AccountMenu({ open, onClose, align = 'left' }) {
+  if (!open) return null;
+  const rows = [
+    ['Register as a Member', 'Join TNR — new application', '/membership/apply', true],
+    ['Member Login', 'Already approved? Sign in', '/member/login'],
+    ['Check Application Status', 'Track an application you have submitted', '/membership/status'],
+  ];
+  return (
+    <div className={`absolute top-full mt-2 w-64 z-50 ${align === 'right' ? 'right-0' : 'left-0'}`}>
+      <div className="rounded-2xl bg-white shadow-2xl border border-gray-100 py-2 animate-fade-up" style={mont}>
+        {rows.map(([label, note, href, primary]) => (
+          <a key={href} href={href} onClick={onClose}
+            className="block px-4 py-2.5 hover:bg-[#0B6B4F]/5 transition-colors">
+            <div className="text-sm font-bold" style={{ color: primary ? '#0B6B4F' : G }}>{label}</div>
+            <div className="text-[11px] text-gray-500 leading-snug">{note}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function NavLink({ item, onNavigate, className }) {
   if (item.soon) return (
     <span className={`${className} flex items-center justify-between cursor-default text-gray-400`}
@@ -24,12 +49,22 @@ export default function SiteNav() {
   const [mobile, setMobile] = useState(false);
   const [acc, setAcc] = useState(null);        // mobile accordion
   const [search, setSearch] = useState(false);
+  const [account, setAccount] = useState(false);   // Register / Login popover
   const ref = useRef(null);
 
   useEffect(() => {
-    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(null); };
+    // A click anywhere outside the header bar closes both the nav dropdown and
+    // the account menu; Escape does the same from the keyboard.
+    const close = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) { setOpen(null); setAccount(false); }
+    };
+    const onKey = (e) => { if (e.key === 'Escape') { setOpen(null); setAccount(false); } };
     document.addEventListener('click', close);
-    return () => document.removeEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', close);
+      document.removeEventListener('keydown', onKey);
+    };
   }, []);
 
   // Full-screen mobile menu: stop the page behind it from scrolling.
@@ -58,16 +93,20 @@ export default function SiteNav() {
     </div>
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm relative">
       <div ref={ref} className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center gap-3">
-        {/* Mobile: REGISTER on the LEFT */}
-        <a href="/membership/apply" aria-label="Register" title="Register"
-          className="xl:hidden grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow shrink-0"
-          style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
-            <path d="M2.8 20c0-3.4 2.8-5.6 6.2-5.6s6.2 2.2 6.2 5.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            <path d="M18.5 8.5v5M21 11h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </a>
+        {/* Mobile: account menu on the LEFT */}
+        <div className="xl:hidden relative shrink-0">
+          <button onClick={() => setAccount(o => !o)} aria-label="Register or log in"
+            aria-expanded={account} title="Register or log in"
+            className="grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow"
+            style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
+              <path d="M2.8 20c0-3.4 2.8-5.6 6.2-5.6s6.2 2.2 6.2 5.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M18.5 8.5v5M21 11h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+          <AccountMenu open={account} onClose={() => setAccount(false)} />
+        </div>
 
         {/* Logo — centred on mobile, left on desktop */}
         <a href="/" className="flex items-center gap-2.5 shrink-0 absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0">
@@ -112,15 +151,19 @@ export default function SiteNav() {
               <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
           <a href="/member/login" className="hidden xl:inline-block px-3 py-2 rounded-xl text-[13px] font-semibold text-[#063D2B] border border-[#063D2B]/15 hover:bg-[#063D2B]/5">LOGIN</a>
-          <a href="/membership/apply" aria-label="Register" title="Register"
-            className="hidden xl:grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow"
-            style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
-              <path d="M2.8 20c0-3.4 2.8-5.6 6.2-5.6s6.2 2.2 6.2 5.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <path d="M18.5 8.5v5M21 11h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </a>
+          <div className="hidden xl:block relative">
+            <button onClick={() => setAccount(o => !o)} aria-label="Register or log in"
+              aria-expanded={account} title="Register or log in"
+              className="grid place-items-center w-10 h-10 rounded-full text-[#063D2B] shadow"
+              style={{ background: 'linear-gradient(180deg,#F3E4B3,#D4A72C)' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2" />
+                <path d="M2.8 20c0-3.4 2.8-5.6 6.2-5.6s6.2 2.2 6.2 5.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M18.5 8.5v5M21 11h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            <AccountMenu open={account} onClose={() => setAccount(false)} align="right" />
+          </div>
           <button className="xl:hidden p-2 -mr-1 text-gray-600" onClick={() => setMobile(!mobile)} aria-label="menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
@@ -167,7 +210,24 @@ export default function SiteNav() {
               )}
             </div>
           ))}
-          <a href="/member/login" className="block px-4 py-3 text-sm font-semibold text-[#063D2B]">LOGIN</a>
+          {/* Both routes at the foot of the drawer, so someone who scrolls the
+              whole menu still finds a way in without going back to the top. */}
+          <div className="p-4 space-y-2.5">
+            <a href="/membership/apply" onClick={() => setMobile(false)}
+              className="block text-center px-4 py-3 rounded-xl text-sm font-bold text-white"
+              style={{ background: 'linear-gradient(180deg,#0B6B4F,#063D2B)' }}>
+              Register as a Member
+            </a>
+            <a href="/member/login" onClick={() => setMobile(false)}
+              className="block text-center px-4 py-3 rounded-xl text-sm font-bold border"
+              style={{ borderColor: 'rgba(6,61,43,.18)', color: G }}>
+              Member Login
+            </a>
+            <a href="/membership/status" onClick={() => setMobile(false)}
+              className="block text-center px-4 py-2 text-[12px] font-semibold text-gray-500">
+              Check application status
+            </a>
+          </div>
         </div>
       )}
     </>
