@@ -13,12 +13,14 @@ const SECTIONS = [
     ['qualification', 'Qualification', 'text'], ['degree', 'Degree', 'text'],
     ['field_of_study', 'Field of Study', 'text'], ['institution', 'Institution', 'text'],
     ['start_date', 'Start Date', 'date'], ['end_date', 'End Date', 'date'],
+    ['currently_studying', 'I am still studying here', 'checkbox'],
     ['grade', 'Grade / CGPA', 'text'], ['description', 'Description', 'textarea'],
   ]],
   ['experience', 'Work Experience', [
     ['job_title', 'Job Title', 'text'], ['organization', 'Organization', 'text'],
     ['employment_type', 'Employment Type', 'text'], ['location', 'Location', 'text'],
     ['start_date', 'Start Date', 'date'], ['end_date', 'End Date', 'date'],
+    ['currently_working', 'I currently work here', 'checkbox'],
     ['responsibilities', 'Responsibilities', 'textarea'], ['achievements', 'Achievements', 'textarea'],
   ]],
   ['skills', 'Skills', [
@@ -40,9 +42,21 @@ const SECTIONS = [
   ['volunteer', 'Volunteer Experience', [
     ['role', 'Role', 'text'], ['organization', 'Organization', 'text'], ['area', 'Area', 'text'],
     ['start_date', 'Start Date', 'date'], ['end_date', 'End Date', 'date'],
+    ['currently_active', 'I am still volunteering here', 'checkbox'],
     ['description', 'Description', 'textarea'],
   ]],
 ];
+
+/* The three sections above each have a "still here" flag. Ticking it hides the
+   end date and the entry reads "… → Present" everywhere it appears — the list,
+   the CV and the public profile. Without it, someone in their current job had
+   to either leave the end date blank (which read as unfinished) or type a
+   future date (which was untrue). */
+const CURRENT_FLAG = {
+  education: 'currently_studying',
+  experience: 'currently_working',
+  volunteer: 'currently_active',
+};
 
 export default function ProfilePage() {
   const [d, setD] = useState(null);
@@ -239,6 +253,9 @@ function SectionCard({ sec, label, fields, items, reload }) {
     });
     reload();
   };
+  // Null for sections with no date range (skills, projects, languages…).
+  const flagKey = CURRENT_FLAG[sec] || null;
+
   const title = (it) => it.name || it.job_title || it.qualification || it.degree || it.language || it.role || '—';
   const sub = (it) => [it.institution, it.organization, it.issuer, it.proficiency, it.level, it.area]
     .filter(Boolean).join(' · ');
@@ -255,9 +272,9 @@ function SectionCard({ sec, label, fields, items, reload }) {
             <div className="flex-1 min-w-0">
               <div className="font-bold text-sm" style={{ color: C.deep }}>{title(it)}</div>
               {sub(it) && <div className="text-xs text-gray-500">{sub(it)}</div>}
-              {(it.start_date || it.end_date) && (
+              {(it.start_date || it.end_date || (flagKey && it[flagKey])) && (
                 <div className="text-[11px] text-gray-400 mt-0.5">
-                  {it.start_date || '—'} → {it.end_date || 'Present'}
+                  {it.start_date || '—'} → {(flagKey && it[flagKey]) ? 'Present' : (it.end_date || 'Present')}
                 </div>)}
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -276,13 +293,29 @@ function SectionCard({ sec, label, fields, items, reload }) {
             {editingId ? `Edit ${label.replace(/s$/, '')}` : `New ${label.replace(/s$/, '')}`}
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
-            {fields.map(([k, l, t]) => (
-              <F key={k} l={l} full={t === 'textarea'}>
-                {t === 'textarea'
-                  ? <textarea rows={2} value={f[k] || ''} onChange={e => setF({ ...f, [k]: e.target.value })} className={base} />
-                  : <input type={t} value={f[k] || ''} onChange={e => setF({ ...f, [k]: e.target.value })} className={base} />}
-              </F>
-            ))}
+            {fields.map(([k, l, t]) => {
+              if (t === 'checkbox') return (
+                <label key={k} className="sm:col-span-2 flex items-center gap-2.5 text-sm cursor-pointer"
+                  style={{ color: C.deep }}>
+                  <input type="checkbox" checked={!!f[k]} className="w-4 h-4 accent-[#0B6B4F]"
+                    // Ticking it clears any end date already typed, so the two
+                    // can never disagree about whether the role has ended.
+                    onChange={e => setF({ ...f, [k]: e.target.checked, ...(e.target.checked ? { end_date: '' } : {}) })} />
+                  {l}
+                </label>
+              );
+              const current = flagKey && f[flagKey] && k === 'end_date';
+              return (
+                <F key={k} l={current ? 'End Date (present)' : l} full={t === 'textarea'}>
+                  {t === 'textarea'
+                    ? <textarea rows={2} value={f[k] || ''} onChange={e => setF({ ...f, [k]: e.target.value })} className={base} />
+                    : <input type={t} value={current ? '' : (f[k] || '')} disabled={!!current}
+                        placeholder={current ? 'Present' : undefined}
+                        onChange={e => setF({ ...f, [k]: e.target.value })}
+                        className={`${base} ${current ? 'opacity-50' : ''}`} />}
+                </F>
+              );
+            })}
           </div>
           <div className="mt-3 flex gap-2">
             <button onClick={save} disabled={busy}

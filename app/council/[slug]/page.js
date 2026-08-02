@@ -116,7 +116,8 @@ export default function CouncilProfilePage() {
                   {(s.education || []).map(e => (
                     <TimelineItem key={e.id} heading={e.institution}
                       sub={[e.degree, e.field_of_study].filter(Boolean).join(' · ')}
-                      meta={yearRange(e.start_year, e.end_year)}>
+                      current={e.is_current}
+                      meta={yearRange(e.start_year, e.end_year, e.is_current)}>
                       {[e.country, e.grade && `Grade: ${e.grade}`].filter(Boolean).join(' · ')}
                       {e.description && <p className="mt-1">{e.description}</p>}
                     </TimelineItem>
