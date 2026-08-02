@@ -270,10 +270,55 @@ export default function CouncilProfilePage() {
                       <div className="mt-0.5 text-[12px]" style={{ color: COLORS.muted }}>
                         {yearRange(pr.start_year, pr.end_year)}
                       </div>
-                      {pr.description && <p className="mt-2 text-[13px] leading-relaxed" style={{ color: COLORS.muted }}>{pr.description}</p>}
+                      {pr.description && <p className="mt-2 text-[13px] leading-relaxed whitespace-pre-line" style={{ color: COLORS.muted }}>{pr.description}</p>}
+                      {pr.url && (
+                        <a href={pr.url} target="_blank" rel="noopener noreferrer"
+                          className="mt-2.5 inline-flex items-center gap-1 text-[12px] font-bold hover:underline"
+                          style={{ color: COLORS.green700 }}>
+                          Visit <ExternalLink size={11} aria-hidden="true" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}
+              </div>
+            </Section>
+
+            <Section id="volunteer" title="Volunteer Experience" count={s.volunteer?.length} empty={has('volunteer')}>
+              <div className={`${glass} p-6`}>
+                <Timeline>
+                  {(s.volunteer || []).map(v => (
+                    <TimelineItem key={v.id} heading={v.role || v.organisation}
+                      sub={v.role ? v.organisation : null} current={v.is_current}
+                      meta={yearRange(v.start_year, v.end_year, v.is_current)}>
+                      {v.area && <div className="inline-flex items-center gap-1.5">
+                        <HeartHandshake size={13} strokeWidth={2} aria-hidden="true"
+                          style={{ color: COLORS.gold500 }} />{v.area}
+                      </div>}
+                      {v.description && <p className="mt-1">{v.description}</p>}
+                    </TimelineItem>
+                  ))}
+                </Timeline>
+              </div>
+            </Section>
+
+            <Section id="languages" title="Languages" count={s.languages?.length} empty={has('languages')}>
+              <div className={`${glass} p-6`}>
+                <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3">
+                  {(s.languages || []).map(l => (
+                    <li key={l.id} className="flex items-center justify-between gap-3 border-b pb-2"
+                      style={{ borderColor: COLORS.neutral }}>
+                      <span className="inline-flex items-center gap-2 text-[14px] font-semibold"
+                        style={{ color: COLORS.charcoal }}>
+                        <LanguagesIcon size={14} strokeWidth={2} aria-hidden="true"
+                          style={{ color: COLORS.green700 }} />{l.language}
+                      </span>
+                      {l.proficiency && (
+                        <span className="text-[12px]" style={{ color: COLORS.muted }}>{l.proficiency}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </Section>
 

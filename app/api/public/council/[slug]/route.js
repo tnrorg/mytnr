@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { ok, fail } from '@/lib/api';
+import { CV_TABLES, MAP, skillNames } from '@/lib/cvToProfile';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -65,6 +66,27 @@ export async function GET(_req, { params }) {
     const { data, error } = await q;
     sections[key] = error ? [] : (data || []).map(({ profile_id, approved, ...rest }) => rest);
   }));
+
+  // ── Fill the gaps from the member's own CV Builder ───────────────────────
+  // A section only falls back when the admin has curated nothing for it, so a
+  // curated history is never replaced by a raw CV entry.
+  if (p.member_id) {
+    const cv = {};
+    await Promise.all(CV_TABLES.map(async ([key, table]) => {
+      const { data, error } = await sb.from(table).select('*')
+        .eq('member_id', p.member_id).order('sort_order');
+      cv[key] = error ? [] : (data || []);
+    }));
+
+    for (const [key] of CV_TABLES) {
+      if (key === 'skills') continue;                 // merged into the tag cloud
+      if ((sections[key] || []).length) continue;     // curated entries win
+      sections[key] = (cv[key] || []).map(MAP[key]);
+    }
+
+    // Skills and languages have no curated equivalent, so they are additive.
+    profile.skills = [...new Set([...(profile.skills || []), ...skillNames(cv.skills)])];
+  }
 
   return ok({ profile, sections });
 }
