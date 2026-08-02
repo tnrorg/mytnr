@@ -70,10 +70,14 @@ export default function ExecutiveCard({ member }) {
 
         <p className="mt-3 text-center text-[13px] text-gray-500 leading-relaxed flex-1">{member.summary}</p>
 
-        <a href={`/about/executive-committee/${member.slug}`}
+        {/* A filled position goes straight to the person's full professional
+            profile — that is what a visitor clicking a face expects. The office
+            description page is only useful when nobody holds the post yet, and
+            the duties appear on the profile anyway. */}
+        <a href={member.name ? `/council/${member.slug}` : `/about/executive-committee/${member.slug}`}
           className="mt-5 block text-center text-[12.5px] font-bold py-2.5 rounded-xl text-white transition hover:opacity-90"
           style={{ background: C.deep }}>
-          View Profile
+          {member.name ? 'View Profile' : 'About This Position'}
         </a>
       </div>
     </article>
