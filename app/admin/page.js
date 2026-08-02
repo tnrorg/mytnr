@@ -22,6 +22,7 @@ import MessagesTab from '@/components/admin/MessagesTab';
 import HeroTab from '@/components/admin/HeroTab';
 import ProjectsTab from '@/components/admin/ProjectsTab';
 import InstitutionsTab from '@/components/admin/InstitutionsTab';
+import CecTab from '@/components/admin/CecTab';
 import CardTemplateTab from '@/components/admin/CardTemplateTab';
 import AreasTab from '@/components/admin/AreasTab';
 // Loaded on demand, only after the SERVER confirms Super Admin.
@@ -38,6 +39,7 @@ const TOP_TABS = [
   ['messages', 'Home Messages', '💬'],
   ['projects', 'Projects', '🏗️'],
   ['institutions', 'Schools & Colleges', '🏫'],
+  ['cec', 'CEC Recruitment', '📋'],
 ];
 const ELECTION_TABS = [
   ['elections', 'Elections', '🗳️'], ['candidates', 'Candidates', '🎖️'], ['members', 'Members', '👥'],
@@ -153,6 +155,7 @@ export default function Admin() {
       {tab === 'messages' && <MessagesTab toast={toast} />}
       {tab === 'projects' && <ProjectsTab toast={toast} />}
       {tab === 'institutions' && <InstitutionsTab toast={toast} />}
+      {tab === 'cec' && <CecTab toast={toast} />}
       {tab === 'members' && <MembersTab toast={toast} />}
       {tab === 'candidates' && <CandidatesTab toast={toast} elections={elections} />}
       {tab === 'elections' && <ElectionsTab toast={toast} admin={admin} reloadElections={reloadElections} />}
