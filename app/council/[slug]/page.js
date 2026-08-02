@@ -112,7 +112,7 @@ export default function CouncilProfilePage() {
             <Section id="education" title="Education Journey" count={s.education?.length} empty={has('education')}>
               <div className={`${glass} p-6`}>
                 <Timeline>
-                  {s.education.map(e => (
+                  {(s.education || []).map(e => (
                     <TimelineItem key={e.id} heading={e.institution}
                       sub={[e.degree, e.field_of_study].filter(Boolean).join(' · ')}
                       meta={yearRange(e.start_year, e.end_year)}>
@@ -127,7 +127,7 @@ export default function CouncilProfilePage() {
             <Section id="experience" title="Professional Experience" count={s.experience?.length} empty={has('experience')}>
               <div className={`${glass} p-6`}>
                 <Timeline>
-                  {s.experience.map(x => (
+                  {(s.experience || []).map(x => (
                     <TimelineItem key={x.id} heading={x.position || x.organisation}
                       sub={x.position ? x.organisation : null} current={x.is_current}
                       meta={yearRange(x.start_year, x.end_year, x.is_current)}>
@@ -150,7 +150,7 @@ export default function CouncilProfilePage() {
 
             <Section id="publications" title="Research & Publications" count={s.publications?.length} empty={has('publications')}>
               <ul className="space-y-3">
-                {s.publications.map(r => (
+                {(s.publications || []).map(r => (
                   <li key={r.id} className={`${glass} p-5`}>
                     <div className="flex items-start gap-3">
                       <BookOpen size={17} strokeWidth={2} aria-hidden="true"
@@ -183,7 +183,7 @@ export default function CouncilProfilePage() {
 
             <Section id="certifications" title="Certifications" count={s.certifications?.length} empty={has('certifications')}>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {s.certifications.map(c => (
+                {(s.certifications || []).map(c => (
                   <div key={c.id} className={`${glass} p-5 transition-transform duration-standard hover:-translate-y-[3px]`}>
                     <ScrollText size={18} strokeWidth={2} aria-hidden="true" style={{ color: COLORS.gold500 }} />
                     <h3 className="mt-3 font-bold text-[14px] leading-snug" style={{ color: COLORS.charcoal }}>{c.title}</h3>
@@ -205,7 +205,7 @@ export default function CouncilProfilePage() {
 
             <Section id="awards" title="Awards & Achievements" count={s.awards?.length} empty={has('awards')}>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {s.awards.map(a => (
+                {(s.awards || []).map(a => (
                   <div key={a.id} className={`${glass} overflow-hidden transition-transform duration-standard hover:-translate-y-[3px]`}>
                     {a.image_url && <img src={a.image_url} alt="" loading="lazy" className="w-full h-36 object-cover" />}
                     <div className="p-5">
@@ -224,8 +224,10 @@ export default function CouncilProfilePage() {
             <Section id="skills" title="Professional Skills"
               empty={!(p.skills || []).length && !(p.expertise || []).length}>
               <div className="flex flex-wrap gap-2">
-                {(p.skills || []).map((t, i) => <Tag key={t} i={i}>{t}</Tag>)}
-                {(p.expertise || []).map((t, i) => <Tag key={t} i={i} tone="gold">{t}</Tag>)}
+                {/* Prefixed keys: a skill and an expertise tag can legitimately
+                    share a word, and now that CV skills merge in they often do. */}
+                {(p.skills || []).map((t, i) => <Tag key={`s-${t}`} i={i}>{t}</Tag>)}
+                {(p.expertise || []).map((t, i) => <Tag key={`e-${t}`} i={i} tone="gold">{t}</Tag>)}
               </div>
             </Section>
 
@@ -257,7 +259,7 @@ export default function CouncilProfilePage() {
 
             <Section id="projects" title="Projects & Community Contributions" count={s.projects?.length} empty={has('projects')}>
               <div className="grid sm:grid-cols-2 gap-4">
-                {s.projects.map(pr => (
+                {(s.projects || []).map(pr => (
                   <div key={pr.id} className={`${glass} overflow-hidden transition-transform duration-standard hover:-translate-y-[3px]`}>
                     {pr.image_url && <img src={pr.image_url} alt="" loading="lazy" className="w-full h-40 object-cover" />}
                     <div className="p-5">
@@ -324,7 +326,7 @@ export default function CouncilProfilePage() {
 
             <Section id="gallery" title="Gallery" count={s.gallery?.length} empty={has('gallery')}>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {s.gallery.map(g => (
+                {(s.gallery || []).map(g => (
                   <figure key={g.id} className="rounded-tnr overflow-hidden bg-gray-100 group">
                     <img src={g.image_url} alt={g.caption || ''} loading="lazy"
                       className="w-full aspect-[4/3] object-cover transition-transform duration-standard group-hover:scale-[1.03]" />
