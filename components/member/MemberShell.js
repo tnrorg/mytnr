@@ -42,6 +42,9 @@ export const ROLE_NAV = {
   ],
   cec: [
     ['My Leadership Profile', '/member/council-profile', '🎓'],
+    // Read-only. The decision sits with the Super Admin; committee members
+    // read the answers so they can advise, not act.
+    ['Executive Applications', '/member/cec-applications', '📋'],
   ],
   uc_team: [
     ['My UC Team', '/member/uc-team', '📍'],

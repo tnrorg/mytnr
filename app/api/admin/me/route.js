@@ -20,6 +20,10 @@ export async function GET(req) {
     username: row.username,
     full_name: row.full_name,
     label: superUser ? 'Super Admin' : 'Control Panel',
+    // Screens that gate an action on rank read this so they can explain why a
+    // button is missing, instead of offering it and letting the server refuse.
+    // The server still enforces the rule — this only shapes the UI.
+    is_super: superUser,
     // Labels live on the server — a normal admin never downloads these strings.
     extra_tabs: superUser
       ? [['committee', 'Committee Vote Entry', '🔐'], ['voterdata', 'Voter Data', '🗃️'], ['admins', 'Admin Accounts', '🛡️']]

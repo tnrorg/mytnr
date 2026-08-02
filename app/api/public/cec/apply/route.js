@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabaseServer';
 import { uploadDataUrl } from '@/lib/storage';
 import { ok, fail, readJson } from '@/lib/api';
 import { validateApplication } from '@/lib/cec';
+import { sendNotice } from '@/lib/mailer';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
@@ -73,6 +74,38 @@ export async function POST(req) {
       await sb.from('cec_applications').update({ reference_no }).eq('id', data.id);
     }
   } catch { /* the application is saved either way; the reference is a nicety */ }
+
+  // Notifications are best-effort and deliberately last: the application is
+  // already saved, and a mail server having a bad day must not turn a
+  // successful submission into an error the applicant sees.
+  const site = process.env.NEXT_PUBLIC_SITE_URL || '';
+  try {
+    await sendNotice({
+      to: row.email,
+      subject: `TNR — application received${reference_no ? ` (${reference_no})` : ''}`,
+      heading: 'We have received your application',
+      body: `Dear ${row.full_name},\n\nThank you for applying for the position of `
+        + `${vacancy.title} on the Central Executive Committee of Tehreek-e-Nojawanan Roundu.\n\n`
+        + (reference_no ? `Your reference number is ${reference_no}. Please quote it in any correspondence.\n\n` : '')
+        + `The selection panel will review all applications after the closing date and `
+        + `will contact you directly about the next steps.`,
+    });
+  } catch { /* saved regardless */ }
+
+  const alertTo = process.env.ADMIN_NOTIFY_EMAIL;
+  if (alertTo) {
+    try {
+      await sendNotice({
+        to: alertTo,
+        subject: `New CEC application — ${vacancy.title}`,
+        heading: 'New Executive Committee application',
+        body: `${row.full_name} has applied for ${vacancy.title}.\n\n`
+          + `Reference: ${reference_no || '—'}\nEmail: ${row.email}\nPhone: ${row.mobile}`,
+        ctaText: 'Open the admin panel',
+        ctaUrl: site ? `${site}/admin` : undefined,
+      });
+    } catch { /* saved regardless */ }
+  }
 
   return ok({
     reference_no,

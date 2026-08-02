@@ -16,6 +16,11 @@ import {
  */
 export default function CecTab({ toast }) {
   const [pane, setPane] = useState('applications');
+  // Asked of the server rather than assumed: the client never decides its own
+  // rank, and the decision endpoint enforces this independently.
+  const [isSuper, setIsSuper] = useState(false);
+  useEffect(() => { aGet('/api/admin/me').then(r => setIsSuper(!!r?.is_super)); }, []);
+
   return <div className="space-y-4 max-w-4xl">
     <div className="flex gap-1 rounded-xl bg-white/5 p-1 w-fit">
       {[['applications', 'Applications'], ['vacancies', 'Positions']].map(([k, l]) => (
@@ -26,12 +31,14 @@ export default function CecTab({ toast }) {
         </button>
       ))}
     </div>
-    {pane === 'applications' ? <Applications toast={toast} /> : <Vacancies toast={toast} />}
+    {pane === 'applications'
+      ? <Applications toast={toast} isSuper={isSuper} />
+      : <Vacancies toast={toast} />}
   </div>;
 }
 
 /* ── Applications ────────────────────────────────────────────────────────── */
-function Applications({ toast }) {
+function Applications({ toast, isSuper }) {
   const [rows, setRows] = useState(null);
   const [vacancies, setVacancies] = useState([]);
   const [err, setErr] = useState('');
@@ -97,7 +104,7 @@ function Applications({ toast }) {
     )}
 
     {shown.map(a => (
-      <ApplicationRow key={a.id} a={a} toast={toast} onDone={load}
+      <ApplicationRow key={a.id} a={a} toast={toast} onDone={load} isSuper={isSuper}
         open={openId === a.id} onToggle={() => setOpenId(openId === a.id ? null : a.id)} />
     ))}
   </div>;
@@ -105,7 +112,7 @@ function Applications({ toast }) {
 
 const fmt = (d) => d ? new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
-function ApplicationRow({ a, toast, onDone, open, onToggle }) {
+function ApplicationRow({ a, toast, onDone, open, onToggle, isSuper }) {
   const [notes, setNotes] = useState(a.admin_notes || '');
   const [busy, setBusy] = useState(false);
   useEffect(() => { setNotes(a.admin_notes || ''); }, [a.admin_notes]);
@@ -198,15 +205,29 @@ function ApplicationRow({ a, toast, onDone, open, onToggle }) {
         )}
       </div>
 
-      {/* ── Pipeline ── */}
-      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-tnr-line/60">
-        {APP_STATUSES.filter(([k]) => k !== a.status).map(([k, l]) => (
-          <button key={k} className="btn-ghost !py-1.5 !px-3 text-xs" disabled={busy}
-            onClick={() => patch({ status: k, admin_notes: notes }, `Moved to ${l}`)}>
-            {l}
-          </button>
-        ))}
-        <button className="btn-ghost !text-red-300 ml-auto text-xs" disabled={busy} onClick={remove}>Delete</button>
+      {/* ── Decision ──
+          Super Admin only. Any admin may record an opinion in the notes above,
+          but the outcome is one person's call and the server refuses it from
+          anyone else — so the buttons are not shown rather than shown and
+          rejected. */}
+      <div className="pt-2 border-t border-tnr-line/60">
+        {isSuper ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] uppercase tracking-wider text-tnr-cream/40 mr-1">Decision</span>
+            {APP_STATUSES.filter(([k]) => k !== a.status).map(([k, l]) => (
+              <button key={k} className="btn-ghost !py-1.5 !px-3 text-xs" disabled={busy}
+                onClick={() => patch({ status: k, admin_notes: notes }, `Moved to ${l}`)}>
+                {l}
+              </button>
+            ))}
+            <button className="btn-ghost !text-red-300 ml-auto text-xs" disabled={busy} onClick={remove}>Delete</button>
+          </div>
+        ) : (
+          <p className="text-[12px] text-tnr-cream/50">
+            Only a Super Admin can move an application to Selected or Not selected.
+            Your notes above are saved and visible to the panel.
+          </p>
+        )}
       </div>
     </div>}
   </Card>;
