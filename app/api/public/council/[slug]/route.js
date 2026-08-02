@@ -70,11 +70,23 @@ export async function GET(_req, { params }) {
   // ── Fill the gaps from the member's own CV Builder ───────────────────────
   // A section only falls back when the admin has curated nothing for it, so a
   // curated history is never replaced by a raw CV entry.
-  if (p.member_id) {
+  //
+  // `member_id` only exists once migration_leadership_member_link.sql has run,
+  // and the admin assign flow silently skips it on an un-migrated database —
+  // so a profile can be linked in every practical sense while the column is
+  // still null. Fall back to matching on email, which is unique per member.
+  let memberId = p.member_id || null;
+  if (!memberId && p.email) {
+    const { data: m } = await sb.from('membership_members')
+      .select('id').ilike('email', p.email).is('deleted_at', null).maybeSingle();
+    memberId = m?.id || null;
+  }
+
+  if (memberId) {
     const cv = {};
     await Promise.all(CV_TABLES.map(async ([key, table]) => {
       const { data, error } = await sb.from(table).select('*')
-        .eq('member_id', p.member_id).order('sort_order');
+        .eq('member_id', memberId).order('sort_order');
       cv[key] = error ? [] : (data || []);
     }));
 
@@ -88,5 +100,9 @@ export async function GET(_req, { params }) {
     profile.skills = [...new Set([...(profile.skills || []), ...skillNames(cv.skills)])];
   }
 
-  return ok({ profile, sections });
+  // `linked` says whether the profile was matched to a member account. When the
+  // CV sections look empty on the public page this is the first thing to check
+  // — false means the profile is not connected to any member record, so there
+  // was no CV to pull, which is very different from "the CV is empty".
+  return ok({ profile, sections, linked: !!memberId });
 }
