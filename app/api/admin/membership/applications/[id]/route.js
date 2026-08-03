@@ -45,10 +45,17 @@ export async function PATCH(req, { params }) {
     if (exists && exists.length)
       return fail('DUPLICATE', 409, { message: `A member already exists for this email (${exists[0].membership_id}).` });
 
-    // The membership number is claimed HERE, at approval — not at submission.
-    // That is what keeps it gapless: only real members advance the sequence,
-    // so a rejected application never leaves a hole in the numbering.
-    const membership_id = await generateMembershipId();
+    // The membership number IS the reference the applicant was given on
+    // submission — reused, not regenerated. Issuing a second number here would
+    // mean someone is quoted TNR-MN-0019 when they apply and carries
+    // TNR-MN-0027 as a member, which makes every support enquiry a lookup.
+    //
+    // A number is only generated if the application somehow has no reference,
+    // which can happen for rows created before the single series, or if the
+    // reference update failed at submission.
+    const membership_id = /^TNR-MN-\d+$/.test(app.reference_no || '')
+      ? app.reference_no
+      : await generateMembershipId();
     const inviteTok = makeInviteToken();
     const now = new Date().toISOString();
     const { data: member, error: insErr } = await sb.from('membership_members').insert({
