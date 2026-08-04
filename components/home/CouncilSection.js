@@ -1,7 +1,7 @@
 'use client';
 import { ArrowRight } from 'lucide-react';
 import CouncilDirectory from '@/components/council/CouncilDirectory';
-import { SectionHeading } from '@/components/ui';
+import { SectionHeading, Reveal } from '@/components/ui';
 import { COLORS, FONT } from '@/lib/design/tokens';
 
 // Homepage preview: card-level information only. The full professional profile
@@ -10,7 +10,7 @@ import { COLORS, FONT } from '@/lib/design/tokens';
 export default function CouncilSection() {
   return (
     <section className="max-w-tnr-wide mx-auto px-4 pb-16 w-full" style={FONT}>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <Reveal className="flex flex-wrap items-end justify-between gap-4">
         <SectionHeading eyebrow="Senior Leadership" title="TNR Advisory Council Members"
           lead="Experienced professionals, academics and community leaders guiding TNR." />
         <a href="/about/advisory-council"
@@ -21,11 +21,13 @@ export default function CouncilSection() {
           <ArrowRight size={14} strokeWidth={2.5} aria-hidden="true"
             className="transition-transform duration-micro group-hover:translate-x-0.5" />
         </a>
-      </div>
-      <div className="mt-10">
+      </Reveal>
+      {/* Slight delay so the heading settles before the cards arrive, rather
+          than the whole block appearing at once. */}
+      <Reveal className="mt-10" delay={0.08}>
         {/* Two full rows at desktop width (4 per row). */}
         <CouncilDirectory limit={8} showFilters={false} />
-      </div>
+      </Reveal>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import AiFab from '@/components/site/AiFab';
 import ExecutiveCard from '@/components/site/ExecutiveCard';
 import { CEC_INTRO } from '@/content/executiveCommittee';
 import { useLeadership } from '@/components/site/useLeadership';
+import { Reveal, RevealGroup, RevealItem } from '@/components/ui';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import CommunityStats from '@/components/home/CommunityStats';
 import LeadershipMessages from '@/components/home/LeadershipMessages';
@@ -56,17 +57,24 @@ function ExecutiveCommittee() {
   const { executive } = useLeadership();
   return (
     <section className="max-w-[1400px] mx-auto px-4 py-14 w-full">
-      <div className="flex items-center justify-center gap-3">
+      <Reveal className="flex items-center justify-center gap-3">
         <span className="h-px w-10 sm:w-20" style={{ background: `${C.gold}66` }} />
         <h2 style={{ ...mont, color: C.deep }} className="text-lg sm:text-xl font-black uppercase tracking-wide text-center">Central Executive Committee</h2>
         <span className="h-px w-10 sm:w-20" style={{ background: `${C.gold}66` }} />
-      </div>
-      <p className="mt-3 text-center text-sm text-gray-500 max-w-3xl mx-auto leading-relaxed">{CEC_INTRO}</p>
+      </Reveal>
+      <Reveal delay={0.06}>
+        <p className="mt-3 text-center text-sm text-gray-500 max-w-3xl mx-auto leading-relaxed">{CEC_INTRO}</p>
+      </Reveal>
 
-      {/* one per row on mobile, three per row from desktop up */}
-      <div className="mt-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {executive.map(m => <ExecutiveCard key={m.slug} member={m} />)}
-      </div>
+      {/* One per row on mobile, three per row from desktop up. RevealGroup
+          staggers the cards so the grid builds rather than snapping in. */}
+      <RevealGroup className="mt-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {executive.map(m => (
+          // h-full on the wrapper AND the card: the extra div would otherwise
+          // absorb the grid stretch and leave cards of unequal height.
+          <RevealItem key={m.slug} className="h-full"><ExecutiveCard member={m} /></RevealItem>
+        ))}
+      </RevealGroup>
     </section>
   );
 }

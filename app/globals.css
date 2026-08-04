@@ -235,3 +235,16 @@ button, input, textarea, select, option { font-family: inherit; }
   .hero-title { font-size: var(--hero-title-d); }
   .hero-text  { font-size: var(--hero-text-d); }
 }
+
+/* ── Smooth scrolling ──────────────────────────────────────────────────────
+   Applies to in-page anchor jumps and the back-to-top control. The
+   prefers-reduced-motion block above already forces `scroll-behavior: auto`,
+   so this is opt-out for anyone who has asked their OS to reduce motion.
+
+   scroll-padding-top matters as much as the smoothness: the site header is
+   sticky, so without it an anchor lands underneath the header and the reader
+   sees the wrong line. 84px clears it with a little breathing room. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 84px;
+}
