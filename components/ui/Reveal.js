@@ -7,7 +7,12 @@ import { revealUp, staggerChildren } from '@/lib/design/tokens';
 export function Reveal({ children, className = '', delay = 0, as = 'div' }) {
   const M = motion[as] || motion.div;
   return (
-    <M className={className} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}
+    // `margin` rather than `amount`: requiring 20% of a tall section to be on
+    // screen meant it only started animating once it was already well up the
+    // page, so the reader saw the tail end. Pulling the trigger line 12% up
+    // from the bottom edge starts the reveal as the section rises into view.
+    <M className={className} initial="hidden" whileInView="show"
+      viewport={{ once: true, margin: '0px 0px -12% 0px' }}
       variants={{ ...revealUp, show: { ...revealUp.show, transition: { ...revealUp.show.transition, delay } } }}>
       {children}
     </M>
@@ -18,7 +23,7 @@ export function Reveal({ children, className = '', delay = 0, as = 'div' }) {
 export function RevealGroup({ children, className = '', gap = 0.06 }) {
   return (
     <motion.div className={className} initial="hidden" whileInView="show"
-      viewport={{ once: true, amount: 0.15 }} variants={staggerChildren(gap)}>
+      viewport={{ once: true, margin: '0px 0px -10% 0px' }} variants={staggerChildren(gap)}>
       {children}
     </motion.div>
   );

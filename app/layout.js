@@ -1,6 +1,7 @@
 import './globals.css';
 import { Mulish } from 'next/font/google';
 import BackToTop from '@/components/site/BackToTop';
+import SmoothScroll from '@/components/site/SmoothScroll';
 
 const mulish = Mulish({
   subsets: ['latin'],
@@ -32,6 +33,8 @@ export default function RootLayout({ children }) {
         {/* One back-to-top control for the whole site — public pages, the
             member portal and the admin panel all get it. */}
         <BackToTop />
+        {/* Eases mouse-wheel scrolling. Renders nothing; safe to delete. */}
+        <SmoothScroll />
       </body>
     </html>
   );
