@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { ok, fail } from '@/lib/api';
 import { ACTIVE_STATUSES } from '@/lib/membershipStats';
+import { areaKey, preferredSpelling, canonicalAreaNames } from '@/lib/membership/areaName';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -31,19 +32,30 @@ export async function GET() {
     }
 
     const total = rows.length;
-    /** Count a field, largest first, ignoring blanks. */
-    const tally = (fn) => {
+    const canonical = await canonicalAreaNames(sb);
+
+    /**
+     * Count a field, largest first, ignoring blanks.
+     *
+     * `canon` is the admin-managed spelling for area fields. Without it the
+     * label was whichever spelling happened to be read first, so one member
+     * typing "hardass" in lower case renamed the village for everyone.
+     */
+    const tally = (fn, canon) => {
       const m = new Map();
       for (const r of rows) {
         for (const raw of [].concat(fn(r) || [])) {
           const v = String(raw || '').trim();
           if (!v) continue;
-          const k = v.toLowerCase();
+          const k = areaKey(v);
           if (!m.has(k)) m.set(k, { label: v, count: 0 });
-          m.get(k).count++;
+          const entry = m.get(k);
+          entry.label = preferredSpelling(entry.label, v);
+          entry.count++;
         }
       }
-      return [...m.values()]
+      return [...m.entries()]
+        .map(([k, x]) => ({ ...x, label: canon?.get(k) || x.label }))
         .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
         .map(x => ({ ...x, percent: total ? Math.round((x.count / total) * 1000) / 10 : 0 }));
     };
@@ -78,8 +90,8 @@ export async function GET() {
       professions:   tally(r => r.current_position),
       gender:        tally(r => r.gender),
       contribution:  tally(r => r.contribution_areas),
-      unionCouncils: tally(r => r.union_council),
-      villages:      tally(r => r.village),
+      unionCouncils: tally(r => r.union_council, canonical.councils),
+      villages:      tally(r => r.village, canonical.villages),
       generatedAt:   new Date().toISOString(),
     });
   } catch (e) {
