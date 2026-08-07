@@ -41,8 +41,15 @@ export async function GET(req) {
 
   if (!scope || !value) return fail('INVALID', 400, { message: 'A location is required.' });
 
-  const base = () => {
+  /* `select()` FIRST, then filters.
+   *
+   * supabase-js only exposes select/insert/update/delete on the object
+   * `from()` returns — the filter methods live on what `select()` returns.
+   * Calling `.in()` before `.select()` throws "q.in is not a function", which
+   * surfaced as "Members are unavailable right now." on every drill-down. */
+  const base = (cols, opts) => {
     let q = supabaseAdmin().from('membership_members')
+      .select(cols, opts)
       .in('status', ACTIVE_STATUSES)
       .is('deleted_at', null);
 
@@ -69,20 +76,29 @@ export async function GET(req) {
     return q;
   };
 
-  if (!base()) return fail('INVALID', 400, { message: 'Unknown location type.' });
+  if (!base('membership_id', { count: 'exact', head: true })) {
+    return fail('INVALID', 400, { message: 'Unknown location type.' });
+  }
 
   // Total approved members here, INCLUDING those with a private profile, so
   // the drawer's heading matches the number on the statistics card.
-  const { count: total, error: countErr } = await base()
-    .select('membership_id', { count: 'exact', head: true });
-  if (countErr) return fail('READ_FAILED', 500, { message: 'Members are unavailable right now.' });
+  const { count: total, error: countErr } =
+    await base('membership_id', { count: 'exact', head: true });
+  if (countErr) {
+    return fail('READ_FAILED', 500, {
+      message: 'Members are unavailable right now.', detail: countErr.message,
+    });
+  }
 
-  const { data, count: listed, error } = await base()
-    .select(PUBLIC_FIELDS, { count: 'exact' })
+  const { data, count: listed, error } = await base(PUBLIC_FIELDS, { count: 'exact' })
     .eq('public_visible', true)
     .order('full_name')
     .range(offset, offset + limit - 1);
-  if (error) return fail('READ_FAILED', 500, { message: 'Members are unavailable right now.' });
+  if (error) {
+    return fail('READ_FAILED', 500, {
+      message: 'Members are unavailable right now.', detail: error.message,
+    });
+  }
 
   const members = (data || []).map(m => ({
     ...m,

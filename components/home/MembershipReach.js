@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { MapPin, Globe2, ArrowRight } from 'lucide-react';
 import { Reveal, SectionHeading } from '@/components/ui';
 import LocationMembersDrawer from '@/components/stats/LocationMembersDrawer';
+import CountryFlag from '@/components/stats/CountryFlag';
 import { COLORS, FONT } from '@/lib/design/tokens';
 
 /* Membership across Pakistan and the wider world, for the home page.
@@ -109,13 +110,14 @@ export default function MembershipReach() {
                     <button
                       onClick={() => setDrill({
                         scope: 'country', value: c.code || c.name,
-                        title: `${c.flag} ${c.name}`.trim(),
+                        title: c.name, flagCode: c.code,
                       })}
                       className="w-full flex items-center gap-2.5 rounded-tnr border px-3 py-2 text-left
                         transition-colors hover:bg-tnr-neutral"
                       style={{ borderColor: COLORS.neutral }}>
-                      {/* Flag is derived from the stored ISO code — no images. */}
-                      <span className="text-[19px] leading-none shrink-0" aria-hidden="true">{c.flag}</span>
+                      {/* Flag image from the stored ISO code — emoji flags do
+                          not render at all on Windows. */}
+                      <CountryFlag code={c.code} size={15} />
                       <span className="min-w-0 flex-1 text-[12.5px] font-semibold truncate"
                         style={{ color: COLORS.charcoal }}>{c.name}</span>
                       <span className="shrink-0 text-[12.5px] font-bold tabular-nums"
@@ -137,7 +139,7 @@ export default function MembershipReach() {
       <LocationMembersDrawer
         open={!!drill} onClose={() => setDrill(null)}
         scope={drill?.scope} value={drill?.value} parent={drill?.parent}
-        title={drill?.title} subtitle={drill?.subtitle} />
+        title={drill?.title} subtitle={drill?.subtitle} flagCode={drill?.flagCode} />
     </section>
   );
 }

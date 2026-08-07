@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { X, MapPin, Briefcase, ArrowRight } from 'lucide-react';
+import CountryFlag from '@/components/stats/CountryFlag';
 import { COLORS, FONT } from '@/lib/design/tokens';
 
 /* Members in one place, opened from any statistics section.
@@ -14,7 +15,8 @@ import { COLORS, FONT } from '@/lib/design/tokens';
  */
 const PAGE = 24;
 
-export default function LocationMembersDrawer({ open, scope, value, parent, title, subtitle, onClose }) {
+export default function LocationMembersDrawer({
+  open, scope, value, parent, title, subtitle, flagCode, onClose }) {
   const [state, setState] = useState({ members: [], total: 0, hidden: 0, hasMore: false });
   const [loading, setLoading] = useState(false);
   const [more, setMore] = useState(false);
@@ -72,7 +74,11 @@ export default function LocationMembersDrawer({ open, scope, value, parent, titl
         <div className="sticky top-0 z-10 bg-white border-b px-5 py-4 flex items-start gap-3"
           style={{ borderColor: COLORS.neutral }}>
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-extrabold truncate" style={{ color: COLORS.green900 }}>{title}</h2>
+            <h2 className="text-lg font-extrabold truncate flex items-center gap-2"
+              style={{ color: COLORS.green900 }}>
+              <CountryFlag code={flagCode} size={18} />
+              <span className="truncate">{title}</span>
+            </h2>
             <p className="text-[12.5px]" style={{ color: COLORS.muted }}>
               {loading ? 'Loading…' : `${state.total} approved member${state.total === 1 ? '' : 's'}`}
               {subtitle ? ` · ${subtitle}` : ''}

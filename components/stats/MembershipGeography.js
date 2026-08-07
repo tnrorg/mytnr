@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Landmark, MapPin, Globe2, ChevronDown } from 'lucide-react';
 import { statCard } from '@/components/stats/StatsShell';
 import LocationMembersDrawer from '@/components/stats/LocationMembersDrawer';
+import CountryFlag from '@/components/stats/CountryFlag';
 import { COLORS } from '@/lib/design/tokens';
 
 /* Where TNR's approved members are — Roundu, Pakistan, and the rest of the
@@ -86,12 +87,13 @@ export default function MembershipGeography() {
               <li key={c.code || c.name}>
                 <button
                   onClick={() => setDrill({
-                    scope: 'country', value: c.code || c.name, title: `${c.flag} ${c.name}`.trim(),
+                    scope: 'country', value: c.code || c.name,
+                    title: c.name, flagCode: c.code,
                   })}
                   className="w-full flex items-center gap-3 rounded-tnr border px-3.5 py-2.5 text-left
                     transition-colors hover:bg-tnr-neutral"
                   style={{ borderColor: COLORS.neutral }}>
-                  <span className="text-[22px] leading-none shrink-0" aria-hidden="true">{c.flag}</span>
+                  <CountryFlag code={c.code} size={16} />
                   <span className="min-w-0 flex-1 text-[13.5px] font-semibold truncate"
                     style={{ color: COLORS.charcoal }}>{c.name}</span>
                   <span className="shrink-0 text-[13px] font-bold tabular-nums"
@@ -111,7 +113,7 @@ export default function MembershipGeography() {
       <LocationMembersDrawer
         open={!!drill} onClose={() => setDrill(null)}
         scope={drill?.scope} value={drill?.value} parent={drill?.parent}
-        title={drill?.title} subtitle={drill?.subtitle} />
+        title={drill?.title} subtitle={drill?.subtitle} flagCode={drill?.flagCode} />
 
       {/* Stated, not hidden. Members approved before the address questions
           existed have no current address, so the three sections do not add up
