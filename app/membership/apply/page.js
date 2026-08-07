@@ -24,7 +24,7 @@ const BLANK = {
   mobile: '', email: '',
   current_country: '', current_country_code: '',
   current_state_province: '', current_state_code: '', current_city: '',
-  education_level: '', field_of_study: '', current_position: '',
+  education_level: '', current_position: '',
   position_other: '', organization_name: '',
   profession: '', profession_other: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
@@ -48,7 +48,7 @@ function reviewRows(f, key) {
     ['Profile photo', f.photo_data ? 'Attached' : 'Not attached'],
   ];
   if (key === 'B') return [
-    ['Education', f.education_level], ['Field of study', f.field_of_study],
+    ['Education', f.education_level],
     ['Profession / Field', f.profession === 'Other' ? f.profession_other : f.profession],
     ['Current position', f.current_position === 'Other' ? f.position_other : f.current_position],
     ...(needsOrganisation(f.current_position)
@@ -359,7 +359,6 @@ export default function ApplyPage() {
           {stepKey === 'B' && <Card title="Education & Profession">
             <Grid>
               <Field label="Highest Level of Education" req error={showErr('education_level')}><Select value={f.education_level} onChange={v => set('education_level', v)} options={EDUCATION_LEVELS} onBlur={() => blur('education_level')} bad={!!showErr('education_level')} /></Field>
-              <Field label="Field of Study / Profession" req error={showErr('field_of_study')}><Input value={f.field_of_study} onChange={v => set('field_of_study', v)} onBlur={() => blur('field_of_study')} bad={!!showErr('field_of_study')} /></Field>
               <Field label="Current Position" req error={showErr('current_position')}>
                 <Select value={f.current_position} onChange={v => set('current_position', v)} options={POSITIONS}
                   onBlur={() => blur('current_position')} bad={!!showErr('current_position')} />

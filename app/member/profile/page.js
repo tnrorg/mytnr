@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import MemberShell from '@/components/member/MemberShell';
 import { mGet, mPatch, mPost } from '@/components/member/memberApi';
+import AddressSelect from '@/components/membership/AddressSelect';
+import { PROFESSIONS } from '@/lib/membership/options';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C' };
 const mont = { fontFamily: 'var(--font-mulish), Mulish, system-ui, sans-serif' };
@@ -82,6 +84,7 @@ export default function ProfilePage() {
 
       <PhotoCard core={d.core} onSaved={m => { setMsg(m); load(); }} />
       <CoreCard core={d.core} onSaved={m => { setMsg(m); load(); }} />
+      <AddressProfessionCard core={d.core} onSaved={m => { setMsg(m); load(); }} />
       <AboutCard profile={d.profile} onSaved={m => { setMsg(m); load(); }} />
 
       {SECTIONS.map(([key, label, fields]) => (
@@ -196,6 +199,110 @@ function CoreCard({ core, onSaved }) {
     </Card>
   );
 }
+
+/* ── Current address, profession and organisation ───────────────────────────
+ * These questions were added to the application form after most members had
+ * already been approved — including every CEC and Advisory Council member — so
+ * their records have nothing in them. This card is the only route by which
+ * those members can ever fill them in.
+ *
+ * Saves immediately, no committee approval: a city or an employer is not an
+ * identity claim, and routing it through review would leave the fields empty
+ * for weeks.
+ */
+function AddressProfessionCard({ core, onSaved }) {
+  const [f, setF] = useState({
+    current_country: core.current_country || '',
+    current_country_code: core.current_country_code || '',
+    current_state_province: core.current_state_province || '',
+    current_state_code: core.current_state_code || '',
+    current_city: core.current_city || '',
+    profession: core.profession || '',
+    profession_other: core.profession_other || '',
+    organization_name: core.organization_name || '',
+  });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  // Same shape the application form's `set` uses, so AddressSelect can be
+  // dropped in unchanged rather than forked for the portal.
+  const set = (k, v) => {
+    setErr('');
+    setF(p => (k.startsWith('__') ? { ...p, ...v } : { ...p, [k]: v }));
+  };
+
+  const save = async () => {
+    if (f.profession && !PROFESSIONS.includes(f.profession))
+      return setErr('Please choose a profession from the list, or select Other.');
+    if (f.profession === 'Other' && !f.profession_other.trim())
+      return setErr('Please type your profession.');
+    setBusy(true);
+    const r = await mPatch('/api/member/profile', f);
+    setBusy(false);
+    if (r.ok) onSaved('Address and profession updated.');
+    else setErr(r?.message || 'Could not save. Please try again.');
+  };
+
+  return (
+    <Card title="Current Address & Profession"
+      note="Where you live now and what you do. Saved immediately — no approval needed.">
+      <AddressSelect f={f} set={set} blur={() => {}} showErr={() => ''}
+        Field={PF} Select={PSelect} Input={PInput} />
+
+      <div className="grid sm:grid-cols-2 gap-3 mt-3">
+        <PF label="Profession / Field">
+          <input list="tnr-portal-professions" value={f.profession} className={base}
+            placeholder="Type to search…" autoComplete="off"
+            onChange={e => set('__profession', {
+              profession: e.target.value,
+              ...(e.target.value === 'Other' ? {} : { profession_other: '' }),
+            })} />
+          <datalist id="tnr-portal-professions">
+            {PROFESSIONS.map(o => <option key={o} value={o} />)}
+          </datalist>
+        </PF>
+        {f.profession === 'Other' && (
+          <PF label="Specify Profession">
+            <input value={f.profession_other} className={base} placeholder="Enter your profession"
+              onChange={e => set('profession_other', e.target.value)} />
+          </PF>
+        )}
+        <PF label="Organisation / Institution">
+          <input value={f.organization_name} className={base}
+            onChange={e => set('organization_name', e.target.value)} />
+        </PF>
+      </div>
+
+      {err && <p className="mt-2 text-[12px] font-semibold text-red-600">{err}</p>}
+      <button onClick={save} disabled={busy}
+        className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-40"
+        style={{ background: `linear-gradient(180deg,${C.green},${C.deep})` }}>
+        {busy ? 'Saving…' : 'Save'}
+      </button>
+    </Card>
+  );
+}
+
+/* Adapters so AddressSelect renders with the PORTAL's field styling rather
+   than the application form's. Same component, two skins — forking it would
+   mean fixing every future cascade bug twice. */
+const PF = ({ label, children }) => (
+  <label className="block">
+    <span className="block text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1">{label}</span>
+    {children}
+  </label>
+);
+const PInput = ({ value, onChange, placeholder }) => (
+  <input value={value || ''} placeholder={placeholder} className={base}
+    onChange={e => onChange(e.target.value)} />
+);
+const PSelect = ({ value, onChange, options, placeholder, disabled }) => (
+  <select value={value || ''} disabled={disabled} onChange={e => onChange(e.target.value)}
+    className={base + (disabled ? ' opacity-50 cursor-not-allowed' : '')}>
+    <option value="">{placeholder || '— select —'}</option>
+    {options.map(o => <option key={o} value={o}>{o}</option>)}
+  </select>
+);
 
 /* ── Free-to-edit professional info ── */
 function AboutCard({ profile, onSaved }) {

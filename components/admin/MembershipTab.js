@@ -171,7 +171,7 @@ function ReviewModal({ app, busy, onClose, onAct }) {
               rather than the row disappearing — a blank is information too. */}
           <R k="Current Address" v={[app.current_city, app.current_state_province, app.current_country]
             .filter(Boolean).join(', ')} />
-          <R k="Education" v={app.education_level} /><R k="Field / Profession" v={app.field_of_study} />
+          <R k="Education" v={app.education_level} />
           <R k="Profession / Field" v={app.profession === 'Other'
             ? (app.profession_other || 'Other') : app.profession} />
           <R k="Current Position" v={app.current_position} />

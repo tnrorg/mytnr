@@ -63,6 +63,15 @@ export async function PATCH(req) {
   // 2a. Core details the member owns — name, mobile, village, union council.
   //     Written immediately so the public profile reflects the change at once.
   const core = pick(b, SELF_EDITABLE_CORE);
+  // `field_of_study` is no longer asked for directly — the profession replaced
+  // it — but the Fields of Study chart, the leadership profile and the
+  // completion score all still read that column. Kept in step here for the
+  // same reason the application route fills it.
+  if ('profession' in core) {
+    core.field_of_study = core.profession === 'Other'
+      ? (String(b.profession_other || '').trim() || null)
+      : (core.profession || null);
+  }
   if (Object.keys(core).length) {
     core.updated_at = new Date().toISOString();
     const { error } = await sb.from('membership_members').update(core).eq('id', member.id);

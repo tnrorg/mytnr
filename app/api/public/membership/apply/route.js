@@ -113,12 +113,19 @@ export async function POST(req) {
     email, email_normalized: email,
     photo_url,
     education_level: b.education_level || null,
-    field_of_study: b.field_of_study || null,
     // Category and free text kept apart: the category is what the profession
     // statistics group on, so the typed value never lands in that column.
     profession: b.profession || null,
     profession_other: b.profession === 'Other'
       ? (String(b.profession_other || '').trim() || null) : null,
+    // The form no longer asks for "Field of Study / Profession" — it duplicated
+    // this question. The column stays populated from the profession so the
+    // Fields of Study chart, the leadership profile and the member portal keep
+    // working for new members instead of going blank for everyone who joins
+    // from here on.
+    field_of_study: b.profession === 'Other'
+      ? (String(b.profession_other || '').trim() || null)
+      : (b.profession || null),
     organization_name: String(b.organization_name || '').trim() || null,
     // "Other" is stored as the text the applicant typed, so reports and the
     // directory filter show a real position rather than a bucket label.
