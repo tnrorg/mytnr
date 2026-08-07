@@ -89,7 +89,7 @@ export default function MembersDirectoryTab({ toast }) {
             Country: m.current_country, Organisation: m.organization_name,
             Profession: m.profession === 'Other' ? (m.profession_other || 'Other') : m.profession,
             Education: m.education_level, Position: m.current_position,
-            Status: m.status, Public: m.public_visible ? 'Yes' : 'No',
+            Status: m.status, Public: m.public_visible === false ? 'No' : 'Yes',
             Approved: m.approved_at ? new Date(m.approved_at).toLocaleDateString('en-GB') : '',
           })), 'Members', 'tnr-membership.xlsx')}>⬇ Export Excel</button>
       </div>
@@ -135,9 +135,15 @@ export default function MembersDirectoryTab({ toast }) {
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${TONE[m.status] || ''}`}>
                     {m.status}</span></td>
                 <td className="px-3 py-2">
-                  <button onClick={() => change(m, { public_visible: !m.public_visible })}
-                    className={`text-xs ${m.public_visible ? 'text-green-400' : 'text-tnr-cream/40'}`}>
-                    {m.public_visible ? 'Visible' : 'Hidden'}</button></td>
+                  {/* Members are public by default. This is the override for
+                      the rare case where someone must be taken off the public
+                      site — a safety concern, a family request. */}
+                  <button onClick={() => change(m, { public_visible: m.public_visible === false })}
+                    title={m.public_visible === false
+                      ? 'Hidden from the public site — click to show'
+                      : 'Listed publicly — click to hide'}
+                    className={`text-xs ${m.public_visible === false ? 'text-tnr-cream/40' : 'text-green-400'}`}>
+                    {m.public_visible === false ? 'Hidden' : 'Visible'}</button></td>
                 <td className="px-3 py-2 whitespace-nowrap text-xs">
                   {['active', 'approved'].includes(m.status)
                     ? <button onClick={() => change(m, { status: 'suspended' })} className="text-red-400 hover:underline mr-2">Suspend</button>

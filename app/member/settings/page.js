@@ -45,8 +45,15 @@ export default function Settings() {
       {err && <div className="mt-3 rounded-xl bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-700">{err}</div>}
 
       <Card title="Privacy">
-        <Toggle label="Show my profile in the public member directory"
-          checked={!!m.public_visible} onChange={v => toggle('public_visible', v)} />
+        {/* The public-directory toggle was removed: every approved member now
+            appears in the directory as a matter of TNR policy. It was opt-in
+            and nobody knew it existed, so the directory stayed empty.
+            Contact details were never public and still are not. */}
+        <p className="text-[12.5px] leading-relaxed mb-3" style={{ color: '#647169' }}>
+          Your name, photo, village, Union Council and profession appear in the
+          public member directory. Your email, phone number and date of birth are
+          never shown publicly.
+        </p>
         <Toggle label="I want to join the official TNR WhatsApp group"
           checked={!!m.whatsapp_opt_in} onChange={v => toggle('whatsapp_opt_in', v)} />
         {m.whatsapp_opt_in && (

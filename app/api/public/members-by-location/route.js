@@ -18,11 +18,10 @@ export const fetchCache = 'force-no-store';
  *   status  — approved/active only, never pending, rejected or suspended
  *   deleted — soft-deleted members are excluded
  *
- * And one that is easy to overlook: `public_visible`. Members who have not
- * switched their profile on are counted in the totals but are NOT listed as
- * cards — that is TNR's own rule, and a drill-down that ignored it would
- * publish exactly the people who asked not to be published. The response says
- * how many were withheld so the count still adds up.
+ * Every approved member is listed. `public_visible` is now an admin-only
+ * override — a member is withheld from this list only if an admin has
+ * explicitly hidden them — and the response still reports how many, so the
+ * heading count and the number of cards always reconcile.
  */
 const PUBLIC_FIELDS =
   'membership_id, full_name, photo_url, village, union_council, ' +
@@ -91,7 +90,9 @@ export async function GET(req) {
   }
 
   const { data, count: listed, error } = await base(PUBLIC_FIELDS, { count: 'exact' })
-    .eq('public_visible', true)
+    // Approved members are public by default; only an explicit admin hide
+    // withholds someone.
+    .not('public_visible', 'is', false)
     .order('full_name')
     .range(offset, offset + limit - 1);
   if (error) {

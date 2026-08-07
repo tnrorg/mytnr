@@ -16,7 +16,7 @@ export async function GET(_req, { params }) {
   const { data, error } = await supabaseAdmin().from('membership_members')
     .select(PUBLIC_FIELDS)
     .eq('membership_id', params.id)
-    .eq('public_visible', true)
+    .not('public_visible', 'is', false)
     .in('status', ACTIVE_STATUSES)
     .is('deleted_at', null)
     .maybeSingle();

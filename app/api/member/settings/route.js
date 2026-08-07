@@ -11,7 +11,10 @@ export async function PATCH(req) {
   const sb = supabaseAdmin();
   const patch = { updated_at: new Date().toISOString() };
 
-  if (b.public_visible !== undefined)  patch.public_visible = !!b.public_visible;
+  // Members no longer control this. Directory visibility is a TNR-wide policy
+  // decision, not a per-member preference — and the setting silently kept the
+  // whole directory empty because nobody knew it was there. An admin can still
+  // hide an individual member if there is a reason to.
   if (b.whatsapp_opt_in !== undefined) patch.whatsapp_opt_in = !!b.whatsapp_opt_in;
 
   if (b.new_password) {

@@ -6,11 +6,10 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
-// Public directory — ONLY approved/active members who opted in to public
-// visibility. Contact details, CNIC, address, DOB and application answers are
-// never selected, so they cannot leak through this endpoint.
-// Members who keep their profile private still count toward the totals in
-// /api/public/member-stats; they simply have no card here.
+// Public directory — every approved/active member. Contact details, CNIC,
+// address, DOB and application answers are never selected, so they cannot leak
+// through this endpoint regardless of who is listed.
+// A member is withheld only if an admin has explicitly hidden them.
 const PUBLIC_FIELDS =
   'membership_id, full_name, photo_url, village, union_council, current_position, ' +
   'education_level, contribution_areas, category_id';
@@ -24,7 +23,13 @@ export async function GET(req) {
 
   let q = supabaseAdmin().from('membership_members')
     .select(PUBLIC_FIELDS)
-    .eq('public_visible', true)
+    // Not `.eq('public_visible', true)`.
+    //
+    // Approved members are public by default. The column survives as an ADMIN
+    // override for the rare case where someone must be removed from the public
+    // site, so it is checked as "not explicitly hidden" — a member with the
+    // flag unset or true is listed, only an explicit false is withheld.
+    .not('public_visible', 'is', false)
     .in('status', ACTIVE_STATUSES)
     .is('deleted_at', null)
     .order('full_name')
@@ -52,7 +57,7 @@ export async function GET(req) {
   // so the dropdowns do not collapse as the visitor narrows their search.
   const { data: allRows } = await supabaseAdmin().from('membership_members')
     .select(PUBLIC_FIELDS)
-    .eq('public_visible', true)
+    .not('public_visible', 'is', false)
     .in('status', ACTIVE_STATUSES)
     .is('deleted_at', null)
     .limit(2000);
