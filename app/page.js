@@ -12,6 +12,7 @@ import LeadershipMessages from '@/components/home/LeadershipMessages';
 import CoreAreas from '@/components/home/CoreAreas';
 import JoinCta from '@/components/home/JoinCta';
 import MembersPreview from '@/components/home/MembersPreview';
+import MembershipReach from '@/components/home/MembershipReach';
 import CouncilSection from '@/components/home/CouncilSection';
 
 const C = { deep: '#063D2B', green: '#0B6B4F', gold: '#D4A72C', soft: '#F3E4B3', ink: '#15231D', bg: '#FDFDFD' };
@@ -41,6 +42,9 @@ export default function Home() {
       <ExecutiveCommittee />
       <CoreAreas />
       <MembersPreview />
+      {/* Pakistan and worldwide reach, straight after Membership Across Roundu.
+          Renders nothing until members have recorded a current address. */}
+      <MembershipReach />
       <JoinCta />
       <SiteFooter />
       <AiFab />
