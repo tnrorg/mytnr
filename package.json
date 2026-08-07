@@ -2,7 +2,7 @@
   "name": "tnr-election-portal",
   "version": "1.0.0",
   "private": true,
-  "description": "Tehreek-e-Nojawanan Roundu (TNR) — Organization Internal Election Portal",
+  "description": "Tehreek-e-Nojawanan Roundu (TNR) \u2014 Organization Internal Election Portal",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
     "bcryptjs": "^2.4.3",
+    "country-state-city": "^3.2.1",
     "framer-motion": "^12.43.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^2.5.1",

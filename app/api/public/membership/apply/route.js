@@ -102,11 +102,19 @@ export async function POST(req) {
     age: b.date_of_birth ? ageFrom(b.date_of_birth) : null,
     village: b.village || null,
     union_council: b.union_council || null,
+    // Where they live now. Name and code both stored — see the migration for
+    // why keeping only the readable name is not enough.
+    current_country: b.current_country || null,
+    current_country_code: b.current_country_code || null,
+    current_state_province: b.current_state_province || null,
+    current_state_code: b.current_state_code || null,
+    current_city: b.current_city || null,
     mobile, mobile_normalized: mobile,
     email, email_normalized: email,
     photo_url,
     education_level: b.education_level || null,
     field_of_study: b.field_of_study || null,
+    organization_name: String(b.organization_name || '').trim() || null,
     // "Other" is stored as the text the applicant typed, so reports and the
     // directory filter show a real position rather than a bucket label.
     current_position: b.current_position === 'Other'
@@ -141,7 +149,7 @@ export async function POST(req) {
       return fail('SCHEMA_OUT_OF_DATE', 500, {
         message: 'The application form is not fully set up yet. Please contact the TNR team.',
         detail: error.message,
-        hint: 'Run the pending migrations in supabase/ — most likely migration_date_of_birth.sql or migration_member_roles.sql.',
+        hint: 'Run the pending migrations in supabase/ — most likely migration_address_organization.sql, migration_date_of_birth.sql or migration_member_roles.sql.',
       });
     }
     return fail('SUBMIT_FAILED', 500, {

@@ -7,8 +7,10 @@ import {
   LEADERSHIP_OPTIONS, DECLARATION_TEXT, DECLARATION_VERSION,
 } from '@/lib/membership/options';
 import {
-  validateApplication, STEPS, stepErrors, isStepComplete, REQUIRED_LABELS, ageFrom, MIN_AGE, MAX_AGE
+  validateApplication, STEPS, stepErrors, isStepComplete, REQUIRED_LABELS, ageFrom,
+  MIN_AGE, MAX_AGE, organisationLabel, needsOrganisation, organisationOptional,
 } from '@/lib/membership/validateApplication';
+import AddressSelect from '@/components/membership/AddressSelect';
 import { ROLES, roleLabel as ROLE_LABEL } from '@/lib/membership/roles';
 import Stepper from '@/components/membership/Stepper';
 import { useApplicationDraft } from '@/components/membership/useApplicationDraft';
@@ -19,8 +21,11 @@ const BLANK = {
   applied_role: '',
   photo_data: '',
   first_name: '', last_name: '', gender: '', date_of_birth: '', village: '', union_council: '',
-  mobile: '', email: '', education_level: '', field_of_study: '', current_position: '',
-  position_other: '',
+  mobile: '', email: '',
+  current_country: '', current_country_code: '',
+  current_state_province: '', current_state_code: '', current_city: '',
+  education_level: '', field_of_study: '', current_position: '',
+  position_other: '', organization_name: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
   youth_issues: '', declaration_accepted: false, whatsapp_opt_in: false,
 };
@@ -35,13 +40,17 @@ function reviewRows(f, key) {
     ['Full name', [f.first_name, f.last_name].filter(Boolean).join(' ')],
     ['Gender', f.gender],
     ['Date of birth', f.date_of_birth ? `${f.date_of_birth} (age ${ageFrom(f.date_of_birth) ?? '—'})` : ''],
-    ['Union Council', f.union_council], ['Village / Area', f.village],
     ['Mobile / WhatsApp', f.mobile], ['Email', f.email],
+    ['Current address', [f.current_city, f.current_state_province, f.current_country]
+      .filter(Boolean).join(', ')],
+    ['Union Council', f.union_council], ['Village / Area', f.village],
     ['Profile photo', f.photo_data ? 'Attached' : 'Not attached'],
   ];
   if (key === 'B') return [
     ['Education', f.education_level], ['Field of study', f.field_of_study],
     ['Current position', f.current_position === 'Other' ? f.position_other : f.current_position],
+    ...(needsOrganisation(f.current_position)
+      ? [[organisationLabel(f.current_position), f.organization_name || '—']] : []),
   ];
   if (key === 'C') return [
     ['Why join TNR', f.why_join],
@@ -76,7 +85,14 @@ export default function ApplyPage() {
   const [councils, setCouncils] = useState(null);   // null = still loading
   const [touched, setTouched] = useState({});   // fields the applicant has visited
   const [tried, setTried] = useState(false);    // they have pressed Submit at least once
-  const set = (k, v) => { setErr(''); setF(p => ({ ...p, [k]: v })); };
+  // `set('__address', {...})` applies several address fields in ONE update.
+  // Cascading resets (country clears state and city) have to land together —
+  // as separate setF calls the intermediate render can submit a city that no
+  // longer belongs to the selected country.
+  const set = (k, v) => {
+    setErr('');
+    setF(p => (k === '__address' ? { ...p, ...v } : { ...p, [k]: v }));
+  };
   const blur = (k) => setTouched(t => ({ ...t, [k]: true }));
 
   // Admin-managed Union Councils and their villages.
@@ -291,6 +307,7 @@ export default function ApplyPage() {
                 )}
               </div>
             </div>
+            <SubHeading>Basic Information</SubHeading>
             <Grid>
               <Field label="First Name" req error={showErr('first_name')}><Input value={f.first_name} onChange={v => set('first_name', v)} onBlur={() => blur('first_name')} bad={!!showErr('first_name')} /></Field>
               <Field label="Last Name" req error={showErr('last_name')}><Input value={f.last_name} onChange={v => set('last_name', v)} onBlur={() => blur('last_name')} bad={!!showErr('last_name')} /></Field>
@@ -303,6 +320,20 @@ export default function ApplyPage() {
                   min={dobBounds().min} max={dobBounds().max}
                   onBlur={() => blur('date_of_birth')} bad={!!showErr('date_of_birth')} />
               </Field>
+              <Field label="Mobile / WhatsApp Number" req error={showErr('mobile')}><Input value={f.mobile} onChange={v => set('mobile', v)} placeholder="+92 3xx xxxxxxx" onBlur={() => blur('mobile')} bad={!!showErr('mobile')} /></Field>
+              <Field label="Email Address" req error={showErr('email')}><Input type="email" value={f.email} onChange={v => set('email', v)} placeholder="name@example.com" onBlur={() => blur('email')} bad={!!showErr('email')} /></Field>
+            </Grid>
+
+            {/* Where the applicant lives now — members are all over the world,
+                which is why this is separate from their home Union Council. */}
+            <SubHeading>Current Address</SubHeading>
+            <AddressSelect f={f} set={set} blur={blur} showErr={showErr}
+              Field={Field} Select={Select} Input={Input} />
+
+            {/* Home area in Roundu. Kept even for overseas members: it is what
+                the village and Union Council statistics are built from. */}
+            <SubHeading>Permanent Address — Roundu</SubHeading>
+            <Grid>
               <Field label="Union Council in Roundu" req error={showErr('union_council')}>
                 {useAreaLists
                   ? <Select value={f.union_council} onChange={setCouncil} options={councils.map(c => c.name)}
@@ -320,8 +351,6 @@ export default function ApplyPage() {
                   : <Input value={f.village} onChange={v => set('village', v)}
                       onBlur={() => blur('village')} bad={!!showErr('village')} />}
               </Field>
-              <Field label="Mobile / WhatsApp Number" req error={showErr('mobile')}><Input value={f.mobile} onChange={v => set('mobile', v)} placeholder="+92 3xx xxxxxxx" onBlur={() => blur('mobile')} bad={!!showErr('mobile')} /></Field>
-              <Field label="Email Address" req error={showErr('email')}><Input type="email" value={f.email} onChange={v => set('email', v)} placeholder="name@example.com" onBlur={() => blur('email')} bad={!!showErr('email')} /></Field>
             </Grid>
           </Card>}
 
@@ -333,6 +362,17 @@ export default function ApplyPage() {
                 <Select value={f.current_position} onChange={v => set('current_position', v)} options={POSITIONS}
                   onBlur={() => blur('current_position')} bad={!!showErr('current_position')} />
               </Field>
+              {/* One database column, `organization_name`, with a label that
+                  follows the chosen position — and hidden entirely for
+                  positions that have no organisation to name. */}
+              {needsOrganisation(f.current_position) && (
+                <Field label={organisationLabel(f.current_position)}
+                  req={!organisationOptional(f.current_position)}
+                  error={showErr('organization_name')}>
+                  <Input value={f.organization_name} onChange={v => set('organization_name', v)}
+                    onBlur={() => blur('organization_name')} bad={!!showErr('organization_name')} />
+                </Field>
+              )}
               {f.current_position === 'Other' && (
                 <Field label="Please specify your position" req error={showErr('position_other')}>
                   <Input value={f.position_other} onChange={v => set('position_other', v)}
@@ -485,6 +525,16 @@ function Card({ title, children }) {
   </div>;
 }
 const Grid = ({ children }) => <div className="grid sm:grid-cols-2 gap-4">{children}</div>;
+
+/* Section divider inside a card. Same type treatment as the Card title, one
+   step quieter, so the new sections read as original rather than bolted on. */
+const SubHeading = ({ children }) => (
+  <div className="pt-2 first:pt-0">
+    <h3 style={{ ...mont, color: C.deep }}
+      className="text-[11px] font-black uppercase tracking-[.14em]">{children}</h3>
+    <div className="mt-1.5 h-px bg-gray-100" />
+  </div>
+);
 function Field({ label, req, error, children }) {
   return <div data-invalid={error ? 'true' : undefined}>
     <label className="block text-xs font-semibold text-gray-500 mb-1.5">

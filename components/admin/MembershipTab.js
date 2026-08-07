@@ -167,8 +167,13 @@ function ReviewModal({ app, busy, onClose, onAct }) {
           <R k="Email" v={app.email} /><R k="Mobile" v={app.mobile} />
           <R k="Gender" v={app.gender} /><R k="Age" v={app.age} />
           <R k="Union Council" v={app.union_council} /><R k="Village" v={app.village} />
+          {/* Older applications predate these questions, so R renders a dash
+              rather than the row disappearing — a blank is information too. */}
+          <R k="Current Address" v={[app.current_city, app.current_state_province, app.current_country]
+            .filter(Boolean).join(', ')} />
           <R k="Education" v={app.education_level} /><R k="Field / Profession" v={app.field_of_study} />
           <R k="Current Position" v={app.current_position} />
+          <R k="Organisation" v={app.organization_name} />
           <R k="Contribution Areas" v={app.contribution_areas} />
           <R k="Leadership View" v={app.leadership_view} /><R k="Leadership Note" v={app.leadership_note} />
           <R k="WhatsApp Opt-in" v={app.whatsapp_opt_in ? 'Yes' : 'No'} />

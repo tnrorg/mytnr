@@ -65,6 +65,16 @@ export async function PATCH(req, { params }) {
       date_of_birth: app.date_of_birth,
       mobile: app.mobile, mobile_normalized: app.mobile_normalized,
       village: app.village, union_council: app.union_council,
+      // Carried across so the member record is complete without re-typing.
+      // `?? null` rather than `||`: these columns only exist after
+      // migration_address_organization.sql, and an older application row
+      // simply has no value for them.
+      current_country: app.current_country ?? null,
+      current_country_code: app.current_country_code ?? null,
+      current_state_province: app.current_state_province ?? null,
+      current_state_code: app.current_state_code ?? null,
+      current_city: app.current_city ?? null,
+      organization_name: app.organization_name ?? null,
       education_level: app.education_level, field_of_study: app.field_of_study,
       current_position: app.current_position, contribution_areas: app.contribution_areas,
       whatsapp_opt_in: app.whatsapp_opt_in,
