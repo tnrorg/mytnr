@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Avatar from '@/components/member/Avatar';
 import VerifiedBadge from '@/components/ui/VerifiedBadge';
+import CountryFlag from '@/components/stats/CountryFlag';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 import MembersAnalytics from '@/components/members/MembersAnalytics';
@@ -20,29 +21,47 @@ const FILTERS = [
 ];
 
 function MemberCard({ m }) {
+  // Where they are now: country only. The city sits on the full profile — a
+  // directory card is a summary, and four lines of address crowds out the
+  // things a visitor is actually scanning for.
+  const home = [m.village, m.union_council].filter(Boolean).join(' · ');
+
   return (
     <div className="rounded-2xl bg-white border border-gray-100 p-5 text-center transition-colors hover:border-[#0B6B4F]/30">
       <Avatar src={m.photo_url} name={m.full_name} fontSize={24}
         className="w-20 h-20 mx-auto rounded-full object-cover ring-2 ring-[#D4A72C]/60 bg-gray-50" />
-      <h3 style={{ ...mont, color: C.deep }} className="mt-3 font-extrabold text-sm leading-tight">{m.full_name}</h3>
-      {/* One gold verified badge across the whole platform: council, executive
-          and general members. Every published member has been approved by the
-          membership committee, so they all carry it. */}
-      <div className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
-        style={{ background: 'rgba(200,154,43,.14)', color: '#7A5C10' }}>
-        <VerifiedBadge size={12} decorative />
-        Verified Member
-      </div>
-      {m.current_position && <div className="text-xs text-gray-500 mt-2">{m.current_position}</div>}
-      <div className="text-[11px] text-gray-400 mt-1">{[m.village, m.union_council].filter(Boolean).join(' · ')}</div>
-      {m.category && <div className="mt-2 text-[10px] font-bold tracking-wide uppercase" style={{ color: C.gold }}>{m.category}</div>}
-      {!!(m.contribution_areas || []).length && (
-        <div className="mt-2.5 flex flex-wrap justify-center gap-1">
-          {m.contribution_areas.slice(0, 3).map(t => (
-            <span key={t} className="rounded-full px-2 py-0.5 text-[9px] text-gray-500" style={{ background: '#F6FAF8' }}>{t}</span>
-          ))}
+
+      {/* The badge sits inline, straight after the surname, the way a verified
+          mark reads on a profile — not as a separate chip on its own line.
+          One gold badge across the whole platform: council, executive and
+          general members are all committee-approved. */}
+      <h3 style={{ ...mont, color: C.deep }}
+        className="mt-3 font-extrabold text-sm leading-tight
+          inline-flex items-center justify-center gap-1.5 flex-wrap">
+        <span>{m.full_name}</span>
+        <VerifiedBadge size={14} title="Verified member" />
+      </h3>
+
+      {m.profession && (
+        <div className="mt-1.5 text-xs font-semibold" style={{ color: C.green }}>{m.profession}</div>
+      )}
+      {m.organization_name && (
+        <div className="text-[11.5px] text-gray-500 mt-0.5">{m.organization_name}</div>
+      )}
+      {m.current_country && (
+        <div className="mt-1.5 inline-flex items-center gap-1.5 text-[11.5px] text-gray-500">
+          <CountryFlag code={m.current_country_code} size={11} />
+          {m.current_country}
         </div>
       )}
+      {home && <div className="text-[11px] text-gray-400 mt-1">{home}</div>}
+
+      {m.category && (
+        <div className="mt-2 text-[10px] font-bold tracking-wide uppercase" style={{ color: C.gold }}>
+          {m.category}
+        </div>
+      )}
+
       <a href={`/members/${m.membership_id}`}
         className="mt-4 block rounded-xl py-2 text-xs font-bold text-white transition-opacity hover:opacity-90"
         style={{ background: C.green }}>View Profile</a>

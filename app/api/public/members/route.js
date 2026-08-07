@@ -12,6 +12,7 @@ export const fetchCache = 'force-no-store';
 // A member is withheld only if an admin has explicitly hidden them.
 const PUBLIC_FIELDS =
   'membership_id, full_name, photo_url, village, union_council, current_position, ' +
+  'profession, profession_other, organization_name, current_country, current_country_code, ' +
   'education_level, contribution_areas, category_id';
 
 export async function GET(req) {
@@ -50,7 +51,11 @@ export async function GET(req) {
   const { data: cats } = await supabaseAdmin().from('membership_categories').select('id, name');
   const cmap = Object.fromEntries((cats || []).map(c => [c.id, c.name]));
 
-  let members = rows.map(({ category_id, ...m }) => ({ ...m, category: cmap[category_id] || null }));
+  let members = rows.map(({ category_id, profession_other, ...m }) => ({
+    ...m,
+    category: cmap[category_id] || null,
+    profession: m.profession === 'Other' ? (profession_other || 'Other') : m.profession,
+  }));
   if (category) members = members.filter(m => m.category === category);
 
   // Filter options come from the whole public roster, not the filtered result,
