@@ -2,6 +2,7 @@
 import { GraduationCap, Briefcase, Users, HeartHandshake, Landmark, MapPin } from 'lucide-react';
 import StatsShell, { BigStat, BreakdownCard } from '@/components/stats/StatsShell';
 import { useRounduStats } from '@/components/stats/useRounduStats';
+import MembershipGeography from '@/components/stats/MembershipGeography';
 
 /* The overview page: every membership breakdown in one place.
  *
@@ -39,6 +40,11 @@ export default function StatisticsPage() {
       {d && d.total > 0 && (
         <>
           <BigStat value={d.total} label="Active Members" />
+
+          {/* Where those members are. Renders nothing until there is data, so
+              the page is unchanged for an empty database. */}
+          <MembershipGeography />
+
           <div className="grid lg:grid-cols-2 gap-5">
             {SECTIONS.map(([k, title, Icon, note], i) => (
               <BreakdownCard key={k} icon={Icon} title={title} note={note}
