@@ -172,6 +172,8 @@ function ReviewModal({ app, busy, onClose, onAct }) {
           <R k="Current Address" v={[app.current_city, app.current_state_province, app.current_country]
             .filter(Boolean).join(', ')} />
           <R k="Education" v={app.education_level} /><R k="Field / Profession" v={app.field_of_study} />
+          <R k="Profession / Field" v={app.profession === 'Other'
+            ? (app.profession_other || 'Other') : app.profession} />
           <R k="Current Position" v={app.current_position} />
           <R k="Organisation" v={app.organization_name} />
           <R k="Contribution Areas" v={app.contribution_areas} />

@@ -114,6 +114,11 @@ export async function POST(req) {
     photo_url,
     education_level: b.education_level || null,
     field_of_study: b.field_of_study || null,
+    // Category and free text kept apart: the category is what the profession
+    // statistics group on, so the typed value never lands in that column.
+    profession: b.profession || null,
+    profession_other: b.profession === 'Other'
+      ? (String(b.profession_other || '').trim() || null) : null,
     organization_name: String(b.organization_name || '').trim() || null,
     // "Other" is stored as the text the applicant typed, so reports and the
     // directory filter show a real position rather than a bucket label.
@@ -149,7 +154,7 @@ export async function POST(req) {
       return fail('SCHEMA_OUT_OF_DATE', 500, {
         message: 'The application form is not fully set up yet. Please contact the TNR team.',
         detail: error.message,
-        hint: 'Run the pending migrations in supabase/ — most likely migration_address_organization.sql, migration_date_of_birth.sql or migration_member_roles.sql.',
+        hint: 'Run the pending migrations in supabase/ — most likely migration_profession.sql, migration_address_organization.sql, migration_date_of_birth.sql or migration_member_roles.sql.',
       });
     }
     return fail('SUBMIT_FAILED', 500, {

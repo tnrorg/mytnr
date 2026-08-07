@@ -87,6 +87,7 @@ export default function MembersDirectoryTab({ toast }) {
             Gender: m.gender, Village: m.village, 'Union Council': m.union_council,
             City: m.current_city, 'State / Province': m.current_state_province,
             Country: m.current_country, Organisation: m.organization_name,
+            Profession: m.profession === 'Other' ? (m.profession_other || 'Other') : m.profession,
             Education: m.education_level, Position: m.current_position,
             Status: m.status, Public: m.public_visible ? 'Yes' : 'No',
             Approved: m.approved_at ? new Date(m.approved_at).toLocaleDateString('en-GB') : '',

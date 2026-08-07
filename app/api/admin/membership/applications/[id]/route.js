@@ -75,6 +75,8 @@ export async function PATCH(req, { params }) {
       current_state_code: app.current_state_code ?? null,
       current_city: app.current_city ?? null,
       organization_name: app.organization_name ?? null,
+      profession: app.profession ?? null,
+      profession_other: app.profession_other ?? null,
       education_level: app.education_level, field_of_study: app.field_of_study,
       current_position: app.current_position, contribution_areas: app.contribution_areas,
       whatsapp_opt_in: app.whatsapp_opt_in,

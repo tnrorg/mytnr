@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import SiteNav from '@/components/site/SiteNav';
 import SiteFooter from '@/components/site/SiteFooter';
 import {
-  GENDERS, EDUCATION_LEVELS, POSITIONS, CONTRIBUTION_AREAS,
+  GENDERS, EDUCATION_LEVELS, POSITIONS, PROFESSIONS, CONTRIBUTION_AREAS,
   LEADERSHIP_OPTIONS, DECLARATION_TEXT, DECLARATION_VERSION,
 } from '@/lib/membership/options';
 import {
@@ -26,6 +26,7 @@ const BLANK = {
   current_state_province: '', current_state_code: '', current_city: '',
   education_level: '', field_of_study: '', current_position: '',
   position_other: '', organization_name: '',
+  profession: '', profession_other: '',
   why_join: '', contribution_areas: [], leadership_view: '', leadership_note: '',
   youth_issues: '', declaration_accepted: false, whatsapp_opt_in: false,
 };
@@ -48,6 +49,7 @@ function reviewRows(f, key) {
   ];
   if (key === 'B') return [
     ['Education', f.education_level], ['Field of study', f.field_of_study],
+    ['Profession / Field', f.profession === 'Other' ? f.profession_other : f.profession],
     ['Current position', f.current_position === 'Other' ? f.position_other : f.current_position],
     ...(needsOrganisation(f.current_position)
       ? [[organisationLabel(f.current_position), f.organization_name || '—']] : []),
@@ -91,7 +93,7 @@ export default function ApplyPage() {
   // longer belongs to the selected country.
   const set = (k, v) => {
     setErr('');
-    setF(p => (k === '__address' ? { ...p, ...v } : { ...p, [k]: v }));
+    setF(p => (k.startsWith('__') ? { ...p, ...v } : { ...p, [k]: v }));
   };
   const blur = (k) => setTouched(t => ({ ...t, [k]: true }));
 
@@ -380,6 +382,24 @@ export default function ApplyPage() {
                     onBlur={() => blur('position_other')} bad={!!showErr('position_other')} />
                 </Field>
               )}
+              <Field label="Profession / Field" req error={showErr('profession')}>
+                <Combo value={f.profession} options={PROFESSIONS} listId="tnr-professions"
+                  placeholder="Type to search…"
+                  onChange={v => set('__profession', {
+                    profession: v,
+                    // Moving off "Other" drops the custom text, so a stale
+                    // answer cannot be submitted alongside a real category.
+                    ...(v === 'Other' ? {} : { profession_other: '' }),
+                  })}
+                  onBlur={() => blur('profession')} bad={!!showErr('profession')} />
+              </Field>
+              {f.profession === 'Other' && (
+                <Field label="Specify Profession" req error={showErr('profession_other')}>
+                  <Input value={f.profession_other} onChange={v => set('profession_other', v)}
+                    placeholder="Enter your profession"
+                    onBlur={() => blur('profession_other')} bad={!!showErr('profession_other')} />
+                </Field>
+              )}
             </Grid>
           </Card>}
 
@@ -552,6 +572,20 @@ const Input = ({ value, onChange, onBlur, bad, type = 'text', placeholder, min, 
 const Textarea = ({ value, onChange, onBlur, bad, rows = 3 }) =>
   <textarea rows={rows} value={value} onBlur={onBlur}
     onChange={e => onChange(e.target.value)} className={ring(bad) + ' leading-relaxed'} />;
+/* Searchable single-select. A native <input list> gives real type-ahead
+   filtering across a long list, which a <select> does not, while remaining the
+   same element the rest of the form already styles. The validator rejects
+   anything that is not on the list, so free typing cannot create a stray
+   category. */
+const Combo = ({ value, onChange, onBlur, bad, options, listId, placeholder }) => (
+  <>
+    <input list={listId} value={value} placeholder={placeholder} onBlur={onBlur}
+      onChange={e => onChange(e.target.value)} className={ring(bad)} autoComplete="off" />
+    <datalist id={listId}>
+      {options.map(o => <option key={o} value={o} />)}
+    </datalist>
+  </>
+);
 const Select = ({ value, onChange, onBlur, bad, options, placeholder = '— select —', disabled }) =>
   <select value={value} onBlur={onBlur} disabled={disabled} onChange={e => onChange(e.target.value)}
     className={ring(bad) + (disabled ? ' opacity-50 cursor-not-allowed' : '')}>
