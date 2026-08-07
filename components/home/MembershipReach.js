@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { MapPin, Globe2, ArrowRight } from 'lucide-react';
 import { Reveal, SectionHeading } from '@/components/ui';
+import LocationMembersDrawer from '@/components/stats/LocationMembersDrawer';
 import { COLORS, FONT } from '@/lib/design/tokens';
 
 /* Membership across Pakistan and the wider world, for the home page.
@@ -20,6 +21,9 @@ const TOP_COUNTRIES = 12;
 export default function MembershipReach() {
   const [d, setD] = useState(null);
   const [failed, setFailed] = useState(false);
+  // Same drill-down as the statistics page, so the interaction is identical
+  // wherever a visitor meets it. Nothing is fetched until a click.
+  const [drill, setDrill] = useState(null);
 
   useEffect(() => {
     let off = false;
@@ -63,8 +67,12 @@ export default function MembershipReach() {
               <ul className="mt-5 space-y-2.5">
                 {d.pakistan.provinces.slice(0, TOP_PROVINCES).map(p => (
                   <li key={p.name}>
+                    <button
+                      onClick={() => setDrill({ scope: 'province', value: p.name, title: p.name })}
+                      className="w-full text-left group">
                     <div className="flex items-baseline justify-between gap-3 text-[13px]">
-                      <span className="truncate" style={{ color: COLORS.charcoal }}>{p.name}</span>
+                      <span className="truncate group-hover:underline underline-offset-2"
+                        style={{ color: COLORS.charcoal }}>{p.name}</span>
                       <span className="shrink-0 tabular-nums font-bold" style={{ color: COLORS.green900 }}>
                         {p.count}
                       </span>
@@ -76,6 +84,7 @@ export default function MembershipReach() {
                           background: COLORS.green700,
                         }} />
                     </div>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -96,15 +105,22 @@ export default function MembershipReach() {
               note={`${d.global.totalCountries} ${d.global.totalCountries === 1 ? 'country' : 'countries'}`}>
               <ul className="mt-5 grid sm:grid-cols-2 gap-2">
                 {d.global.countries.slice(0, TOP_COUNTRIES).map(c => (
-                  <li key={c.code || c.name}
-                    className="flex items-center gap-2.5 rounded-tnr border px-3 py-2"
-                    style={{ borderColor: COLORS.neutral }}>
-                    {/* Flag is derived from the stored ISO code — no images. */}
-                    <span className="text-[19px] leading-none shrink-0" aria-hidden="true">{c.flag}</span>
-                    <span className="min-w-0 flex-1 text-[12.5px] font-semibold truncate"
-                      style={{ color: COLORS.charcoal }}>{c.name}</span>
-                    <span className="shrink-0 text-[12.5px] font-bold tabular-nums"
-                      style={{ color: COLORS.green900 }}>{c.count}</span>
+                  <li key={c.code || c.name}>
+                    <button
+                      onClick={() => setDrill({
+                        scope: 'country', value: c.code || c.name,
+                        title: `${c.flag} ${c.name}`.trim(),
+                      })}
+                      className="w-full flex items-center gap-2.5 rounded-tnr border px-3 py-2 text-left
+                        transition-colors hover:bg-tnr-neutral"
+                      style={{ borderColor: COLORS.neutral }}>
+                      {/* Flag is derived from the stored ISO code — no images. */}
+                      <span className="text-[19px] leading-none shrink-0" aria-hidden="true">{c.flag}</span>
+                      <span className="min-w-0 flex-1 text-[12.5px] font-semibold truncate"
+                        style={{ color: COLORS.charcoal }}>{c.name}</span>
+                      <span className="shrink-0 text-[12.5px] font-bold tabular-nums"
+                        style={{ color: COLORS.green900 }}>{c.count}</span>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -117,6 +133,11 @@ export default function MembershipReach() {
           </Reveal>
         )}
       </div>
+
+      <LocationMembersDrawer
+        open={!!drill} onClose={() => setDrill(null)}
+        scope={drill?.scope} value={drill?.value} parent={drill?.parent}
+        title={drill?.title} subtitle={drill?.subtitle} />
     </section>
   );
 }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Landmark, MapPin, Globe2, ChevronDown } from 'lucide-react';
 import { statCard } from '@/components/stats/StatsShell';
+import LocationMembersDrawer from '@/components/stats/LocationMembersDrawer';
 import { COLORS } from '@/lib/design/tokens';
 
 /* Where TNR's approved members are — Roundu, Pakistan, and the rest of the
@@ -14,6 +15,9 @@ import { COLORS } from '@/lib/design/tokens';
 export default function MembershipGeography() {
   const [d, setD] = useState(null);
   const [err, setErr] = useState('');
+  // The location a visitor has opened. Null until something is clicked — the
+  // member list is only fetched then, never on page load.
+  const [drill, setDrill] = useState(null);
 
   useEffect(() => {
     let off = false;
@@ -42,6 +46,9 @@ export default function MembershipGeography() {
         groups={d.roundu.councils}
         childLabel="villages"
         emptyText="No permanent addresses recorded yet."
+        onOpen={setDrill}
+        parentScope="union_council"
+        childScope="village"
       />
 
       <Section
@@ -56,6 +63,9 @@ export default function MembershipGeography() {
         groups={d.pakistan.provinces}
         childLabel="cities"
         emptyText="No members have recorded a current address in Pakistan yet."
+        onOpen={setDrill}
+        parentScope="province"
+        childScope="city"
       />
 
       {/* Countries, with the flag derived from the stored ISO code. */}
@@ -73,24 +83,35 @@ export default function MembershipGeography() {
         ) : (
           <ul className="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
             {d.global.countries.map(c => (
-              <li key={c.code || c.name}
-                className="flex items-center gap-3 rounded-tnr border px-3.5 py-2.5"
-                style={{ borderColor: COLORS.neutral }}>
-                <span className="text-[22px] leading-none shrink-0" aria-hidden="true">{c.flag}</span>
-                <span className="min-w-0 flex-1 text-[13.5px] font-semibold truncate"
-                  style={{ color: COLORS.charcoal }}>{c.name}</span>
-                <span className="shrink-0 text-[13px] font-bold tabular-nums"
-                  style={{ color: COLORS.green900 }}>
-                  {c.count}
-                  <span className="ml-1 font-medium" style={{ color: COLORS.muted }}>
-                    {c.count === 1 ? 'member' : 'members'}
+              <li key={c.code || c.name}>
+                <button
+                  onClick={() => setDrill({
+                    scope: 'country', value: c.code || c.name, title: `${c.flag} ${c.name}`.trim(),
+                  })}
+                  className="w-full flex items-center gap-3 rounded-tnr border px-3.5 py-2.5 text-left
+                    transition-colors hover:bg-tnr-neutral"
+                  style={{ borderColor: COLORS.neutral }}>
+                  <span className="text-[22px] leading-none shrink-0" aria-hidden="true">{c.flag}</span>
+                  <span className="min-w-0 flex-1 text-[13.5px] font-semibold truncate"
+                    style={{ color: COLORS.charcoal }}>{c.name}</span>
+                  <span className="shrink-0 text-[13px] font-bold tabular-nums"
+                    style={{ color: COLORS.green900 }}>
+                    {c.count}
+                    <span className="ml-1 font-medium" style={{ color: COLORS.muted }}>
+                      {c.count === 1 ? 'member' : 'members'}
+                    </span>
                   </span>
-                </span>
+                </button>
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      <LocationMembersDrawer
+        open={!!drill} onClose={() => setDrill(null)}
+        scope={drill?.scope} value={drill?.value} parent={drill?.parent}
+        title={drill?.title} subtitle={drill?.subtitle} />
 
       {/* Stated, not hidden. Members approved before the address questions
           existed have no current address, so the three sections do not add up
@@ -133,7 +154,8 @@ const Numbers = ({ stats }) => (
 /* One parent → children section. Parents collapse, because a district with
    twenty union councils each holding a dozen villages is unreadable fully
    expanded — and the counts are what most visitors came for. */
-function Section({ icon, title, note, stats, groups, childLabel, emptyText }) {
+function Section({ icon, title, note, stats, groups, childLabel, emptyText,
+  onOpen, parentScope, childScope }) {
   const [open, setOpen] = useState(null);
   return (
     <div className={statCard}>
@@ -149,11 +171,20 @@ function Section({ icon, title, note, stats, groups, childLabel, emptyText }) {
             return (
               <li key={g.name} className="rounded-tnr border overflow-hidden"
                 style={{ borderColor: COLORS.neutral }}>
+                <div className="flex items-stretch">
+                  {/* The NAME opens the member list; the rest of the row
+                      expands the children. Two jobs, two targets — one row
+                      doing both would make one of them undiscoverable. */}
+                  <button onClick={() => onOpen?.({ scope: parentScope, value: g.name, title: g.name })}
+                    className="px-4 py-3 text-left min-w-0 flex-1 transition-colors hover:bg-tnr-neutral">
+                    <span className="block text-[14px] font-bold truncate underline decoration-transparent
+                      hover:decoration-inherit underline-offset-2"
+                      style={{ color: COLORS.green900 }}>{g.name}</span>
+                  </button>
                 <button onClick={() => setOpen(isOpen ? null : g.name)}
                   aria-expanded={isOpen}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-tnr-neutral">
-                  <span className="min-w-0 flex-1 text-[14px] font-bold truncate"
-                    style={{ color: COLORS.green900 }}>{g.name}</span>
+                  aria-label={`Show ${childLabel} in ${g.name}`}
+                  className="flex items-center gap-3 pr-4 py-3 transition-colors hover:bg-tnr-neutral">
                   {!!g.children.length && (
                     <span className="shrink-0 text-[11.5px]" style={{ color: COLORS.muted }}>
                       {g.children.length} {childLabel}
@@ -167,16 +198,24 @@ function Section({ icon, title, note, stats, groups, childLabel, emptyText }) {
                       style={{ color: COLORS.muted }} />
                   )}
                 </button>
+                </div>
 
                 {isOpen && !!g.children.length && (
                   <ul className="px-4 pb-3 pt-1 grid sm:grid-cols-2 gap-x-6">
                     {g.children.map(c => (
-                      <li key={c.name}
-                        className="flex items-baseline justify-between gap-3 py-1.5 border-b text-[13px]"
-                        style={{ borderColor: COLORS.neutral }}>
-                        <span className="truncate" style={{ color: COLORS.charcoal }}>{c.name}</span>
-                        <span className="shrink-0 tabular-nums font-semibold"
-                          style={{ color: COLORS.green900 }}>{c.count}</span>
+                      <li key={c.name}>
+                        <button
+                          onClick={() => onOpen?.({
+                            scope: childScope, value: c.name, parent: g.name,
+                            title: c.name, subtitle: g.name,
+                          })}
+                          className="w-full flex items-baseline justify-between gap-3 py-1.5 border-b text-[13px]
+                            text-left transition-colors hover:text-[#176B49]"
+                          style={{ borderColor: COLORS.neutral }}>
+                          <span className="truncate" style={{ color: COLORS.charcoal }}>{c.name}</span>
+                          <span className="shrink-0 tabular-nums font-semibold"
+                            style={{ color: COLORS.green900 }}>{c.count}</span>
+                        </button>
                       </li>
                     ))}
                   </ul>
