@@ -20,4 +20,4 @@ organizational workflows, and community services.
 **Tech Stack:** Next.js • React • JavaScript • Supabase • REST APIs  
 **Status:** 🟢 Live Production  
 **Source Code:** 🔒 Private / Proprietary  
-**Live:** [View Live Platform](YOUR_TNR_URL)
+**Live:** [View Live Platform](mytnr.org)
